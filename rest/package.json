@@ -1,0 +1,38 @@
+{
+    "name": "ra-data-subzero-rest",
+    "version": "3.1.0",
+    "description": "subZero REST data provider for react-admin",
+    "main": "lib/index.js",
+    "module": "esm/index.js",
+    "sideEffects": false,
+    "files": [
+        "*.md",
+        "lib",
+        "esm",
+        "src"
+    ],
+    "authors": [
+        "François Zaninotto",
+        "Raphael Scheible"
+    ],
+    "repository": "scheiblr/ra-data-subzero",
+    "homepage": "https://github.com/scheiblr/ra-data-subzero",
+    "bugs": "https://github.com/scheiblr/ra-data-subzero/issues",
+    "license": "MIT",
+    "scripts": {
+        "build": "yarn run build-cjs && yarn run build-esm",
+        "build-cjs": "rimraf ./lib && tsc",
+        "build-esm": "rimraf ./esm && tsc --outDir esm --module es2015",
+        "watch": "rimraf ./lib && tsc --watch"
+    },
+    "dependencies": {
+        "query-string": "^5.1.1"
+    },
+    "devDependencies": {
+        "cross-env": "^5.2.0",
+        "rimraf": "^2.6.3"
+    },
+    "peerDependencies": {
+        "ra-core": "^3.0.0"
+    }
+}
