@@ -1,7 +1,7 @@
 {
-    "name": "ra-data-subzero-rest",
-    "version": "3.1.0",
-    "description": "subZero REST data provider for react-admin",
+    "name": "ra-data-subzero",
+    "version": "1.0.0",
+    "description": "subZero data provider for react-admin",
     "main": "lib/index.js",
     "module": "esm/index.js",
     "sideEffects": false,
