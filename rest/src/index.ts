@@ -2,11 +2,11 @@ import { stringify } from 'query-string';
 import { fetchUtils, DataProvider } from 'ra-core';
 
 /**
- * Maps react-admin queries to a simple REST API
+ * Maps react-admin queries to a subzero REST API
  *
- * This REST dialect is similar to the one of FakeRest
+ * This REST dialect uses postgrest syntax
  *
- * @see https://github.com/marmelab/FakeRest
+ * @see https://postgrest.org/en/v6.0/api.html#embedded-filters
  *
  * @example
  *
@@ -22,12 +22,12 @@ import { fetchUtils, DataProvider } from 'ra-core';
  *
  * import React from 'react';
  * import { Admin, Resource } from 'react-admin';
- * import simpleRestProvider from 'ra-data-simple-rest';
+ * import subzeroRestProvider from 'ra-data-subzero-rest';
  *
  * import { PostList } from './posts';
  *
  * const App = () => (
- *     <Admin dataProvider={simpleRestProvider('http://path.to.my.api/')}>
+ *     <Admin dataProvider={subzeroRestProvider('http://path.to.my.api/')}>
  *         <Resource name="posts" list={PostList} />
  *     </Admin>
  * );
