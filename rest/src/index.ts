@@ -47,9 +47,16 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson): DataProvider => ({
             limit: page * perPage - 1
             // TODO: filter
         };
+
+        // add header that Content-Range is in returned header
+        const options = {
+            headers: new Headers({ Accept: 'application/json' })
+        }
+        options.headers.set('Prefer', 'count=exact');
+
         const url = `${apiUrl}/${resource}?${stringify(query)}`;
 
-        return httpClient(url).then(({ headers, json }) => {
+        return httpClient(url, options).then(({ headers, json }) => {
             if (!headers.has('content-range')) {
                 throw new Error(
                     'The Content-Range header is missing in the HTTP Response. The subzero REST data provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?'
@@ -63,7 +70,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson): DataProvider => ({
                         .split('/')
                         .pop(),
                     10
-                ),
+                )
             };
         });
     },
