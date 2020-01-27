@@ -1,5 +1,5 @@
 {
-    "name": "ra-data-subzero",
+    "name": "ra-data-subzero-rest",
     "version": "1.0.0",
     "description": "subZero data provider for react-admin",
     "main": "lib/index.js",

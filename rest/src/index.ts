@@ -10,12 +10,13 @@ import { fetchUtils, DataProvider } from 'ra-core';
  *
  * @example
  *
- * getList     => GET http://my.api.url/posts?sort=['title','ASC']&range=[0, 24]
- * getOne      => GET http://my.api.url/posts/123
- * getMany     => GET http://my.api.url/posts?filter={id:[123,456,789]}
- * update      => PUT http://my.api.url/posts/123
+ * getList     => GET http://my.api.url/posts?order=title.asc&offset=0&limit=24&filterField=eq.value
+ * getOne      => GET http://my.api.url/posts?id=eq.123
+ * getMany     => GET http://my.api.url/posts?id=in.(123,456,789)
+ * update      => PATCH http://my.api.url/posts?id=eq.123
  * create      => POST http://my.api.url/posts
- * delete      => DELETE http://my.api.url/posts/123
+ * delete      => DELETE http://my.api.url/posts?id=eq.123
+ * deleteMany  => DELETE http://my.api.url/posts?id=in.(123,456,789)
  *
  * @example
  *
@@ -37,17 +38,21 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson): DataProvider => ({
     getList: (resource, params) => {
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort;
+        // TODO: filter
+        console.log(params.filter);
+        
         const query = {
-            sort: JSON.stringify([field, order]),
-            range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
-            filter: JSON.stringify(params.filter),
+            order: `${field}.${order}`,
+            offset: (page - 1) * perPage,
+            limit: page * perPage - 1
+            // TODO: filter
         };
         const url = `${apiUrl}/${resource}?${stringify(query)}`;
 
         return httpClient(url).then(({ headers, json }) => {
             if (!headers.has('content-range')) {
                 throw new Error(
-                    'The Content-Range header is missing in the HTTP Response. The simple REST data provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?'
+                    'The Content-Range header is missing in the HTTP Response. The subzero REST data provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?'
                 );
             }
             return {
@@ -64,18 +69,18 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson): DataProvider => ({
     },
 
     getOne: (resource, params) =>
-        httpClient(`${apiUrl}/${resource}/${params.id}`).then(({ json }) => ({
+        httpClient(`${apiUrl}/${resource}?eq.${params.id}`).then(({ json }) => ({
             data: json,
         })),
 
     getMany: (resource, params) => {
-        const query = {
-            filter: JSON.stringify({ id: params.ids }),
-        };
-        const url = `${apiUrl}/${resource}?${stringify(query)}`;
+        const query = JSON.stringify(params.ids);
+
+        const url = `${apiUrl}/${resource}?id=in.(${stringify(query)})`;
         return httpClient(url).then(({ json }) => ({ data: json }));
     },
 
+    // TODO
     getManyReference: (resource, params) => {
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort;
@@ -108,12 +113,14 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson): DataProvider => ({
         });
     },
 
+    // TODO
     update: (resource, params) =>
         httpClient(`${apiUrl}/${resource}/${params.id}`, {
             method: 'PUT',
             body: JSON.stringify(params.data),
         }).then(({ json }) => ({ data: json })),
 
+    // TODO
     // simple-rest doesn't handle provide an updateMany route, so we fallback to calling update n times instead
     updateMany: (resource, params) =>
         Promise.all(
@@ -125,6 +132,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson): DataProvider => ({
             )
         ).then(responses => ({ data: responses.map(({ json }) => json.id) })),
 
+    // TODO
     create: (resource, params) =>
         httpClient(`${apiUrl}/${resource}`, {
             method: 'POST',
@@ -133,11 +141,13 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson): DataProvider => ({
             data: { ...params.data, id: json.id },
         })),
 
+    // TODO
     delete: (resource, params) =>
         httpClient(`${apiUrl}/${resource}/${params.id}`, {
             method: 'DELETE',
         }).then(({ json }) => ({ data: json })),
 
+    // TODO
     // simple-rest doesn't handle filters on DELETE route, so we fallback to calling DELETE n times instead
     deleteMany: (resource, params) =>
         Promise.all(
