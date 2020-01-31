@@ -79,7 +79,9 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
     return httpClient(url, options).then(({ headers, json }) => {
       if (!headers.has('content-range')) {
         throw new Error(
-          'The Content-Range header is missing in the HTTP Response. The subzero REST data provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?'
+          `The Content-Range header is missing in the HTTP Response. The postgREST data provider expects 
+          responses for lists of resources to contain this header with the total number of results to build 
+          the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?`
         );
       }
       return {
@@ -97,7 +99,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
 
   getOne: (resource, params) =>
     httpClient(`${apiUrl}/${resource}?id=eq.${params.id}`, {
-      headers: new Headers({'accept': 'application/vnd.pgrst.object+json'}),
+      headers: new Headers({ 'accept': 'application/vnd.pgrst.object+json' }),
     }).then(({ json }) => ({
       data: json,
     })),
@@ -126,7 +128,9 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
     return httpClient(url).then(({ headers, json }) => {
       if (!headers.has('content-range')) {
         throw new Error(
-          'The Content-Range header is missing in the HTTP Response. The simple REST data provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?'
+          `The Content-Range header is missing in the HTTP Response. The postgREST data provider expects 
+          responses for lists of resources to contain this header with the total number of results to build 
+          the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?`
         );
       }
       return {
