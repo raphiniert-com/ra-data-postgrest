@@ -55,10 +55,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
   getList: (resource, params) => {
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
-
     const parsedFilter = parseFilters(params.filter, defaultListOp);
-
-    console.log(parsedFilter);
 
     const query = {
       order: `${field}.${order.toLowerCase()}`,
@@ -70,9 +67,11 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
 
     // add header that Content-Range is in returned header
     const options = {
-      headers: new Headers({ Accept: 'application/json' })
+      headers: new Headers({ 
+        Accept: 'application/json',
+        Prefer: 'count=exact'
+      })
     }
-    options.headers.set('Prefer', 'count=exact');
 
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
 
@@ -111,21 +110,30 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
     return httpClient(url).then(({ json }) => ({ data: json }));
   },
 
-  // TODO
   getManyReference: (resource, params) => {
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
+    const parsedFilter = parseFilters(params.filter, defaultListOp);
+
     const query = {
-      sort: JSON.stringify([field, order]),
-      range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
-      filter: JSON.stringify({
-        ...params.filter,
-        [params.target]: params.id,
-      }),
+      [params.target]: `eq.${params.id}`,
+      order: `${field}.${order.toLowerCase()}`,
+      offset: (page - 1) * perPage,
+      limit: page * perPage - 1,
+      ...parsedFilter,
     };
+
+    // add header that Content-Range is in returned header
+    const options = {
+      headers: new Headers({ 
+        Accept: 'application/json',
+        Prefer: 'count=exact'
+      })
+    }
+
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
 
-    return httpClient(url).then(({ headers, json }) => {
+    return httpClient(url, options).then(({ headers, json }) => {
       if (!headers.has('content-range')) {
         throw new Error(
           `The Content-Range header is missing in the HTTP Response. The postgREST data provider expects 
@@ -157,22 +165,29 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
       body: JSON.stringify(params.data),
     }).then(({ json }) => ({ data: json })),
 
-  // TODO
-  // simple-rest doesn't handle provide an updateMany route, so we fallback to calling update n times instead
+  // TODO: improve this and use postgrest multi update call
   updateMany: (resource, params) =>
     Promise.all(
       params.ids.map(id =>
-        httpClient(`${apiUrl}/${resource}/${id}`, {
-          method: 'PUT',
+        httpClient(`${apiUrl}/${resource}?id=eq.${id}`, {
+          method: 'PATCH',
+          headers: new Headers({
+            'Prefer': 'return=representation',
+            'Content-Type': 'application/json'
+          }),
           body: JSON.stringify(params.data),
         })
       )
     ).then(responses => ({ data: responses.map(({ json }) => json.id) })),
 
-  // TODO
   create: (resource, params) =>
     httpClient(`${apiUrl}/${resource}`, {
       method: 'POST',
+      headers: new Headers({
+        'Accept': 'application/vnd.pgrst.object+json',
+        'Prefer': 'return=representation',
+        'Content-Type': 'application/json'
+      }),
       body: JSON.stringify(params.data),
     }).then(({ json }) => {
       console.log(json);
@@ -182,19 +197,28 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
       }
     }),
 
-  // TODO
   delete: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}/${params.id}`, {
+    httpClient(`${apiUrl}/${resource}?id=eq.${params.id}`, {
       method: 'DELETE',
+      headers: new Headers({
+        'Accept': 'application/vnd.pgrst.object+json',
+        'Prefer': 'return=representation',
+        'Content-Type': 'application/json'
+      }),
     }).then(({ json }) => ({ data: json })),
 
-  // TODO
-  // simple-rest doesn't handle filters on DELETE route, so we fallback to calling DELETE n times instead
+  
+  // TODO: improve this and use postgrest multi delete call
   deleteMany: (resource, params) =>
     Promise.all(
       params.ids.map(id =>
-        httpClient(`${apiUrl}/${resource}/${id}`, {
+        httpClient(`${apiUrl}/${resource}?id=eq.${id}`, {
           method: 'DELETE',
+          headers: new Headers({
+            'Accept': 'application/vnd.pgrst.object+json',
+            'Prefer': 'return=representation',
+            'Content-Type': 'application/json'
+          }),
         })
       )
     ).then(responses => ({ data: responses.map(({ json }) => json.id) })),
