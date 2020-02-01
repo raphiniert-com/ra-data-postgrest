@@ -138,4 +138,4 @@ One can simply append the comparator with an `@` to the source. In this example 
 
 ## License
 
-This data provider is licensed under the MIT License, and sponsored by [raphiniert.com](https://raphiniert.com).
+This data provider is licensed under the MIT License and sponsored by [raphiniert.com](https://raphiniert.com).
