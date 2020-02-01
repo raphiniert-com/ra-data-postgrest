@@ -67,7 +67,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
 
     // add header that Content-Range is in returned header
     const options = {
-      headers: new Headers({ 
+      headers: new Headers({
         Accept: 'application/json',
         Prefer: 'count=exact'
       })
@@ -125,7 +125,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
 
     // add header that Content-Range is in returned header
     const options = {
-      headers: new Headers({ 
+      headers: new Headers({
         Accept: 'application/json',
         Prefer: 'count=exact'
       })
@@ -165,20 +165,15 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
       body: JSON.stringify(params.data),
     }).then(({ json }) => ({ data: json })),
 
-  // TODO: improve this and use postgrest multi update call
   updateMany: (resource, params) =>
-    Promise.all(
-      params.ids.map(id =>
-        httpClient(`${apiUrl}/${resource}?id=eq.${id}`, {
-          method: 'PATCH',
-          headers: new Headers({
-            'Prefer': 'return=representation',
-            'Content-Type': 'application/json'
-          }),
-          body: JSON.stringify(params.data),
-        })
-      )
-    ).then(responses => ({ data: responses.map(({ json }) => json.id) })),
+    httpClient(`${apiUrl}/${resource}?id=in.(${params.ids.join(',')})`, {
+      method: 'PATCH',
+      headers: new Headers({
+        'Prefer': 'return=representation',
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify(params.data),
+    }).then(({ json }) => ({ data: json.map(data => data.id) })),
 
   create: (resource, params) =>
     httpClient(`${apiUrl}/${resource}`, {
@@ -207,19 +202,12 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
       }),
     }).then(({ json }) => ({ data: json })),
 
-  
-  // TODO: improve this and use postgrest multi delete call
   deleteMany: (resource, params) =>
-    Promise.all(
-      params.ids.map(id =>
-        httpClient(`${apiUrl}/${resource}?id=eq.${id}`, {
-          method: 'DELETE',
-          headers: new Headers({
-            'Accept': 'application/vnd.pgrst.object+json',
-            'Prefer': 'return=representation',
-            'Content-Type': 'application/json'
-          }),
-        })
-      )
-    ).then(responses => ({ data: responses.map(({ json }) => json.id) })),
+    httpClient(`${apiUrl}/${resource}?id=in.(${params.ids.join(',')})`, {
+      method: 'DELETE',
+      headers: new Headers({
+        'Prefer': 'return=representation',
+        'Content-Type': 'application/json'
+      }),
+    }).then(({ json }) => ({ data: json.map(data => data.id) })),
 });
