@@ -209,5 +209,5 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
         'Prefer': 'return=representation',
         'Content-Type': 'application/json'
       }),
-    }).then(({ json }) => ({ data: json.map(data => data.id) })),
+    }).then(({ json }) => ({ data: json.json().map(data => data.id) })),
 });

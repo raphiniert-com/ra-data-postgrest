@@ -1,5 +1,5 @@
 {
-    "name": "ra-data-subzero-rest",
+    "name": "ra-data-postgrest",
     "version": "1.0.0",
     "description": "subZero data provider for react-admin",
     "main": "lib/index.js",
@@ -27,6 +27,7 @@
         "prepare": "install-peers"
     },
     "dependencies": {
+        "jwt-decode": "^2.2.0",
         "query-string": "^5.1.1"
     },
     "devDependencies": {
