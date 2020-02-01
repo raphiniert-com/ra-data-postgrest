@@ -20,7 +20,7 @@
     "bugs": "https://github.com/scheiblr/ra-data-postgrest/issues",
     "license": "MIT",
     "scripts": {
-        "build": "yarn run build-cjs && yarn run build-esm",
+        "build": "npm run build-cjs && npm run build-esm",
         "build-cjs": "rimraf ./lib && tsc",
         "build-esm": "rimraf ./esm && tsc --outDir esm --module es2015",
         "watch": "rimraf ./lib && tsc --watch",
