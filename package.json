@@ -1,5 +1,5 @@
 {
-    "name": "ra-data-postgrest",
+    "name": "@raphiniert/ra-data-postgrest",
     "version": "1.0.0",
     "description": "subZero data provider for react-admin",
     "main": "lib/index.js",
@@ -16,8 +16,8 @@
         "Raphael Scheible"
     ],
     "repository": "scheiblr/ra-data-subzero",
-    "homepage": "https://github.com/scheiblr/ra-data-subzero",
-    "bugs": "https://github.com/scheiblr/ra-data-subzero/issues",
+    "homepage": "https://github.com/scheiblr/ra-data-postgrest",
+    "bugs": "https://github.com/scheiblr/ra-data-postgrest/issues",
     "license": "MIT",
     "scripts": {
         "build": "yarn run build-cjs && yarn run build-esm",
