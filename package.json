@@ -1,0 +1,41 @@
+{
+    "name": "@raphiniert/ra-data-postgrest",
+    "version": "1.0.1",
+    "description": "subZero data provider for react-admin",
+    "main": "lib/index.js",
+    "module": "esm/index.js",
+    "sideEffects": false,
+    "files": [
+        "*.md",
+        "lib",
+        "esm",
+        "src"
+    ],
+    "authors": [
+        "François Zaninotto",
+        "Raphael Scheible"
+    ],
+    "repository": "scheiblr/ra-data-postgrest",
+    "homepage": "https://github.com/raphiniert-com/ra-data-postgrest",
+    "bugs": "https://github.com/raphiniert-com/ra-data-postgrest/issues",
+    "license": "MIT",
+    "scripts": {
+        "build": "npm run build-cjs && npm run build-esm",
+        "build-cjs": "rimraf ./lib && tsc",
+        "build-esm": "rimraf ./esm && tsc --outDir esm --module es2015",
+        "watch": "rimraf ./lib && tsc --watch",
+        "prepare": "install-peers"
+    },
+    "dependencies": {
+        "query-string": "^5.1.1"
+    },
+    "devDependencies": {
+        "cross-env": "^5.2.0",
+        "install-peers-cli": "^2.2.0",
+        "rimraf": "^2.6.3",
+        "typescript": "^3.5.3"
+    },
+    "peerDependencies": {
+        "ra-core": "^3.1.0"
+    }
+}
