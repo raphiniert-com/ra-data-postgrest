@@ -3,5 +3,3 @@ import authProvider from './authProvider';
 
 export { authProvider };
 export default dataProvider;
-
-// export * from './authProvider';

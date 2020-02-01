@@ -10,13 +10,15 @@ import { fetchUtils, DataProvider } from 'ra-core';
  *
  * @example
  *
- * getList     => GET http://my.api.url/posts?order=title.asc&offset=0&limit=24&filterField=eq.value
- * getOne      => GET http://my.api.url/posts?id=eq.123
- * getMany     => GET http://my.api.url/posts?id=in.(123,456,789)
- * update      => PATCH http://my.api.url/posts?id=eq.123
- * create      => POST http://my.api.url/posts
- * delete      => DELETE http://my.api.url/posts?id=eq.123
- * deleteMany  => DELETE http://my.api.url/posts?id=in.(123,456,789)
+ * getList          => GET    http://my.api.url/posts?order=title.asc&offset=0&limit=24&filterField=eq.value
+ * getOne           => GET    http://my.api.url/posts?id=eq.123
+ * getMany          => GET    http://my.api.url/posts?id=in.(123,456,789)
+ * getManyReference => GET    http://my.api.url/posts?author_id=eq.345
+ * create           => POST   http://my.api.url/posts
+ * update           => PATCH  http://my.api.url/posts?id=eq.123
+ * updateMany       => PATCH  http://my.api.url/posts?id=in.(123,456,789)
+ * delete           => DELETE http://my.api.url/posts?id=eq.123
+ * deleteMany       => DELETE http://my.api.url/posts?id=in.(123,456,789)
  *
  * @example
  *
