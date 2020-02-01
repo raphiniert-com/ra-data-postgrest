@@ -2,7 +2,7 @@ import { stringify } from 'query-string';
 import { fetchUtils, DataProvider } from 'ra-core';
 
 /**
- * Maps react-admin queries to a subzero REST API
+ * Maps react-admin queries to a postgrest REST API
  *
  * This REST dialect uses postgrest syntax
  *
@@ -22,12 +22,12 @@ import { fetchUtils, DataProvider } from 'ra-core';
  *
  * import React from 'react';
  * import { Admin, Resource } from 'react-admin';
- * import subzeroRestProvider from 'ra-data-subzero-rest';
+ * import postgrestRestProvider from '@raphiniert/ra-data-postgrest';
  *
  * import { PostList } from './posts';
  *
  * const App = () => (
- *     <Admin dataProvider={subzeroRestProvider('http://path.to.my.api/')}>
+ *     <Admin dataProvider={postgrestRestProvider('http://path.to.my.api/')}>
  *         <Resource name="posts" list={PostList} />
  *     </Admin>
  * );
