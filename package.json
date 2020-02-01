@@ -15,9 +15,9 @@
         "François Zaninotto",
         "Raphael Scheible"
     ],
-    "repository": "scheiblr/ra-data-subzero",
-    "homepage": "https://github.com/scheiblr/ra-data-postgrest",
-    "bugs": "https://github.com/scheiblr/ra-data-postgrest/issues",
+    "repository": "scheiblr/ra-data-postgrest",
+    "homepage": "https://github.com/raphiniert-com/ra-data-postgrest",
+    "bugs": "https://github.com/raphiniert-com/ra-data-postgrest/issues",
     "license": "MIT",
     "scripts": {
         "build": "npm run build-cjs && npm run build-esm",
