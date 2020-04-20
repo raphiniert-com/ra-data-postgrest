@@ -46,8 +46,23 @@ function parseFilters(filter, defaultListOp) {
 
     const value = filter[key];
 
-    result[splitKey[0]] =
-      operation.includes('like') ? `${operation}.*${value}*` : `${operation}.${value}`;
+    let op = operation.includes('like') ? `${operation}.*${value}*` : `${operation}.${value}`;
+    if( result[splitKey[0]] === undefined ){
+      // first operator for the key, we add it to the dict
+      result[splitKey[0]] = op;
+    }
+    else
+    {
+      if( ! Array.isArray(result[splitKey[0]]) ) {
+        // second operator, we transform to an array
+        result[splitKey[0]] = [result[splitKey[0]], op]
+      }
+      else
+      {
+        // third and subsequent, we add to array
+        result[splitKey[0]].push(op);
+      }
+    }
   });
 
   return result;
