@@ -45,7 +45,7 @@ function parseFilters(filter, defaultListOp) {
     const operation = splitKey.length == 2 ? splitKey[1] : defaultListOp;
 
     let values;
-    if ( operation.includes('like') ){
+    if (operation.includes('like')) {
       // we split the search term in words
       values = filter[key].trim().split(' ');
     } else {
@@ -54,18 +54,16 @@ function parseFilters(filter, defaultListOp) {
 
     values.forEach(value => {
       let op = operation.includes('like') ? `${operation}.*${value}*` : `${operation}.${value}`;
-      if( result[splitKey[0]] === undefined ){
+      if (result[splitKey[0]] === undefined) {
         // first operator for the key, we add it to the dict
         result[splitKey[0]] = op;
       }
       else
       {
-        if( ! Array.isArray(result[splitKey[0]]) ) {
+        if (!Array.isArray(result[splitKey[0]])) {
           // second operator, we transform to an array
           result[splitKey[0]] = [result[splitKey[0]], op]
-        }
-        else
-        {
+        } else {
           // third and subsequent, we add to array
           result[splitKey[0]].push(op);
         }
