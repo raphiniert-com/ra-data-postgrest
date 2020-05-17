@@ -44,10 +44,32 @@ function parseFilters(filter, defaultListOp) {
     const splitKey = key.split('@');
     const operation = splitKey.length == 2 ? splitKey[1] : defaultListOp;
 
-    const value = filter[key];
+    let values;
+    if (operation.includes('like')) {
+      // we split the search term in words
+      values = filter[key].trim().split(' ');
+    } else {
+      values = [filter[key]];
+    }
 
-    result[splitKey[0]] =
-      operation.includes('like') ? `${operation}.*${value}*` : `${operation}.${value}`;
+    values.forEach(value => {
+      let op = operation.includes('like') ? `${operation}.*${value}*` : `${operation}.${value}`;
+      if (result[splitKey[0]] === undefined) {
+        // first operator for the key, we add it to the dict
+        result[splitKey[0]] = op;
+      }
+      else
+      {
+        if (!Array.isArray(result[splitKey[0]])) {
+          // second operator, we transform to an array
+          result[splitKey[0]] = [result[splitKey[0]], op]
+        } else {
+          // third and subsequent, we add to array
+          result[splitKey[0]].push(op);
+        }
+      }
+    });
+
   });
 
   return result;
