@@ -22,7 +22,7 @@ This Data Provider fits REST APIs using simple GET parameters for filters and so
 | `update`           | `PATCH http://my.api.url/posts?id=eq.123`
 | `updateMany`       | `PATCH http://my.api.url/posts?id=in.(123,456,789)`
 | `delete`           | `DELETE http://my.api.url/posts?id=eq.123`
-| `deteleMany`       | `DELETE http://my.api.url/posts?id=in.(123,456,789)`
+| `deleteMany`       | `DELETE http://my.api.url/posts?id=in.(123,456,789)`
 
 **Note**: The PostgREST data provider expects the API to include a `Content-Range` header in the response to `getList` calls. The value must be the total number of resources in the collection. This allows react-admin to know how many pages of resources there are in total, and build the pagination controls.
 
