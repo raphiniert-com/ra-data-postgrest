@@ -2,6 +2,11 @@
 
 Find all notable changes of this project in this file.
 
+## v1.0.4 - 2020-06-08
+### Fixed
+- Fixed missing js files in npm package [#8](https://github.com/raphiniert-com/ra-data-postgrest/issues/8)
+- [#9](https://github.com/raphiniert-com/ra-data-postgrest/pull/9), Fixed typo in readme - @[seclace](https://github.com/seclace)
+
 ## v1.0.3 - 2020-05-17
 ### Fixed
 - Fixed bug when multidelete - @[colonist4096](https://github.com/colonist4096)
