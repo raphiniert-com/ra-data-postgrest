@@ -208,13 +208,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
         'Content-Type': 'application/json'
       }),
       body: JSON.stringify(params.data),
-    }).then(({ json }) => {
-      console.log(json);
-
-      return {
-        data: { ...params.data, id: json.id },
-      }
-    }),
+    }).then(({ json }) => ({ data: { ...params.data, id: json.id }})),
 
   delete: (resource, params) =>
     httpClient(`${apiUrl}/${resource}?id=eq.${params.id}`, {
