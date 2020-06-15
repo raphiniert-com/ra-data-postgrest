@@ -44,7 +44,7 @@ export default {
   checkError: error => {
     const status = error.status;
     if (status === 401 || status === 403) {
-      localStorage.removeItem('token');
+      localStorage.removeItem('me');
       return Promise.reject();
     }
     return Promise.resolve();
