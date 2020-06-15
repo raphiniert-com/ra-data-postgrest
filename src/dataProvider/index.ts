@@ -84,7 +84,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
     const query = {
       order: `${field}.${order.toLowerCase()}`,
       offset: (page - 1) * perPage,
-      limit: page * perPage - 1,
+      limit: perPage,
       // append filters
       ...parsedFilter
     };
@@ -143,7 +143,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
       [params.target]: `eq.${params.id}`,
       order: `${field}.${order.toLowerCase()}`,
       offset: (page - 1) * perPage,
-      limit: page * perPage - 1,
+      limit: perPage,
       ...parsedFilter,
     };
 
