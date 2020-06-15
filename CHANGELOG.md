@@ -2,6 +2,11 @@
 
 Find all notable changes of this project in this file.
 
+## v1.0.5 - 2020-06-15
+### Fixed
+- [#13](https://github.com/raphiniert-com/ra-data-postgrest/pull/13), Remove console.log - @[jpagex](https://github.com/jpagex)
+- [#12](https://github.com/raphiniert-com/ra-data-postgrest/pull/12), Fixed limit parameter - @[jpagex](https://github.com/jpagex)
+
 ## v1.0.4 - 2020-06-08
 ### Fixed
 - Fixed missing js files in npm package [#8](https://github.com/raphiniert-com/ra-data-postgrest/issues/8)
