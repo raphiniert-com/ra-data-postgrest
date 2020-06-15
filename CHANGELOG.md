@@ -2,6 +2,10 @@
 
 Find all notable changes of this project in this file.
 
+## v1.0.6 - 2020-06-15
+### Fixed
+- Fixed wrong support statement concerning [postgrest starter kit](https://github.com/subzerocloud/postgrest-starter-kit) in readme
+
 ## v1.0.5 - 2020-06-15
 ### Fixed
 - [#13](https://github.com/raphiniert-com/ra-data-postgrest/pull/13), Remove console.log - @[jpagex](https://github.com/jpagex)
