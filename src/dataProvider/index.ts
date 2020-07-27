@@ -1,5 +1,5 @@
 import { stringify } from 'query-string';
-import { fetchUtils, DataProvider } from 'ra-core';
+import { fetchUtils, DataProvider, Identifier } from 'ra-core';
 
 /**
  * Maps react-admin queries to a postgrest REST API
@@ -75,8 +75,44 @@ function parseFilters(filter, defaultListOp) {
   return result;
 }
 
-export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq'): DataProvider => ({
+type PrimaryKey = string | Array<string>;
+
+function getPrimaryKey(resource, primaryKeys: Map<string, PrimaryKey>) {
+  return primaryKeys.get(resource) || 'id';
+}
+
+function decodeId(id: Identifier, primaryKey: PrimaryKey): string[] {
+  if (Array.isArray(primaryKey)) {
+    return JSON.parse(id.toString());
+  } else {
+    return [id.toString()];
+  }
+}
+
+function encodeId(data: any, primaryKey: PrimaryKey): Identifier {
+  if (Array.isArray(primaryKey)) {
+    return JSON.stringify(primaryKey.map(key => data[key]));
+  } else {
+    return data[primaryKey];
+  }
+}
+
+function dataWithId(data: any, primaryKey: PrimaryKey) {
+  if (primaryKey === 'id' || (data && data.id)) {
+    return data;
+  }
+
+  return Object.assign(data, {
+    id: encodeId(data, primaryKey)
+  });
+}
+
+const defaultPrimaryKeys = new Map<string, PrimaryKey>();
+
+export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq', primaryKeys: Map<string, PrimaryKey> = defaultPrimaryKeys): DataProvider => ({
   getList: (resource, params) => {
+    const primaryKey = getPrimaryKey(resource, primaryKeys);
+
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
     const parsedFilter = parseFilters(params.filter, defaultListOp);
@@ -95,7 +131,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
         Accept: 'application/json',
         Prefer: 'count=exact'
       })
-    }
+    };
 
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
 
@@ -108,7 +144,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
         );
       }
       return {
-        data: json,
+        data: json.map(obj => dataWithId(obj, primaryKey)),
         total: parseInt(
           headers
             .get('content-range')
@@ -120,16 +156,31 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
     });
   },
 
-  getOne: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}?id=eq.${params.id}`, {
+  getOne: (resource, params) => {
+    const primaryKey = getPrimaryKey(resource, primaryKeys);
+    const primaryKeyParams = decodeId(params.id, primaryKey);
+    const query = Array.isArray(primaryKey)
+      ? `and=(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`
+      : stringify({ [primaryKey]: `eq.${params.id}` });
+    const url = `${apiUrl}/${resource}?${query}`;
+
+    return httpClient(url, {
       headers: new Headers({ 'accept': 'application/vnd.pgrst.object+json' }),
     }).then(({ json }) => ({
-      data: json,
-    })),
+      data: dataWithId(json, primaryKey),
+    }))
+  },
 
   getMany: (resource, params) => {
-    const ids = params.ids.join(",");
-    const url = `${apiUrl}/${resource}?id=in.(${ids})`;
+    const ids = params.ids;
+    const primaryKey = getPrimaryKey(resource, primaryKeys);
+    const query = Array.isArray(primaryKey)
+      ? `or=(${ids.map(id => {
+        const primaryKeyParams = decodeId(id, primaryKey);
+        return `and(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
+      })})`
+      : stringify({ [primaryKey]: `in.(${ids.join(',')})` });
+    const url = `${apiUrl}/${resource}?${query}`;
 
     return httpClient(url).then(({ json }) => ({ data: json }));
   },
@@ -178,29 +229,78 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
     });
   },
 
-  update: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}?id=eq.${params.id}`, {
+  update: (resource, params) => {
+    const primaryKey = getPrimaryKey(resource, primaryKeys);
+    const primaryKeyParams = decodeId(params.id, primaryKey);
+    const query = Array.isArray(primaryKey)
+      ? `and=(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`
+      : stringify({ [primaryKey]: `eq.${params.id}` });
+    const url = `${apiUrl}/${resource}?${query}`;
+
+    const { id, ...data } = params.data;
+    const primaryKeyData = Array.isArray(primaryKey)
+      ? primaryKey.reduce((keyData, key) => ({
+        ...keyData,
+        [key]: params.data[key]
+      }), {})
+      : { [primaryKey]: params.data[primaryKey] }
+    const body = JSON.stringify({
+      ...data,
+      ...primaryKeyData
+    });
+
+    return httpClient(url, {
       method: 'PATCH',
       headers: new Headers({
         'Accept': 'application/vnd.pgrst.object+json',
         'Prefer': 'return=representation',
         'Content-Type': 'application/json'
       }),
-      body: JSON.stringify(params.data),
-    }).then(({ json }) => ({ data: json })),
+      body,
+    }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
+  },
 
-  updateMany: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}?id=in.(${params.ids.join(',')})`, {
+  updateMany: (resource, params) => {
+    const ids = params.ids;
+    const primaryKey = getPrimaryKey(resource, primaryKeys);
+    const query = Array.isArray(primaryKey)
+      ? `or=(${ids.map(id => {
+        const primaryKeyParams = decodeId(id, primaryKey);
+        return `and(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
+      })})`
+      : stringify({ [primaryKey]: `in.(${ids.join(',')})` });
+    const url = `${apiUrl}/${resource}?${query}`;
+
+    const body = JSON.stringify(params.data.map(obj => {
+      const { id, ...data } = obj;
+      const primaryKeyData = Array.isArray(primaryKey)
+        ? primaryKey.reduce((keyData, key) => ({
+          ...keyData,
+          [key]: obj[key]
+        }), {})
+        : { [primaryKey]: obj[primaryKey] }
+      return {
+        ...data,
+        ...primaryKeyData
+      };
+    }));
+
+    return httpClient(url, {
       method: 'PATCH',
       headers: new Headers({
         'Prefer': 'return=representation',
         'Content-Type': 'application/json',
       }),
-      body: JSON.stringify(params.data),
-    }).then(({ json }) => ({ data: json.map(data => data.id) })),
+      body,
+    }).then(({ json }) => ({
+      data: json.map(data => encodeId(data, primaryKey))
+    }));
+  },
 
-  create: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}`, {
+  create: (resource, params) => {
+    const primaryKey = getPrimaryKey(resource, primaryKeys);
+
+    return httpClient(`${apiUrl}/${resource}`, {
       method: 'POST',
       headers: new Headers({
         'Accept': 'application/vnd.pgrst.object+json',
@@ -208,24 +308,49 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq')
         'Content-Type': 'application/json'
       }),
       body: JSON.stringify(params.data),
-    }).then(({ json }) => ({ data: { ...params.data, id: json.id }})),
+    }).then(({ json }) => ({
+      data: {
+        ...params.data,
+        id: encodeId(json, primaryKey)
+      }
+    }));
+  },
 
-  delete: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}?id=eq.${params.id}`, {
+  delete: (resource, params) => {
+    const primaryKey = getPrimaryKey(resource, primaryKeys);
+    const primaryKeyParams = decodeId(params.id, primaryKey);
+    const query = Array.isArray(primaryKey)
+      ? `and=(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`
+      : stringify({ [primaryKey]: `eq.${params.id}` });
+    const url = `${apiUrl}/${resource}?${query}`;
+
+    return httpClient(url, {
       method: 'DELETE',
       headers: new Headers({
         'Accept': 'application/vnd.pgrst.object+json',
         'Prefer': 'return=representation',
         'Content-Type': 'application/json'
       }),
-    }).then(({ json }) => ({ data: json })),
+    }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
+  },
 
-  deleteMany: (resource, params) =>
-    httpClient(`${apiUrl}/${resource}?id=in.(${params.ids.join(',')})`, {
+  deleteMany: (resource, params) => {
+    const ids = params.ids;
+    const primaryKey = getPrimaryKey(resource, primaryKeys);
+    const query = Array.isArray(primaryKey)
+      ? `or=(${ids.map(id => {
+        const primaryKeyParams = decodeId(id, primaryKey);
+        return `and(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
+      })})`
+      : stringify({ [primaryKey]: `in.(${ids.join(',')})` });
+    const url = `${apiUrl}/${resource}?${query}`;
+
+    return httpClient(url, {
       method: 'DELETE',
       headers: new Headers({
         'Prefer': 'return=representation',
         'Content-Type': 'application/json'
       }),
-    }).then(({ json }) => ({ data: json.map(data => data.id) })),
+    }).then(({ json }) => ({ data: json.map(data => encodeId(data, primaryKey)) }));
+  },
 });
