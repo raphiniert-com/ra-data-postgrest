@@ -136,6 +136,16 @@ The dataProvider is designed to enable you to specify the comparator in your rea
 One can simply append the comparator with an `@` to the source. In this example the field `post_title` would be filtered with `ilike` whereas `post_author` would be filtered using `eq` which is the default if no special comparator is specified.
 
 
+### Compound primary keys
+If one has data resources without primary keys named `id`, one will have to define this specifically. Also, if there is a primary key, which is defined over multiple columns:
+
+```jsx
+const dataProvider = postgrestRestProvider(API_URL, fetchUtils.fetchJson, 'eq', new Map([
+  ['some_table', 'custom_id'],
+  ['another_table', ['first_column', 'second_column']],
+]));
+```
+
 ## License
 
 This data provider is licensed under the MIT License and sponsored by [raphiniert.com](https://raphiniert.com).

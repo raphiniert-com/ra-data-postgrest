@@ -2,6 +2,14 @@
 
 Find all notable changes of this project in this file.
 
+## v1.0.7 - 2020-08-23
+### New feature
+- [#14](https://github.com/raphiniert-com/ra-data-postgrest/pull/14) compound primary keys (see [README.md](https://github.com/raphiniert-com/ra-data-postgrest/blob/master/README.md#compound-primary-keys)) - @[programmarchy](https://github.com/programmarchy)
+
+### Maintenance
+- `import React from 'react';` -> `import * as React from 'react';`
+- Some minor code cleanup
+
 ## v1.0.6 - 2020-06-15
 ### Fixed
 - Fixed wrong support statement concerning [postgrest starter kit](https://github.com/subzerocloud/postgrest-starter-kit) in readme
