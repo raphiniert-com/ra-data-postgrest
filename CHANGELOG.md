@@ -2,6 +2,14 @@
 
 Find all notable changes of this project in this file.
 
+## unreleased
+### New Features
+- Adding full [postgrest starter kit](https://github.com/subzerocloud/postgrest-starter-kit) support (authProvider)
+- Adding full vanilla postgrest support (authProvider)
+
+### Fixed
+- Fixed remove correct item in case of error in authProvider
+
 ## v1.0.6 - 2020-06-15
 ### Fixed
 - Fixed wrong support statement concerning [postgrest starter kit](https://github.com/subzerocloud/postgrest-starter-kit) in readme
