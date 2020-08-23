@@ -159,9 +159,11 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   getOne: (resource, params) => {
     const primaryKey = getPrimaryKey(resource, primaryKeys);
     const primaryKeyParams = decodeId(params.id, primaryKey);
+
     const query = Array.isArray(primaryKey)
       ? `and=(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`
       : stringify({ [primaryKey]: `eq.${params.id}` });
+
     const url = `${apiUrl}/${resource}?${query}`;
 
     return httpClient(url, {
@@ -174,12 +176,14 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   getMany: (resource, params) => {
     const ids = params.ids;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
+
     const query = Array.isArray(primaryKey)
       ? `or=(${ids.map(id => {
         const primaryKeyParams = decodeId(id, primaryKey);
         return `and(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
       })})`
       : stringify({ [primaryKey]: `in.(${ids.join(',')})` });
+      
     const url = `${apiUrl}/${resource}?${query}`;
 
     return httpClient(url).then(({ json }) => ({ data: json }));
@@ -232,18 +236,22 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   update: (resource, params) => {
     const primaryKey = getPrimaryKey(resource, primaryKeys);
     const primaryKeyParams = decodeId(params.id, primaryKey);
-    const query = Array.isArray(primaryKey)
-      ? `and=(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`
-      : stringify({ [primaryKey]: `eq.${params.id}` });
-    const url = `${apiUrl}/${resource}?${query}`;
 
     const { id, ...data } = params.data;
+
+    const query = Array.isArray(primaryKey)
+      ? `and=(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`
+      : stringify({ [primaryKey]: `eq.${id}` });
+
     const primaryKeyData = Array.isArray(primaryKey)
       ? primaryKey.reduce((keyData, key) => ({
         ...keyData,
         [key]: params.data[key]
       }), {})
       : { [primaryKey]: params.data[primaryKey] }
+
+    const url = `${apiUrl}/${resource}?${query}`;
+
     const body = JSON.stringify({
       ...data,
       ...primaryKeyData
@@ -269,7 +277,6 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
         return `and(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
       })})`
       : stringify({ [primaryKey]: `in.(${ids.join(',')})` });
-    const url = `${apiUrl}/${resource}?${query}`;
 
     const body = JSON.stringify(params.data.map(obj => {
       const { id, ...data } = obj;
@@ -284,6 +291,8 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
         ...primaryKeyData
       };
     }));
+
+    const url = `${apiUrl}/${resource}?${query}`;
 
     return httpClient(url, {
       method: 'PATCH',
@@ -300,7 +309,9 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   create: (resource, params) => {
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-    return httpClient(`${apiUrl}/${resource}`, {
+    const url = `${apiUrl}/${resource}`;
+
+    return httpClient(url, {
       method: 'POST',
       headers: new Headers({
         'Accept': 'application/vnd.pgrst.object+json',
@@ -319,9 +330,11 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   delete: (resource, params) => {
     const primaryKey = getPrimaryKey(resource, primaryKeys);
     const primaryKeyParams = decodeId(params.id, primaryKey);
+    
     const query = Array.isArray(primaryKey)
       ? `and=(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`
       : stringify({ [primaryKey]: `eq.${params.id}` });
+
     const url = `${apiUrl}/${resource}?${query}`;
 
     return httpClient(url, {
@@ -337,12 +350,14 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   deleteMany: (resource, params) => {
     const ids = params.ids;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
+
     const query = Array.isArray(primaryKey)
       ? `or=(${ids.map(id => {
         const primaryKeyParams = decodeId(id, primaryKey);
         return `and(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
       })})`
       : stringify({ [primaryKey]: `in.(${ids.join(',')})` });
+      
     const url = `${apiUrl}/${resource}?${query}`;
 
     return httpClient(url, {
