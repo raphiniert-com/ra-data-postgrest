@@ -40,7 +40,7 @@ Access-Control-Expose-Headers: Content-Range
 
 ```jsx
 // in src/App.js
-import React from 'react';
+import * as React from 'react';
 import { Admin, Resource } from 'react-admin';
 import postgrestRestProvider from '@raphiniert/ra-data-postgrest';
 
@@ -100,12 +100,12 @@ const httpClient = (url, options = {}) => {
 Now all the requests to the REST API will contain the `Authorization: SRTRDFVESGNJYTUKTYTHRG` header.
 
 ### Using authProvider
-This package also comes with an [authProvider](https://github.com/marmelab/react-admin/blob/master/docs/Authentication.md) for react-admin which enables you to enable authentification. The provider is designed to work together with [subzero-starter-kit](https://github.com/subzerocloud/subzero-starter-kit). This starter kit sends the JWT within a session cookie. The authProvider expects that. If you want to use postgREST without the starter kit you'll need to write your own. Feel free to contribute!
+This package also comes with an [authProvider](https://github.com/marmelab/react-admin/blob/master/docs/Authentication.md) for react-admin to enable authentification. The provider is designed to work together with [subzero-starter-kit](https://github.com/subzerocloud/subzero-starter-kit). This starter kit sends the JWT within a session cookie. The authProvider expects that. If you want to use postgREST without the starter kit you'll need to write your own. Feel free to contribute!
 
-With one of the starter kits it is very easy to use the authProvider:
+With the starter kit it is very easy to use the authProvider:
 ```jsx
 // in src/App.js
-import React from 'react';
+import * as React from 'react';
 import { Admin, Resource } from 'react-admin';
 import postgrestRestProvider, { authProvider } from '@raphiniert/ra-data-postgrest';
 
