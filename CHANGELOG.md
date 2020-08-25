@@ -2,6 +2,17 @@
 
 Find all notable changes of this project in this file.
 
+## Unpublished
+### Breaking changes
+- refactored compound primary keys:
+  For single custom keys wrap an array as follows:
+  ```jsx
+  const dataProvider = postgrestRestProvider(API_URL, fetchUtils.fetchJson, 'eq', new Map([
+    ['some_table',    ['custom_id']], // <- instead of ['some_table','custom_id']
+    ['another_table', ['first_column', 'second_column']],
+  ]));
+  ```
+
 ## v1.0.7 - 2020-08-23
 ### New feature
 - [#14](https://github.com/raphiniert-com/ra-data-postgrest/pull/14) compound primary keys (see [README.md](https://github.com/raphiniert-com/ra-data-postgrest/blob/master/README.md#compound-primary-keys)) - @[programmarchy](https://github.com/programmarchy)
