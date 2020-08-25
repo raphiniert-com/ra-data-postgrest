@@ -78,27 +78,27 @@ function parseFilters(filter, defaultListOp) {
 // compound keys capability
 type PrimaryKey = Array<string>;
 
-function getPrimaryKey(resource, primaryKeys: Map<string, PrimaryKey>) {
+const getPrimaryKey = (resource : string, primaryKeys: Map<string, PrimaryKey>) => {
   return primaryKeys.get(resource) || ['id'];
 }
 
-function decodeId(id: Identifier, primaryKey: PrimaryKey): string[] {
-  if (primaryKey.length > 1) {
+const decodeId = (id: Identifier, primaryKey: PrimaryKey): string[] => {
+  if (isCompoundKey(primaryKey)) {
     return JSON.parse(id.toString());
   } else {
     return [id.toString()];
   }
 }
 
-function encodeId(data: any, primaryKey: PrimaryKey): Identifier {
-  if (primaryKey.length > 1) {
+const encodeId = (data: any, primaryKey: PrimaryKey): Identifier => {
+  if (isCompoundKey(primaryKey)) {
     return JSON.stringify(primaryKey.map(key => data[key]));
   } else {
     return data[primaryKey[0]];
   }
 }
 
-function dataWithId(data: any, primaryKey: PrimaryKey) {
+const dataWithId = (data: any, primaryKey: PrimaryKey) => {
   if (primaryKey === ['id'] || (data && data.id)) {
     return data;
   }
@@ -106,6 +106,47 @@ function dataWithId(data: any, primaryKey: PrimaryKey) {
   return Object.assign(data, {
     id: encodeId(data, primaryKey)
   });
+}
+
+const isCompoundKey = (primaryKey: PrimaryKey) : Boolean => {
+  return primaryKey.length > 1;
+}
+
+const getQuery = (primaryKey : PrimaryKey, ids: Identifier | Array<Identifier>) : string => {
+  if (Array.isArray(ids)) {
+    if (isCompoundKey(primaryKey)) {
+      return `or=(${ids.map(id => {
+            const primaryKeyParams = decodeId(id, primaryKey);
+            return `and(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
+          }
+        )})` 
+      } else {
+        return stringify({ [primaryKey[0]]: `in.(${ids.join(',')})` });
+      }
+  } else {
+    // if ids is one Identifier
+    const id = ids;
+    const primaryKeyParams = decodeId(id, primaryKey);
+
+    if (isCompoundKey(primaryKey)) {
+      return `and=(${primaryKey.map((key : string, i: any) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
+    } else {
+      return stringify({ [primaryKey[0]]: `eq.${id}` });
+    }
+  }
+}
+
+const getKeyData = (primaryKey : PrimaryKey, data: object) : object => {
+  if (isCompoundKey(primaryKey)) {
+    return primaryKey.reduce(
+      (keyData, key) => ({
+        ...keyData,
+          [key]: data[key]
+        }), 
+      {});
+  } else {
+    return { [primaryKey[0]]: data[primaryKey[0]] };
+  }
 }
 
 const defaultPrimaryKeys = new Map<string, PrimaryKey>();
@@ -158,13 +199,11 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   },
 
   getOne: (resource, params) => {
+    const id = params.id;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
-    const primaryKeyParams = decodeId(params.id, primaryKey);
-
-    const query = (primaryKey.length > 1)
-      ? `and=(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`
-      : stringify({ [primaryKey[0]]: `eq.${params.id}` });
-
+    
+    const query = getQuery(primaryKey, id)
+    
     const url = `${apiUrl}/${resource}?${query}`;
 
     return httpClient(url, {
@@ -178,12 +217,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const ids = params.ids;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-    const query = (primaryKey.length > 1)
-      ? `or=(${ids.map(id => {
-        const primaryKeyParams = decodeId(id, primaryKey);
-        return `and(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
-      })})`
-      : stringify({ [primaryKey[0]]: `in.(${ids.join(',')})` });
+    const query = getQuery(primaryKey, ids)
       
     const url = `${apiUrl}/${resource}?${query}`;
 
@@ -235,21 +269,12 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   },
 
   update: (resource, params) => {
-    const primaryKey = getPrimaryKey(resource, primaryKeys);
-    const primaryKeyParams = decodeId(params.id, primaryKey);
-
     const { id, ...data } = params.data;
+    const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-    const query = (primaryKey.length > 1)
-      ? `and=(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`
-      : stringify({ [primaryKey[0]]: `eq.${id}` });
+    const query = getQuery(primaryKey, id);
 
-    const primaryKeyData = (primaryKey.length > 1)
-      ? primaryKey.reduce((keyData, key) => ({
-        ...keyData,
-        [key]: params.data[key]
-      }), {})
-      : { [primaryKey[0]]: params.data[primaryKey[0]] }
+    const primaryKeyData = getKeyData(primaryKey, data);
 
     const url = `${apiUrl}/${resource}?${query}`;
 
@@ -272,26 +297,20 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   updateMany: (resource, params) => {
     const ids = params.ids;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
-    const query = (primaryKey.length > 1)
-      ? `or=(${ids.map(id => {
-        const primaryKeyParams = decodeId(id, primaryKey);
-        return `and(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
-      })})`
-      : stringify({ [primaryKey[0]]: `in.(${ids.join(',')})` });
 
-    const body = JSON.stringify(params.data.map(obj => {
-      const { id, ...data } = obj;
-      const primaryKeyData = (primaryKey.length > 1)
-        ? primaryKey.reduce((keyData, key) => ({
-          ...keyData,
-          [key]: obj[key]
-        }), {})
-        : { [primaryKey[0]]: obj[primaryKey[0]] }
-      return {
-        ...data,
-        ...primaryKeyData
-      };
-    }));
+    const query = getQuery(primaryKey, ids);
+
+    const body = JSON.stringify(
+      params.data.map(obj => {
+        const { id, ...data } = obj;
+        const primaryKeyData = getKeyData(primaryKey, data);
+
+        return {
+          ...data,
+          ...primaryKeyData
+        };
+      })
+    );
 
     const url = `${apiUrl}/${resource}?${query}`;
 
@@ -329,12 +348,10 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   },
 
   delete: (resource, params) => {
+    const id = params.id;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
-    const primaryKeyParams = decodeId(params.id, primaryKey);
     
-    const query = (primaryKey.length > 1)
-      ? `and=(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`
-      : stringify({ [primaryKey[0]]: `eq.${params.id}` });
+    const query = getQuery(primaryKey, id);
 
     const url = `${apiUrl}/${resource}?${query}`;
 
@@ -352,12 +369,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const ids = params.ids;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-    const query = (primaryKey.length > 1)
-      ? `or=(${ids.map(id => {
-        const primaryKeyParams = decodeId(id, primaryKey);
-        return `and(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
-      })})`
-      : stringify({ [primaryKey[0]]: `in.(${ids.join(',')})` });
+    const query = getQuery(primaryKey, ids);
       
     const url = `${apiUrl}/${resource}?${query}`;
 
