@@ -1,7 +1,7 @@
 {
     "name": "@raphiniert/ra-data-postgrest",
     "version": "1.0.7",
-    "description": "subZero data provider for react-admin",
+    "description": "postgREST data provider for react-admin",
     "main": "lib/index.js",
     "module": "esm/index.js",
     "sideEffects": false,
