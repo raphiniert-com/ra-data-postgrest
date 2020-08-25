@@ -141,7 +141,7 @@ If one has data resources without primary keys named `id`, one will have to defi
 
 ```jsx
 const dataProvider = postgrestRestProvider(API_URL, fetchUtils.fetchJson, 'eq', new Map([
-  ['some_table', 'custom_id'],
+  ['some_table',    ['custom_id']],
   ['another_table', ['first_column', 'second_column']],
 ]));
 ```
