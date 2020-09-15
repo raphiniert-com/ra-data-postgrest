@@ -202,7 +202,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const id = params.id;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
     
-    const query = getQuery(primaryKey, id)
+    const query = getQuery(primaryKey, id);
     
     const url = `${apiUrl}/${resource}?${query}`;
 
@@ -217,7 +217,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const ids = params.ids;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-    const query = getQuery(primaryKey, ids)
+    const query = getQuery(primaryKey, ids);
       
     const url = `${apiUrl}/${resource}?${query}`;
 
