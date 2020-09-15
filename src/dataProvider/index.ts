@@ -149,10 +149,20 @@ const getKeyData = (primaryKey : PrimaryKey, data: object) : object => {
   }
 }
 
+const getOrderBy = (field : string, order: string, primaryKey : PrimaryKey) => {
+  if (field == 'id') {
+    return primaryKey.map(key => (`${key}.${order.toLowerCase()}`)).join(',');
+  } else {
+    return `${field}.${order.toLowerCase()}`;
+  }
+};
+
 const defaultPrimaryKeys = new Map<string, PrimaryKey>();
 
-export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq', primaryKeys: Map<string, PrimaryKey> = defaultPrimaryKeys): DataProvider => ({
+export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq', 
+                primaryKeys: Map<string, PrimaryKey> = defaultPrimaryKeys): DataProvider => ({
   getList: (resource, params) => {
+    console.log(params);
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
     const { page, perPage } = params.pagination;
@@ -160,7 +170,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const parsedFilter = parseFilters(params.filter, defaultListOp);
 
     const query = {
-      order: `${field}.${order.toLowerCase()}`,
+      order: getOrderBy(field, order, primaryKey),
       offset: (page - 1) * perPage,
       limit: perPage,
       // append filters
@@ -228,10 +238,11 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
     const parsedFilter = parseFilters(params.filter, defaultListOp);
+    const primaryKey = getPrimaryKey(resource, primaryKeys);
 
     const query = {
       [params.target]: `eq.${params.id}`,
-      order: `${field}.${order.toLowerCase()}`,
+      order: getOrderBy(field, order, primaryKey),
       offset: (page - 1) * perPage,
       limit: perPage,
       ...parsedFilter,
