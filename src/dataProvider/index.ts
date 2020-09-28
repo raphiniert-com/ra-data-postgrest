@@ -231,7 +231,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
       
     const url = `${apiUrl}/${resource}?${query}`;
 
-    return httpClient(url).then(({ json }) => ({ data: json }));
+    return httpClient(url).then(({ json }) => ({ data: json.map( obj => dataWithId(obj, primaryKey)) }));
   },
 
   getManyReference: (resource, params) => {
