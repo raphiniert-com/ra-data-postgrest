@@ -2,6 +2,10 @@
 
 Find all notable changes of this project in this file.
 
+## v1.1.1 - 2020-09-28
+### Fixes
+- fixed getMany and getManyReferecnce for compound keys
+
 ## v1.1.0 - 2020-09-16
 ### Fixes
 - removed requirement to define order key in react admin, when using compound keys: default was `id`, now it's the compound key
