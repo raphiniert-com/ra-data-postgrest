@@ -231,7 +231,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
       
     const url = `${apiUrl}/${resource}?${query}`;
 
-    return httpClient(url).then(({ json }) => ({ data: json.map(data => encodeId(data, primaryKey)) }));
+    return httpClient(url).then(({ json }) => ({ data: json.map(data => dataWithId(data, primaryKey)) }));
   },
 
   getManyReference: (resource, params) => {
@@ -267,7 +267,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
         );
       }
       return {
-        data: json.map(data => ({...data, id: encodeId(data, primaryKey)})),
+        data: json.map(data => dataWithId(data, primaryKey)),
         total: parseInt(
           headers
             .get('content-range')
@@ -333,7 +333,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
       }),
       body,
     }).then(({ json }) => ({
-      data: json.map(data => encodeId(data, primaryKey))
+      data: json.map(data => dataWithId(data, primaryKey))
     }));
   },
 
@@ -390,6 +390,6 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
         'Prefer': 'return=representation',
         'Content-Type': 'application/json'
       }),
-    }).then(({ json }) => ({ data: json.map(data => encodeId(data, primaryKey)) }));
+    }).then(({ json }) => ({ data: json.map(data => dataWithId(data, primaryKey)) }));
   },
 });
