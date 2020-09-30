@@ -267,7 +267,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
         );
       }
       return {
-        data: json.map(data => encodeId(data, primaryKey)),
+        data: json.map(data => ({...data, id: encodeId(data, primaryKey)})),
         total: parseInt(
           headers
             .get('content-range')
