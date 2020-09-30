@@ -119,7 +119,7 @@ const getQuery = (primaryKey : PrimaryKey, ids: Identifier | Array<Identifier>) 
             const primaryKeyParams = decodeId(id, primaryKey);
             return `and(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
           }
-        )})` 
+        )})`
       } else {
         return stringify({ [primaryKey[0]]: `in.(${ids.join(',')})` });
       }
@@ -142,7 +142,7 @@ const getKeyData = (primaryKey : PrimaryKey, data: object) : object => {
       (keyData, key) => ({
         ...keyData,
           [key]: data[key]
-        }), 
+        }),
       {});
   } else {
     return { [primaryKey[0]]: data[primaryKey[0]] };
@@ -159,7 +159,7 @@ const getOrderBy = (field : string, order: string, primaryKey : PrimaryKey) => {
 
 const defaultPrimaryKeys = new Map<string, PrimaryKey>();
 
-export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq', 
+export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
                 primaryKeys: Map<string, PrimaryKey> = defaultPrimaryKeys): DataProvider => ({
   getList: (resource, params) => {
     console.log(params);
@@ -211,9 +211,9 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   getOne: (resource, params) => {
     const id = params.id;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
-    
+
     const query = getQuery(primaryKey, id);
-    
+
     const url = `${apiUrl}/${resource}?${query}`;
 
     return httpClient(url, {
@@ -228,10 +228,10 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
     const query = getQuery(primaryKey, ids);
-      
+
     const url = `${apiUrl}/${resource}?${query}`;
 
-    return httpClient(url).then(({ json }) => ({ data: json.map(data => encodeId(data, primaryKey)) }));
+    return httpClient(url).then(({ json }) => ({ data: json.map(data => ({...data, id: encodeId(data, primaryKey)})) }));
   },
 
   getManyReference: (resource, params) => {
@@ -267,7 +267,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
         );
       }
       return {
-        data: json.map(data => encodeId(data, primaryKey)),
+        data: json.map(data => ({...data, id: encodeId(data, primaryKey)})),
         total: parseInt(
           headers
             .get('content-range')
@@ -333,7 +333,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
       }),
       body,
     }).then(({ json }) => ({
-      data: json.map(data => encodeId(data, primaryKey))
+      data: json.map(data => ({...data, id: encodeId(data, primaryKey)}))
     }));
   },
 
@@ -361,7 +361,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   delete: (resource, params) => {
     const id = params.id;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
-    
+
     const query = getQuery(primaryKey, id);
 
     const url = `${apiUrl}/${resource}?${query}`;
@@ -381,7 +381,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
     const query = getQuery(primaryKey, ids);
-      
+
     const url = `${apiUrl}/${resource}?${query}`;
 
     return httpClient(url, {
@@ -390,6 +390,6 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
         'Prefer': 'return=representation',
         'Content-Type': 'application/json'
       }),
-    }).then(({ json }) => ({ data: json.map(data => encodeId(data, primaryKey)) }));
+    }).then(({ json }) => ({ data: json.map(data => ({...data, id: encodeId(data, primaryKey)})) }));
   },
 });
