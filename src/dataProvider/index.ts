@@ -231,7 +231,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
       
     const url = `${apiUrl}/${resource}?${query}`;
 
-    return httpClient(url).then(({ json }) => ({ data: json.map(data => encodeId(data, primaryKey)) }));
+    return httpClient(url).then(({ json }) => ({ data: json.map(data => dataWithId(data, primaryKey)) }));
   },
 
   getManyReference: (resource, params) => {
@@ -267,7 +267,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
         );
       }
       return {
-        data: json.map(data => encodeId(data, primaryKey)),
+        data: json.map(data => dataWithId(data, primaryKey)),
         total: parseInt(
           headers
             .get('content-range')
