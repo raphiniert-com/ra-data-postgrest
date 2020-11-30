@@ -280,7 +280,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   },
 
   update: (resource, params) => {
-    const { id, ...data } = params.data;
+    const { id, data } = params;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
     const query = getQuery(primaryKey, id);
