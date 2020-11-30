@@ -162,7 +162,6 @@ const defaultPrimaryKeys = new Map<string, PrimaryKey>();
 export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq', 
                 primaryKeys: Map<string, PrimaryKey> = defaultPrimaryKeys): DataProvider => ({
   getList: (resource, params) => {
-    console.log(params);
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
     const { page, perPage } = params.pagination;
