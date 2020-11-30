@@ -2,6 +2,11 @@
 
 Find all notable changes of this project in this file.
 
+## v1.1.3 - 2020-11-30
+### Fixes
+- [#20](https://github.com/raphiniert-com/ra-data-postgrest/pull/20), fixed small bug in update - @[mkkane](https://github.com/mkkane)
+- removed console log
+
 ## v1.1.2 - 2020-10-05
 ### Fixes
 - fixed the last fix of getMany and getManyReferecnce for compound keys :)
