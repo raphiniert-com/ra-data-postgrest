@@ -112,26 +112,38 @@ const isCompoundKey = (primaryKey: PrimaryKey) : Boolean => {
   return primaryKey.length > 1;
 }
 
-const getQuery = (primaryKey : PrimaryKey, ids: Identifier | Array<Identifier>) : string => {
-  if (Array.isArray(ids)) {
+const getQuery = (primaryKey : PrimaryKey, ids: Identifier | Array<Identifier>, resource: string) : string => {
+  if (Array.isArray(ids) && ids.length > 1) {
+    // no standardized query with multiple ids possible for rpc endpoints which are api-exposed database functions
+    if (resource.startsWith('rpc/')) {
+      console.error('PostgREST\'s rpc endpoints are not intended to be handled as views. Therefore, no query generation for multiple key values implemented!');
+
+      return ;
+    }
+
     if (isCompoundKey(primaryKey)) {
-      return `or=(${ids.map(id => {
-            const primaryKeyParams = decodeId(id, primaryKey);
-            return `and(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
-          }
-        )})` 
+      return `or=(
+          ${ids.map(id => {
+                const primaryKeyParams = decodeId(id, primaryKey);
+                return `and(${primaryKey.map((key, i) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
+              })
+            }
+        )`;
       } else {
         return stringify({ [primaryKey[0]]: `in.(${ids.join(',')})` });
       }
   } else {
     // if ids is one Identifier
-    const id = ids;
+    const id : Identifier = ids.toString();
     const primaryKeyParams = decodeId(id, primaryKey);
 
     if (isCompoundKey(primaryKey)) {
-      return `and=(${primaryKey.map((key : string, i: any) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
+      if (resource.startsWith('rpc/'))
+        return `${primaryKey.map((key : string, i: any) => `${key}=${primaryKeyParams[i]}`).join('&')}`;
+      else
+        return `and=(${primaryKey.map((key : string, i: any) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
     } else {
-      return stringify({ [primaryKey[0]]: `eq.${id}` });
+      return stringify({ [primaryKey[0]]: `${id}` });
     }
   }
 }
@@ -211,7 +223,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const id = params.id;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
     
-    const query = getQuery(primaryKey, id);
+    const query = getQuery(primaryKey, id, resource);
     
     const url = `${apiUrl}/${resource}?${query}`;
 
@@ -226,7 +238,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const ids = params.ids;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-    const query = getQuery(primaryKey, ids);
+    const query = getQuery(primaryKey, ids, resource);
       
     const url = `${apiUrl}/${resource}?${query}`;
 
@@ -282,7 +294,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const { id, data } = params;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-    const query = getQuery(primaryKey, id);
+    const query = getQuery(primaryKey, id, resource);
 
     const primaryKeyData = getKeyData(primaryKey, data);
 
@@ -308,7 +320,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const ids = params.ids;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-    const query = getQuery(primaryKey, ids);
+    const query = getQuery(primaryKey, ids, resource);
 
     const body = JSON.stringify(
       params.data.map(obj => {
@@ -361,7 +373,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const id = params.id;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
     
-    const query = getQuery(primaryKey, id);
+    const query = getQuery(primaryKey, id, resource);
 
     const url = `${apiUrl}/${resource}?${query}`;
 
@@ -379,7 +391,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const ids = params.ids;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-    const query = getQuery(primaryKey, ids);
+    const query = getQuery(primaryKey, ids, resource);
       
     const url = `${apiUrl}/${resource}?${query}`;
 
