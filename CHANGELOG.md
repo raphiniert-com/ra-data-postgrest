@@ -2,12 +2,15 @@
 
 Find all notable changes of this project in this file.
 
-## v1.1.4 - 2021-01-16
+## v1.1.5 - 2021-01-16
 ### fixed
 - fixed query string generation of rpc endpoints [issue #22](https://github.com/raphiniert-com/ra-data-postgrest/issues/22)
 
 ### Breaking changes
-- Support was dropped for generating the query string given many ids in case of an rpc endpoint. If your application has some psql functions which parse the standard input, I recommend to rework your db design. Query strings of single rpc calls now drop the operator (`eq.`) and are generated properly.
+- Support was dropped for generating the query string given many ids in case of an rpc endpoint. If your application has some psql functions which parse the standard input, I recommend to rework your db design. If this change causes strong damage to your application, please contact me in order to find a proper generic solution. Query strings of single rpc calls now drop the operator (`eq.`) and are generated properly.
+
+## v1.1.4 - 2021-01-16
+- deployment error
 
 ## v1.1.3 - 2020-11-30
 ### Fixes
