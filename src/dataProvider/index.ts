@@ -143,7 +143,7 @@ const getQuery = (primaryKey : PrimaryKey, ids: Identifier | Array<Identifier>, 
       else
         return `and=(${primaryKey.map((key : string, i: any) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
     } else {
-      return stringify({ [primaryKey[0]]: `${id}` });
+      return stringify({ [primaryKey[0]]: `eq.${id}` });
     }
   }
 }
