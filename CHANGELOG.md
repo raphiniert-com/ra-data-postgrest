@@ -2,8 +2,12 @@
 
 Find all notable changes of this project in this file.
 
+## v1.1.6 - 2021-01-16
+### Fixes
+- fixed eq. prefix for non-compound keys [issue #23](https://github.com/raphiniert-com/ra-data-postgrest/issues/23) - @[andymed-jlp](https://github.com/andymed-jlp)
+
 ## v1.1.5 - 2021-01-16
-### fixed
+### Fixes
 - fixed query string generation of rpc endpoints [issue #22](https://github.com/raphiniert-com/ra-data-postgrest/issues/22)
 
 ### Breaking changes
