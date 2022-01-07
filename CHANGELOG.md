@@ -2,6 +2,13 @@
 
 Find all notable changes of this project in this file.
 
+## v1.1.7 - 2022-01-07
+### Fixes
+- fixed bad behaivor with compound keys while using field named `id` [issue #27](https://github.com/raphiniert-com/ra-data-postgrest/issues/27) and [issue #19](https://github.com/raphiniert-com/ra-data-postgrest/pull/19) - @[kenfehling](https://github.com/kenfehling)
+
+### New feature
+- added rpc filter support, which is explained [here](https://github.com/raphiniert-com/ra-data-postgrest#special-filter-feature-rpc-functions) - @[TheRealAstroboy](https://github.com/TheRealAstroboy)
+
 ## v1.1.6 - 2021-01-16
 ### Fixes
 - fixed eq. prefix for non-compound keys [issue #23](https://github.com/raphiniert-com/ra-data-postgrest/issues/23) - @[andymed-jlp](https://github.com/andymed-jlp)
