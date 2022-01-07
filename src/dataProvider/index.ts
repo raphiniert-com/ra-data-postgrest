@@ -53,7 +53,9 @@ function parseFilters(filter, defaultListOp) {
     }
 
     values.forEach(value => {
-      let op = operation.includes('like') ? `${operation}.*${value}*` : `${operation}.${value}`;
+      // if operator is intentionally blank, rpc syntax 
+      let op = operation.includes('like') ? `${operation}.*${value}*` : operation.length == 0 ? `${value}` : `${operation}.${value}`;
+
       if (result[splitKey[0]] === undefined) {
         // first operator for the key, we add it to the dict
         result[splitKey[0]] = op;
@@ -251,8 +253,13 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const parsedFilter = parseFilters(params.filter, defaultListOp);
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-    const query = {
+    const query = params.target ? {
       [params.target]: `eq.${params.id}`,
+      order: getOrderBy(field, order, primaryKey),
+      offset: (page - 1) * perPage,
+      limit: perPage,
+      ...parsedFilter,
+    }:{
       order: getOrderBy(field, order, primaryKey),
       offset: (page - 1) * perPage,
       limit: perPage,
