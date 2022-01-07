@@ -1,6 +1,6 @@
 {
     "name": "@raphiniert/ra-data-postgrest",
-    "version": "1.1.7",
+    "version": "1.1.8",
     "description": "postgREST data provider for react-admin",
     "main": "lib/index.js",
     "module": "esm/index.js",
@@ -36,6 +36,6 @@
         "typescript": "^3.9.5"
     },
     "peerDependencies": {
-        "ra-core": "^3.8.4"
+        "ra-core": "^3.19.6"
     }
 }
