@@ -135,6 +135,19 @@ The dataProvider is designed to enable you to specify the comparator in your rea
 
 One can simply append the comparator with an `@` to the source. In this example the field `post_title` would be filtered with `ilike` whereas `post_author` would be filtered using `eq` which is the default if no special comparator is specified.
 
+### Special Filter Feature (RPC Functions)
+The dataProvider is designed to enable you to use Get RPC functions:
+
+```GET /rpc/add_them?post_author=Herbert HTTP/1.1```
+The function parameter names match the query parameters ```&post_author=Herbert``` if you end the field with an `@` (neither default comparator nor special comparator)
+
+```jsx
+<Filter {...props}>
+  <TextInput label="Search" source="post_title" alwaysOn />
+  <TextInput label="Search" source="post_author@" alwaysOn />
+  // some more filters
+</Filter>
+```
 
 ### Compound primary keys
 If one has data resources without primary keys named `id`, one will have to define this specifically. Also, if there is a primary key, which is defined over multiple columns:
