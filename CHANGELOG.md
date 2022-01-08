@@ -10,12 +10,12 @@ Find all notable changes of this project in this file.
 - fixed bad behaivor with compound keys while using field named `id` [issue #27](https://github.com/raphiniert-com/ra-data-postgrest/issues/27) and [issue #19](https://github.com/raphiniert-com/ra-data-postgrest/pull/19) - @[kenfehling](https://github.com/kenfehling)
 
 ### New feature
-- added rpc filter support, which is explained [here](https://github.com/raphiniert-com/ra-data-postgrest#special-filter-feature-rpc-functions) - @[TheRealAstroboy](https://github.com/TheRealAstroboy)
+- [#26](https://github.com/raphiniert-com/ra-data-postgrest/pull/26), added rpc filter support, which is explained [here](https://github.com/raphiniert-com/ra-data-postgrest#special-filter-feature-rpc-functions) - @[TheRealAstroboy](https://github.com/TheRealAstroboy)
 
 
 ## v1.1.6 - 2021-01-16
 ### Fixes
-- fixed eq. prefix for non-compound keys [issue #23](https://github.com/raphiniert-com/ra-data-postgrest/issues/23) - @[andymed-jlp](https://github.com/andymed-jlp)
+- [#24](https://github.com/raphiniert-com/ra-data-postgrest/pull/24), fixed eq. prefix for non-compound keys [issue #23](https://github.com/raphiniert-com/ra-data-postgrest/issues/23) - @[andymed-jlp](https://github.com/andymed-jlp)
 
 ## v1.1.5 - 2021-01-16
 ### Fixes
@@ -56,7 +56,7 @@ Find all notable changes of this project in this file.
 
 ## v1.0.7 - 2020-08-23
 ### New feature
-- [#14](https://github.com/raphiniert-com/ra-data-postgrest/pull/14) compound primary keys (see [README.md](https://github.com/raphiniert-com/ra-data-postgrest/blob/master/README.md#compound-primary-keys)) - @[programmarchy](https://github.com/programmarchy)
+- [#14](https://github.com/raphiniert-com/ra-data-postgrest/pull/14), added compound primary keys (see [README.md](https://github.com/raphiniert-com/ra-data-postgrest/blob/master/README.md#compound-primary-keys)) - @[programmarchy](https://github.com/programmarchy)
 
 ### Maintenance
 - `import React from 'react';` -> `import * as React from 'react';`
