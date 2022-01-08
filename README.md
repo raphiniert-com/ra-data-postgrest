@@ -135,15 +135,11 @@ The dataProvider is designed to enable you to specify the comparator in your rea
 
 One can simply append the comparator with an `@` to the source. In this example the field `post_title` would be filtered with `ilike` whereas `post_author` would be filtered using `eq` which is the default if no special comparator is specified.
 
-### Special Filter Feature (RPC Functions)
-The dataProvider is designed to enable you to use Get RPC functions:
-
-```GET /rpc/add_them?post_author=Herbert HTTP/1.1```
-The function parameter names match the query parameters ```&post_author=Herbert``` if you end the field with an `@` (neither default comparator nor special comparator)
+#### RPC Functions
+Given a RPC call as ```GET /rpc/add_them?post_author=Herbert HTTP/1.1```, the dataProvider allows you to filter such endpoints. As they are no view, but a SQL procedure, several postgREST features do not apply. I.e. no comparators such as `ilike`, `like`, `eq` are applicable. Only the raw value without comparator needs to be send to the API. In order to realize this behavior, just add an "empty" comparator to the field, i.e. end `source` with an `@` as in the example:
 
 ```jsx
 <Filter {...props}>
-  <TextInput label="Search" source="post_title" alwaysOn />
   <TextInput label="Search" source="post_author@" alwaysOn />
   // some more filters
 </Filter>
