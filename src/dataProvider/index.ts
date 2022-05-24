@@ -1,4 +1,3 @@
-import { stringify } from 'query-string';
 import { fetchUtils, DataProvider, Identifier } from 'ra-core';
 
 /**
@@ -132,7 +131,7 @@ const getQuery = (primaryKey : PrimaryKey, ids: Identifier | Array<Identifier>, 
             }
         )`;
       } else {
-        return stringify({ [primaryKey[0]]: `in.(${ids.join(',')})` });
+        return new URLSearchParams({ [primaryKey[0]]: `in.(${ids.join(',')})` }).toString();
       }
   } else {
     // if ids is one Identifier
@@ -145,7 +144,7 @@ const getQuery = (primaryKey : PrimaryKey, ids: Identifier | Array<Identifier>, 
       else
         return `and=(${primaryKey.map((key : string, i: any) => `${key}.eq.${primaryKeyParams[i]}`).join(',')})`;
     } else {
-      return stringify({ [primaryKey[0]]: `eq.${id}` });
+      return new URLSearchParams([[primaryKey[0], `eq.${id}`]]).toString();
     }
   }
 }
@@ -184,8 +183,8 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
 
     const query = {
       order: getOrderBy(field, order, primaryKey),
-      offset: (page - 1) * perPage,
-      limit: perPage,
+      offset: String((page - 1) * perPage),
+      limit: String(perPage),
       // append filters
       ...parsedFilter
     };
@@ -198,7 +197,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
       })
     };
 
-    const url = `${apiUrl}/${resource}?${stringify(query)}`;
+    const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
 
     return httpClient(url, options).then(({ headers, json }) => {
       if (!headers.has('content-range')) {
@@ -256,13 +255,13 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const query = params.target ? {
       [params.target]: `eq.${params.id}`,
       order: getOrderBy(field, order, primaryKey),
-      offset: (page - 1) * perPage,
-      limit: perPage,
+      offset: String((page - 1) * perPage),
+      limit: String(perPage),
       ...parsedFilter,
     }:{
       order: getOrderBy(field, order, primaryKey),
-      offset: (page - 1) * perPage,
-      limit: perPage,
+      offset: String((page - 1) * perPage),
+      limit: String(perPage),
       ...parsedFilter,
     };
 
@@ -274,7 +273,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
       })
     }
 
-    const url = `${apiUrl}/${resource}?${stringify(query)}`;
+    const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
 
     return httpClient(url, options).then(({ headers, json }) => {
       if (!headers.has('content-range')) {
