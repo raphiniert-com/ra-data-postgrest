@@ -1,41 +1,47 @@
 {
-    "name": "@raphiniert/ra-data-postgrest",
-    "version": "1.1.8",
-    "description": "postgREST data provider for react-admin",
-    "main": "lib/index.js",
-    "module": "esm/index.js",
-    "sideEffects": false,
-    "files": [
-        "*.md",
-        "lib",
-        "esm",
-        "src"
-    ],
-    "authors": [
-        "François Zaninotto",
-        "Raphael Scheible"
-    ],
-    "repository": "raphiniert-com/ra-data-postgrest",
-    "homepage": "https://github.com/raphiniert-com/ra-data-postgrest",
-    "bugs": "https://github.com/raphiniert-com/ra-data-postgrest/issues",
-    "license": "MIT",
-    "scripts": {
-        "build": "yarn run build-cjs && yarn run build-esm",
-        "build-cjs": "rimraf ./lib && tsc",
-        "build-esm": "rimraf ./esm && tsc --outDir esm --module es2015",
-        "watch": "tsc --outDir esm --module es2015 --watch",
-        "prepare": "install-peers"
-    },
-    "dependencies": {
-        "query-string": "^5.1.1"
-    },
-    "devDependencies": {
-        "cross-env": "^5.2.0",
-        "install-peers-cli": "^2.2.0",
-        "rimraf": "^2.6.3",
-        "typescript": "^3.9.5"
-    },
-    "peerDependencies": {
-        "ra-core": "^3.19.6"
-    }
+  "name": "@promitheus/ra-data-postgrest",
+  "version": "1.1.8",
+  "description": "postgREST data provider for react-admin",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "sideEffects": false,
+  "files": [
+    "*.md",
+    "lib",
+    "esm",
+    "src"
+  ],
+  "authors": [
+    "François Zaninotto",
+    "Raphael Scheible"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raphiniert-com/ra-data-postgrest.git"
+  },
+  "homepage": "https://github.com/raphiniert-com/ra-data-postgrest",
+  "bugs": {
+    "url": "https://github.com/raphiniert-com/ra-data-postgrest/issues"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn run build-cjs && yarn run build-esm",
+    "build-cjs": "rimraf ./lib && tsc",
+    "build-esm": "rimraf ./esm && tsc --outDir esm --module es2015",
+    "watch": "tsc --outDir esm --module es2015 --watch",
+    "prepare": "install-peers"
+  },
+  "dependencies": {
+    "query-string": "^5.1.1"
+  },
+  "devDependencies": {
+    "cross-env": "^5.2.0",
+    "install-peers-cli": "^2.2.0",
+    "rimraf": "^2.6.3",
+    "typescript": "^3.9.5"
+  },
+  "peerDependencies": {
+    "ra-core": "^4.1"
+  },
+  "author": ""
 }
