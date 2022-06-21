@@ -2,6 +2,9 @@
 
 Find all notable changes of this project in this file.
 
+## v1.2
+- update library to be compatible with `ra-core 4.1.5`
+
 ## v1.1.8 - 2022-01-07
 - required re-release as I missed to transpile all and upload the features of 1.1.7 to npm.
 
