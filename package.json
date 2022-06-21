@@ -13,7 +13,8 @@
   ],
   "authors": [
     "François Zaninotto",
-    "Raphael Scheible"
+    "Raphael Scheible",
+    "Promit Ghosh"
   ],
   "repository": {
     "type": "git",
@@ -22,6 +23,10 @@
   "homepage": "https://github.com/promitheus7/ra-data-postgrest",
   "bugs": {
     "url": "https://github.com/promitheus7/ra-data-postgrest/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "license": "MIT",
   "scripts": {
