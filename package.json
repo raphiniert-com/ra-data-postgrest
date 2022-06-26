@@ -37,7 +37,7 @@
     "prepare": "install-peers"
   },
   "dependencies": {
-    "query-string": "^5.1.1"
+    "query-string": "^7.1.1"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
