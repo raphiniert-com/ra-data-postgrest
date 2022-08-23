@@ -2,6 +2,9 @@
 
 Find all notable changes of this project in this file.
 
+## v1.1.9 - 2023-08-23
+- [#30](https://github.com/raphiniert-com/ra-data-postgrest/pull/30), updated ts and modified code, such that some package dependencies became unrequired - @[corrideat](https://github.com/corrideat)
+
 ## v1.1.8 - 2022-01-07
 - required re-release as I missed to transpile all and upload the features of 1.1.7 to npm.
 
