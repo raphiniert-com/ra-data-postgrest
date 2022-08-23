@@ -8,6 +8,8 @@ PostgREST Data Provider for [react-admin](https://github.com/marmelab/react-admi
 npm install --save @promitheus/ra-data-postgrest
 ```
 
+**NOTE**: When using RA 3.x.x, use the data-provider 1.x.x. For RA >= 4.1.x use the data-provider starting from 1.2.x.
+
 ## REST Dialect
 
 This Data Provider fits REST APIs using simple GET parameters for filters and sorting. This is the dialect used for instance in [PostgREST](http://postgrest.org).
