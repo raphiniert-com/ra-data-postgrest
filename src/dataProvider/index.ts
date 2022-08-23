@@ -23,7 +23,7 @@ import { fetchUtils, DataProvider, Identifier } from 'ra-core';
  *
  * import * as React from 'react';
  * import { Admin, Resource } from 'react-admin';
- * import postgrestRestProvider from '@raphiniert/ra-data-postgrest';
+ * import postgrestRestProvider from '@promitheus/ra-data-postgrest';
  *
  * import { PostList } from './posts';
  *
