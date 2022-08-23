@@ -33,6 +33,6 @@
         "typescript": "^4.6.4"
     },
     "peerDependencies": {
-        "ra-core": "^4.1.0"
+        "ra-core": "^3.19.6"
     }
 }
