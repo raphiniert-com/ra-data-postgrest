@@ -2,6 +2,10 @@
 
 Find all notable changes of this project in this file.
 
+## v1.2.0 - 2023-08-23
+- [#33](https://github.com/raphiniert-com/ra-data-postgrest/pull/33), adding dependabot - @[promitheus7](https://github.com/promitheus7)
+- [#30](https://github.com/raphiniert-com/ra-data-postgrest/pull/30) and [#33](https://github.com/raphiniert-com/ra-data-postgrest/pull/33), updated dependency to compatible starting from `ra-core` 4.1.x - @[corrideat](https://github.com/corrideat), @[promitheus7](https://github.com/promitheus7)
+
 ## v1.1.9 - 2023-08-23
 - [#30](https://github.com/raphiniert-com/ra-data-postgrest/pull/30), updated ts and modified code, such that some package dependencies became unrequired - @[corrideat](https://github.com/corrideat)
 

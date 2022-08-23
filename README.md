@@ -5,7 +5,7 @@ PostgREST Data Provider for [react-admin](https://github.com/marmelab/react-admi
 ## Installation
 
 ```sh
-npm install --save @raphiniert/ra-data-postgrest
+npm install --save @promitheus/ra-data-postgrest
 ```
 
 ## REST Dialect
@@ -42,7 +42,7 @@ Access-Control-Expose-Headers: Content-Range
 // in src/App.js
 import React from 'react';
 import { Admin, Resource } from 'react-admin';
-import postgrestRestProvider from '@raphiniert/ra-data-postgrest';
+import postgrestRestProvider from '@promitheus/ra-data-postgrest';
 
 import { PostList } from './posts';
 
@@ -63,7 +63,7 @@ That means that if you need to add custom headers to your requests, you just nee
 
 ```jsx
 import { fetchUtils, Admin, Resource } from 'react-admin';
-import postgrestRestProvider from '@raphiniert/ra-data-postgrest';
+import postgrestRestProvider from '@promitheus/ra-data-postgrest';
 
 const httpClient = (url, options = {}) => {
     if (!options.headers) {
@@ -107,7 +107,7 @@ With one of the starter kits it is very easy to use the authProvider:
 // in src/App.js
 import React from 'react';
 import { Admin, Resource } from 'react-admin';
-import postgrestRestProvider, { authProvider } from '@raphiniert/ra-data-postgrest';
+import postgrestRestProvider, { authProvider } from '@promitheus/ra-data-postgrest';
 
 import { PostList } from './posts';
 
