@@ -20,13 +20,17 @@
     "bugs": "https://github.com/raphiniert-com/ra-data-postgrest/issues",
     "license": "MIT",
     "scripts": {
-        "build": "yarn run build-cjs && yarn run build-esm",
+        "test": "jest --coverage",
+        "build": "npm run build-cjs && npm run build-esm",
         "build-cjs": "rimraf ./lib && tsc",
         "build-esm": "rimraf ./esm && tsc --outDir esm --module es2015",
         "watch": "tsc --outDir esm --module es2015 --watch",
         "prepare": "install-peers"
     },
     "devDependencies": {
+        "@types/jest": "^28.1.4",
+        "jest": "^28.1.2",
+        "ts-jest": "^28.0.5",
         "cross-env": "^7.0.3",
         "install-peers-cli": "^2.2.0",
         "rimraf": "^3.0.2",
