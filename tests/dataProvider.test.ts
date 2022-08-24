@@ -1,6 +1,6 @@
 import { fetchUtils, SORT_ASC, SORT_DESC } from "ra-core";
 
-import { SINGLE_ENTITY, ENTITY_LIST } from "./mockup.data";
+import { SINGLE_TODO, TODO_LIST } from "./mockup.data";
 import dataProvider from "../src/index";
 
 type HTTPClientMock = typeof fetchUtils.fetchJson;
@@ -11,7 +11,7 @@ describe("test dataProvider", () => {
     test("minimal arguments for dataprovider", () => {
         const t = () => {
             dataProvider(BASE_URL)
-                .getOne("Patient", { id: SINGLE_ENTITY.id })
+                .getOne("Patient", { id: SINGLE_TODO.id })
                 .then((response) => response != undefined);
         };
         expect(t).not.toThrow(TypeError);
@@ -23,7 +23,7 @@ describe("test dataProvider", () => {
                 200,
                 undefined,
                 undefined,
-                ENTITY_LIST
+                TODO_LIST
             );
 
         });
@@ -35,7 +35,7 @@ describe("test dataProvider", () => {
                 200,
                 undefined,
                 undefined,
-                SINGLE_ENTITY
+                SINGLE_TODO
             );
         });
 

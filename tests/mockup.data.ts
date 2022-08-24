@@ -1,11 +1,11 @@
-export const SINGLE_ENTITY = {
+export const SINGLE_TODO = {
   "id": 2,
   "todo": "item_2",
   "private": true,
   "mine": false
 };
 
-export const ENTITY_LIST = [
+export const TODO_LIST = [
   {
     "id": 1,
     "todo": "item_1",
