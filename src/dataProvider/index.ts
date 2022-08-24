@@ -1,6 +1,6 @@
 import { fetchUtils, DataProvider } from 'ra-core';
 import { PrimaryKey, PostgRestOperator, getPrimaryKey, parseFilters, 
-         getOrderBy, dataWithId, getQuery, getKeyData, encodeId } from "./utils";
+         getOrderBy, dataWithId, getQuery, getKeyData, encodeId } from "./urlBuilder";
 /**
  * Maps react-admin queries to a postgrest REST API
  *
