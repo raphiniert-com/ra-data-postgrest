@@ -10,7 +10,7 @@ export const ENTITY_LIST = [
     "id": 1,
     "todo": "item_1",
     "private": false,
-    "mine": false
+    "mine": true
   },
   {
     "id": 2,
@@ -28,7 +28,7 @@ export const ENTITY_LIST = [
     "id": 4,
     "todo": "item_4",
     "private": true,
-    "mine": false
+    "mine": true
   },
   {
     "id": 5,
