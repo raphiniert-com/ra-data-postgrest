@@ -178,16 +178,18 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
     const { page, perPage } = params.pagination;
-    const { field, order } = params.sort;
+    const { field, order } = params.sort || {};
     const parsedFilter = parseFilters(params.filter, defaultListOp);
 
     const query = {
-      order: getOrderBy(field, order, primaryKey),
       offset: String((page - 1) * perPage),
       limit: String(perPage),
       // append filters
       ...parsedFilter
     };
+    if (field) {
+      query.order = getOrderBy(field, order, primaryKey);
+    }
 
     // add header that Content-Range is in returned header
     const options = {
