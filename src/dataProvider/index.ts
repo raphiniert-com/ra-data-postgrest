@@ -35,8 +35,16 @@ import { fetchUtils, DataProvider, Identifier } from 'ra-core';
  *
  * export default App;
  */
-function parseFilters(filter, defaultListOp) {
-  let result = {};
+type ParsedFiltersResult = {
+  filter: any;
+  meta: any;
+  select: any;
+}
+
+function parseFilters(params, defaultListOp): Partial<ParsedFiltersResult> {
+  const { filter, meta = {} } = params;
+
+  let result: Partial<ParsedFiltersResult> = {};
   Object.keys(filter).forEach(function (key) {
     // key: the name of the object key
 
@@ -72,6 +80,12 @@ function parseFilters(filter, defaultListOp) {
     });
 
   });
+
+  if (meta.columns) {
+    result.select = Array.isArray(meta.columns)
+      ? meta.columns.join(',')
+      : meta.columns;
+  }
 
   return result;
 }
@@ -179,7 +193,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
 
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
-    const parsedFilter = parseFilters(params.filter, defaultListOp);
+    const parsedFilter = parseFilters(params, defaultListOp);
 
     const query = {
       order: getOrderBy(field, order, primaryKey),
@@ -249,7 +263,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
   getManyReference: (resource, params) => {
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
-    const parsedFilter = parseFilters(params.filter, defaultListOp);
+    const parsedFilter = parseFilters(params, defaultListOp);
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
     const query = params.target ? {
