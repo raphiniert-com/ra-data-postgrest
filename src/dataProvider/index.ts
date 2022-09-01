@@ -1,4 +1,17 @@
-import { fetchUtils, DataProvider, Identifier } from 'ra-core';
+import {
+  fetchUtils,
+  DataProvider,
+  Identifier,
+  GetListParams,
+  GetOneParams,
+  GetManyParams,
+  GetManyReferenceParams,
+  UpdateParams,
+  UpdateManyParams,
+  CreateParams,
+  DeleteParams,
+  DeleteManyParams,
+} from 'ra-core';
 
 /**
  * Maps react-admin queries to a postgrest REST API
@@ -174,7 +187,7 @@ const defaultPrimaryKeys = new Map<string, PrimaryKey>();
 
 export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq', 
                 primaryKeys: Map<string, PrimaryKey> = defaultPrimaryKeys): DataProvider => ({
-  getList: (resource, params) => {
+  getList: (resource, params: Partial<GetListParams> = {}) => {
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
     const { page, perPage } = params.pagination;
@@ -193,7 +206,8 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const options = {
       headers: new Headers({
         Accept: 'application/json',
-        Prefer: 'count=exact'
+        Prefer: 'count=exact',
+        ...(params.meta?.headers || {}),
       })
     };
 
@@ -220,7 +234,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     });
   },
 
-  getOne: (resource, params) => {
+  getOne: (resource, params: Partial<GetOneParams> = {}) => {
     const id = params.id;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
     
@@ -229,13 +243,16 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const url = `${apiUrl}/${resource}?${query}`;
 
     return httpClient(url, {
-      headers: new Headers({ 'accept': 'application/vnd.pgrst.object+json' }),
+      headers: new Headers({
+        'accept': 'application/vnd.pgrst.object+json',
+        ...(params.meta?.headers || {}),
+      }),
     }).then(({ json }) => ({
       data: dataWithId(json, primaryKey),
     }))
   },
 
-  getMany: (resource, params) => {
+  getMany: (resource, params: Partial<GetManyParams> = {}) => {
     const ids = params.ids;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
@@ -246,7 +263,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     return httpClient(url).then(({ json }) => ({ data: json.map(data => dataWithId(data, primaryKey)) }));
   },
 
-  getManyReference: (resource, params) => {
+  getManyReference: (resource, params: Partial<GetManyReferenceParams> = {}) => {
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
     const parsedFilter = parseFilters(params.filter, defaultListOp);
@@ -269,7 +286,8 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     const options = {
       headers: new Headers({
         Accept: 'application/json',
-        Prefer: 'count=exact'
+        Prefer: 'count=exact',
+        ...(params.meta?.headers || {}),
       })
     }
 
@@ -296,7 +314,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     });
   },
 
-  update: (resource, params) => {
+  update: (resource, params: Partial<UpdateParams> = {}) => {
     const { id, data } = params;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
@@ -316,13 +334,14 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
       headers: new Headers({
         'Accept': 'application/vnd.pgrst.object+json',
         'Prefer': 'return=representation',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        ...(params.meta?.headers || {}),
       }),
       body,
     }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
   },
 
-  updateMany: (resource, params) => {
+  updateMany: (resource, params: Partial<UpdateManyParams> = {}) => {
     const ids = params.ids;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
@@ -347,6 +366,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
       headers: new Headers({
         'Prefer': 'return=representation',
         'Content-Type': 'application/json',
+        ...(params.meta?.headers || {}),
       }),
       body,
     }).then(({ json }) => ({
@@ -354,7 +374,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     }));
   },
 
-  create: (resource, params) => {
+  create: (resource, params: Partial<CreateParams> = {}) => {
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
     const url = `${apiUrl}/${resource}`;
@@ -364,7 +384,8 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
       headers: new Headers({
         'Accept': 'application/vnd.pgrst.object+json',
         'Prefer': 'return=representation',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        ...(params.meta?.headers || {}),
       }),
       body: JSON.stringify(params.data),
     }).then(({ json }) => ({
@@ -375,7 +396,7 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
     }));
   },
 
-  delete: (resource, params) => {
+  delete: (resource, params: Partial<DeleteParams> = {}) => {
     const id = params.id;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
     
@@ -388,12 +409,13 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
       headers: new Headers({
         'Accept': 'application/vnd.pgrst.object+json',
         'Prefer': 'return=representation',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        ...(params.meta?.headers || {}),
       }),
     }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
   },
 
-  deleteMany: (resource, params) => {
+  deleteMany: (resource, params: Partial<DeleteManyParams> = {}) => {
     const ids = params.ids;
     const primaryKey = getPrimaryKey(resource, primaryKeys);
 
@@ -405,7 +427,8 @@ export default (apiUrl, httpClient = fetchUtils.fetchJson, defaultListOp = 'eq',
       method: 'DELETE',
       headers: new Headers({
         'Prefer': 'return=representation',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        ...(params.meta?.headers || {}),
       }),
     }).then(({ json }) => ({ data: json.map(data => encodeId(data, primaryKey)) }));
   },
