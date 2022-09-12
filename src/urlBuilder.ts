@@ -119,7 +119,7 @@ export const encodeId = (data: any, primaryKey: PrimaryKey): Identifier => {
 };
 
 export const dataWithId = (data: any, primaryKey: PrimaryKey) => {
-    if (primaryKey === ['id']) {
+  if (JSON.stringify(primaryKey) === JSON.stringify(['id'])) {
         return data;
     }
 
