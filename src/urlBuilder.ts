@@ -23,6 +23,8 @@ const postgrestOperators = [
     'neq',
     'like',
     'ilike',
+    'match',
+    'imatch',
     'in',
     'is',
     'fts',
@@ -119,7 +121,7 @@ export const encodeId = (data: any, primaryKey: PrimaryKey): Identifier => {
 };
 
 export const dataWithId = (data: any, primaryKey: PrimaryKey) => {
-  if (JSON.stringify(primaryKey) === JSON.stringify(['id'])) {
+    if (JSON.stringify(primaryKey) === JSON.stringify(['id'])) {
         return data;
     }
 
