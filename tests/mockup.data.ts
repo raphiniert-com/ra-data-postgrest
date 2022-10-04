@@ -67,14 +67,14 @@ export const CONTACT_LIST = [
 ];
 
 export const SINGLE_LICENSE = {
-    id: '000aba4f-3011-4059-a7c1-7462dd053862',
+    license_id: '000aba4f-3011-4059-a7c1-7462dd053862',
     user_id: 1,
 };
 
 export const LICENSE_LIST = [
     { ...SINGLE_LICENSE },
     {
-        id: '111f688f-9863-4bf0-a885-ffd4d38d6ece',
+        license_id: '111f688f-9863-4bf0-a885-ffd4d38d6ece',
         user_id: 2,
     },
 ];

@@ -10,7 +10,7 @@ import {
     getKeyData,
     getOrderBy,
 } from '../src/urlBuilder';
-import { SINGLE_CONTACT, SINGLE_TODO } from './mockup.data';
+import { SINGLE_CONTACT, SINGLE_LICENSE, SINGLE_TODO } from './mockup.data';
 
 const primaryKeySingle: PrimaryKey = ['id'];
 const primaryKeyMulti: PrimaryKey = ['id', 'type'];
@@ -69,6 +69,13 @@ describe('getKeyData', () => {
         const primaryKey = getPrimaryKey(resource, resourcePimaryKeys);
         expect(getKeyData(primaryKey, SINGLE_TODO)).toEqual({
             id: SINGLE_TODO.id,
+        });
+    });
+    it('should return the key data for a single column primary key with an alternative name', () => {
+        const resource = 'licenses';
+        const primaryKey = getPrimaryKey(resource, resourcePimaryKeys);
+        expect(getKeyData(primaryKey, SINGLE_LICENSE)).toEqual({
+            license_id: SINGLE_LICENSE.license_id,
         });
     });
     it('should return the key data for a multi column primary key', () => {
