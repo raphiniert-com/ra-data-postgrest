@@ -50,3 +50,31 @@ export const TODO_LIST = [
         user_id: 2,
     },
 ];
+
+export const SINGLE_CONTACT = {
+    id: 1,
+    type: 'X',
+    labels: ['A', 'B'],
+};
+
+export const CONTACT_LIST = [
+    { ...SINGLE_CONTACT },
+    {
+        id: 2,
+        type: 'Y',
+        labels: ['A', 'C'],
+    },
+];
+
+export const SINGLE_LICENSE = {
+    id: '000aba4f-3011-4059-a7c1-7462dd053862',
+    user_id: 1,
+};
+
+export const LICENSE_LIST = [
+    { ...SINGLE_LICENSE },
+    {
+        id: '111f688f-9863-4bf0-a885-ffd4d38d6ece',
+        user_id: 2,
+    },
+];

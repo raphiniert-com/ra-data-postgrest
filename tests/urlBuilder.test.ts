@@ -10,19 +10,19 @@ import {
     getKeyData,
     getOrderBy,
 } from '../src/urlBuilder';
+import { SINGLE_CONTACT, SINGLE_TODO } from './mockup.data';
 
 const primaryKeySingle: PrimaryKey = ['id'];
 const primaryKeyMulti: PrimaryKey = ['id', 'type'];
+const resourcePimaryKeys = new Map<string, PrimaryKey>();
+resourcePimaryKeys.set('contacts', primaryKeyMulti);
+resourcePimaryKeys.set('licenses', ['license_id']);
 
 describe('parseFilters', () => {
     // TODO: add tests
 });
 
 describe('getPrimaryKey', () => {
-    const resourcePimaryKeys = new Map<string, PrimaryKey>();
-    resourcePimaryKeys.set('contacts', primaryKeyMulti);
-    resourcePimaryKeys.set('licenses', ['license_id']);
-
     it('should return the special primary for any resource in the resourcePimaryKeys map', () => {
         expect(getPrimaryKey('contacts', resourcePimaryKeys)).toEqual(
             primaryKeyMulti
@@ -64,7 +64,21 @@ describe('getQuery', () => {
 });
 
 describe('getKeyData', () => {
-    // TODO: add tests
+    it('should return the key data for a single column primary key', () => {
+        const resource = 'todos';
+        const primaryKey = getPrimaryKey(resource, resourcePimaryKeys);
+        expect(getKeyData(primaryKey, SINGLE_TODO)).toEqual({
+            id: SINGLE_TODO.id,
+        });
+    });
+    it('should return the key data for a multi column primary key', () => {
+        const resource = 'contacts';
+        const primaryKey = getPrimaryKey(resource, resourcePimaryKeys);
+        expect(getKeyData(primaryKey, SINGLE_CONTACT)).toEqual({
+            id: SINGLE_CONTACT.id,
+            type: SINGLE_CONTACT.type,
+        });
+    });
 });
 
 describe('getOrderBy', () => {
