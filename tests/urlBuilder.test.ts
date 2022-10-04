@@ -1,12 +1,22 @@
 import {
-    getOrderBy,
-    getPrimaryKey,
-    isCompoundKey,
     PrimaryKey,
+    parseFilters,
+    getPrimaryKey,
+    decodeId,
+    encodeId,
+    dataWithId,
+    isCompoundKey,
+    getQuery,
+    getKeyData,
+    getOrderBy,
 } from '../src/urlBuilder';
 
 const primaryKeySingle: PrimaryKey = ['id'];
 const primaryKeyMulti: PrimaryKey = ['id', 'type'];
+
+describe('parseFilters', () => {
+    // TODO: add tests
+});
 
 describe('getPrimaryKey', () => {
     const resourcePimaryKeys = new Map<string, PrimaryKey>();
@@ -28,6 +38,18 @@ describe('getPrimaryKey', () => {
     });
 });
 
+describe('decodeId', () => {
+    // TODO: add tests
+});
+
+describe('encodeId', () => {
+    // TODO: add tests
+});
+
+describe('dataWithId', () => {
+    // TODO: add tests
+});
+
 describe('isCompoundKey', () => {
     it('should return false if the primaryKey consists of a single column', () => {
         expect(isCompoundKey(primaryKeySingle)).toBe(false);
@@ -35,6 +57,14 @@ describe('isCompoundKey', () => {
     it('should return true if the primaryKey consists of multiple columns', () => {
         expect(isCompoundKey(primaryKeyMulti)).toBe(true);
     });
+});
+
+describe('getQuery', () => {
+    // TODO: add tests
+});
+
+describe('getKeyData', () => {
+    // TODO: add tests
 });
 
 describe('getOrderBy', () => {
