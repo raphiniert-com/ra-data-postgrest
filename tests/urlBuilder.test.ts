@@ -39,11 +39,23 @@ describe('getPrimaryKey', () => {
 });
 
 describe('decodeId', () => {
-    // TODO: add tests
+    it('should decode from the encoded id the original id', () => {
+        expect(decodeId(1, primaryKeySingle)).toEqual(['1']);
+        expect(decodeId(1, ['license_id'])).toEqual(['1']);
+        expect(decodeId('[1,"X"]', primaryKeyMulti)).toEqual([1, 'X']);
+    });
 });
 
 describe('encodeId', () => {
-    // TODO: add tests
+    it('should encode from the data the id value itself', () => {
+        expect(encodeId(SINGLE_TODO, primaryKeySingle)).toEqual(SINGLE_TODO.id);
+        expect(encodeId(SINGLE_LICENSE, ['license_id'])).toEqual(
+            SINGLE_LICENSE.license_id
+        );
+    });
+    it('should encode from the data the ids as a json stringified array of the id values', () => {
+        expect(encodeId(SINGLE_CONTACT, primaryKeyMulti)).toEqual('[1,"X"]');
+    });
 });
 
 describe('dataWithId', () => {
