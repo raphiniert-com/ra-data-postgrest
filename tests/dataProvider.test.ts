@@ -1,44 +1,36 @@
-import { fetchUtils, SORT_ASC, SORT_DESC } from 'ra-core';
+import { fetchUtils } from 'ra-core';
+import raPostgrestProvider from '../src/index';
 
-import { SINGLE_TODO, TODO_LIST } from './mockup.data';
-import dataProvider from '../src/index';
+describe('getOne', () => {
+    it('should build correct url for a simple getOne request', async () => {
+        const { httpClient, dataPovider } = createDataProviderMock();
 
-type HTTPClientMock = typeof fetchUtils.fetchJson;
+        await dataPovider.getOne('Patient', { id: 2 });
 
-describe('test dataProvider', () => {
-    const BASE_URL = 'http://localhost:3000';
-
-    test('minimal arguments for dataprovider', () => {
-        const t = () => {
-            dataProvider(BASE_URL)
-                .getOne('Patient', { id: SINGLE_TODO.id })
-                .then(response => response != undefined);
-        };
-        expect(t).not.toThrow(TypeError);
-    });
-
-    describe('getList', () => {
-        test('test page offset, sort and return value', () => {
-            const httpClient = createHTTPClientMock(
-                200,
-                undefined,
-                undefined,
-                TODO_LIST
-            );
-        });
-    });
-
-    describe('getOne', () => {
-        test('with Entity ID', () => {
-            const httpClient = createHTTPClientMock(
-                200,
-                undefined,
-                undefined,
-                SINGLE_TODO
-            );
-        });
+        expect(httpClient).toHaveBeenCalledWith(
+            `${BASE_URL}/Patient?id=eq.2`,
+            makeHeaderExpectation({
+                accept: 'application/vnd.pgrst.object+json',
+            })
+        );
     });
 });
+
+type HTTPClientMock = typeof fetchUtils.fetchJson;
+const BASE_URL = 'http://localhost:3000';
+
+function createDataProviderMock() {
+    const httpClient: HTTPClientMock = jest.fn(() => Promise.resolve({}));
+    const dataPovider = raPostgrestProvider(BASE_URL, httpClient);
+
+    return { httpClient, dataPovider };
+}
+
+function makeHeaderExpectation(headers) {
+    return {
+        headers: new Headers(headers),
+    };
+}
 
 /**
  * Helper method for creating a jest function which mocks a HTTP client.
