@@ -1,26 +1,78 @@
 import { fetchUtils } from 'ra-core';
 import raPostgrestProvider from '../src/index';
 
-describe('getOne', () => {
-    it('should build correct url for a simple getOne request', async () => {
-        const { httpClient, dataPovider } = createDataProviderMock();
+type Case = {
+    test: string;
+    method: string;
+    resource: string;
+    params: Record<string, any>;
+    responseHeaders?: Record<string, string>;
+    expectedUrl: string;
+    expectedHeaders: Record<string, string>;
+};
 
-        await dataPovider.getOne('Patient', { id: 2 });
+const cases: Case[] = [
+    {
+        test: 'should build correct url for a simple getOne request',
+        method: 'getOne',
+        resource: 'Patient',
+        params: {
+            id: 2,
+        },
+        expectedUrl: `/Patient?id=eq.2`,
+        expectedHeaders: {
+            accept: 'application/vnd.pgrst.object+json',
+        },
+    },
+];
 
-        expect(httpClient).toHaveBeenCalledWith(
-            `${BASE_URL}/Patient?id=eq.2`,
-            makeHeaderExpectation({
-                accept: 'application/vnd.pgrst.object+json',
-            })
-        );
-    });
+describe('urlBuilder', () => {
+    cases.forEach(
+        ({
+            test,
+            method,
+            resource,
+            params,
+            responseHeaders,
+            expectedUrl,
+            expectedHeaders,
+        }) => {
+            it(test, async () => {
+                const { httpClient, dataPovider } = createDataProviderMock(
+                    200,
+                    '',
+                    [],
+                    responseHeaders
+                );
+
+                await dataPovider[method](resource, params);
+
+                expect(httpClient).toHaveBeenCalledWith(
+                    `${BASE_URL}${expectedUrl}`,
+                    makeHeaderExpectation(expectedHeaders)
+                );
+            });
+        }
+    );
 });
 
 type HTTPClientMock = typeof fetchUtils.fetchJson;
 const BASE_URL = 'http://localhost:3000';
 
-function createDataProviderMock() {
-    const httpClient: HTTPClientMock = jest.fn(() => Promise.resolve({}));
+function createDataProviderMock(
+    expectedStatus: number,
+    expectedBody: string,
+    expectedJSON?: any,
+    expectedHeaders?: Record<string, string>
+) {
+    const httpClient = jest.fn(url =>
+        Promise.resolve({
+            status: expectedStatus,
+            headers: new Headers(expectedHeaders),
+            body: expectedBody,
+            json: expectedJSON,
+        })
+    );
     const dataPovider = raPostgrestProvider(BASE_URL, httpClient);
 
     return { httpClient, dataPovider };
@@ -30,23 +82,4 @@ function makeHeaderExpectation(headers) {
     return {
         headers: new Headers(headers),
     };
-}
-
-/**
- * Helper method for creating a jest function which mocks a HTTP client.
- */
-function createHTTPClientMock(
-    expectedStatus: number,
-    expectedHeaders?: Headers,
-    expectedBody?: string,
-    expectedJSON?: any
-): HTTPClientMock {
-    return jest.fn(() =>
-        Promise.resolve({
-            status: expectedStatus,
-            headers: expectedHeaders,
-            body: expectedBody,
-            json: expectedJSON,
-        })
-    );
 }
