@@ -209,6 +209,7 @@ export default (
         const query = getQuery(primaryKey, ids, resource);
 
         const body = JSON.stringify(
+            // TODO: this is probably wrong, because for updateMany RA expects data to be an object and not an array. Also the tests fails because it throughs: TypeError: params.data.map is not a function
             params.data.map(obj => {
                 const { id, ...data } = obj;
                 const primaryKeyData = getKeyData(primaryKey, data);

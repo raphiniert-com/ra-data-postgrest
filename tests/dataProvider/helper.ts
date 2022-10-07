@@ -8,25 +8,19 @@ function createDataProviderMock(
     expectedStatus: number,
     expectedBody: string,
     expectedJSON?: any,
-    expectedHeaders?: Record<string, string>
+    expectedOptions?: Record<string, any>
 ) {
-    const httpClient = jest.fn(url =>
+    const httpClient = jest.fn((url, options) =>
         Promise.resolve({
             status: expectedStatus,
             body: expectedBody,
             json: expectedJSON,
-            headers: new Headers(expectedHeaders),
+            headers: new Headers(expectedOptions),
         })
     );
     const dataPovider = raPostgrestProvider(BASE_URL, httpClient);
 
     return { httpClient, dataPovider };
-}
-
-function makeHeaderExpectation(headers) {
-    return {
-        headers: new Headers(headers),
-    };
 }
 
 export type Case = {
@@ -36,7 +30,7 @@ export type Case = {
     params: Record<string, any>;
     responseHeaders?: Record<string, string>;
     expectedUrl: string;
-    expectedHeaders: Record<string, string>;
+    expectedOptions?: Record<string, any>;
 };
 
 export const makeTestFromCase = ({
@@ -46,9 +40,9 @@ export const makeTestFromCase = ({
     params,
     responseHeaders,
     expectedUrl,
-    expectedHeaders,
+    expectedOptions,
 }: Case) => {
-    it(`${method} should build correct url for a ${test}`, async () => {
+    it(`${method} > ${test}`, async () => {
         const { httpClient, dataPovider } = createDataProviderMock(
             200,
             '',
@@ -58,9 +52,28 @@ export const makeTestFromCase = ({
 
         await dataPovider[method](resource, params);
 
-        expect(httpClient).toHaveBeenCalledWith(
-            `${BASE_URL}${expectedUrl}`,
-            makeHeaderExpectation(expectedHeaders)
-        );
+        const [actualUrl, actualOptions] = httpClient.mock.calls[0];
+
+        expect(actualUrl).toBe(`${BASE_URL}${expectedUrl}`);
+
+        if (
+            actualOptions ||
+            (expectedOptions && Object.keys(expectedOptions).length)
+        ) {
+            const {
+                headers: actualHeaders,
+                ...actualRestOptions
+            } = actualOptions;
+
+            // transform Headers to an object so it can be compared to the expectations (that is an object)
+            const actualOptionsPreparedForTesting = {
+                headers: Object.fromEntries(actualHeaders),
+                ...actualRestOptions,
+            };
+
+            expect(actualOptionsPreparedForTesting).toStrictEqual(
+                expectedOptions
+            );
+        }
     });
 };
