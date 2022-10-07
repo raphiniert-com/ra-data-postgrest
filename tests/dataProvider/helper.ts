@@ -1,5 +1,5 @@
 import { fetchUtils } from 'ra-core';
-import raPostgrestProvider from '../src/index';
+import raPostgrestProvider from '../../src/index';
 
 type HTTPClientMock = typeof fetchUtils.fetchJson;
 const BASE_URL = 'http://localhost:3000';
