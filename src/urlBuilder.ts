@@ -61,7 +61,7 @@ export const parseFilters = (
                 : defaultListOp;
 
         let values: Array<string>;
-        if (operation in ['like', 'ilike']) {
+        if (['like', 'ilike'].includes(operation)) {
             // we split the search term in words
             values = filter[key].trim().split(' ');
         } else {
