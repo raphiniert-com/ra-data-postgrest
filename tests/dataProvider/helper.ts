@@ -29,8 +29,9 @@ export type Case = {
     resource: string;
     params: Record<string, any>;
     responseHeaders?: Record<string, string>;
-    expectedUrl: string;
+    expectedUrl?: string;
     expectedOptions?: Record<string, any>;
+    throws?: RegExp;
 };
 
 export const makeTestFromCase = ({
@@ -41,6 +42,7 @@ export const makeTestFromCase = ({
     responseHeaders,
     expectedUrl,
     expectedOptions,
+    throws,
 }: Case) => {
     it(`${method} > ${test}`, async () => {
         const { httpClient, dataPovider } = createDataProviderMock(
@@ -50,7 +52,16 @@ export const makeTestFromCase = ({
             responseHeaders
         );
 
-        await dataPovider[method](resource, params);
+        try {
+            await dataPovider[method](resource, params);
+        } catch (e) {
+            if (throws) {
+                expect(e.message).toMatch(throws);
+            } else {
+                throw e;
+            }
+            return; // when an error occurred, it's not useful to test url and options
+        }
 
         const [actualUrl, actualOptions] = httpClient.mock.calls[0];
 
