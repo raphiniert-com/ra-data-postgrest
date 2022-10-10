@@ -19,7 +19,24 @@ resourcePimaryKeys.set('contacts', primaryKeyMulti);
 resourcePimaryKeys.set('licenses', ['license_id']);
 
 describe('parseFilters', () => {
-    // TODO: add tests
+    it('should parse filters', () => {
+        expect(
+            parseFilters(
+                {
+                    q1: 'foo',
+                    'q2@ilike': 'bar',
+                    'q3@like': 'baz qux',
+                    'q4@gt': 'c',
+                },
+                'eq'
+            )
+        ).toEqual({
+            q1: 'eq.foo',
+            q2: 'ilike.*bar*',
+            q3: ['like.*baz*', 'like.*qux*'],
+            q4: 'gt.c',
+        });
+    });
 });
 
 describe('getPrimaryKey', () => {
