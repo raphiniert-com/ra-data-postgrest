@@ -47,7 +47,7 @@ const postgrestOperators = [
 export type PostgRestOperator = typeof postgrestOperators[number];
 
 export const parseFilters = (
-    filter: Array<string>,
+    filter: Record<string, any>,
     defaultListOp: PostgRestOperator
 ) => {
     let result = {};
