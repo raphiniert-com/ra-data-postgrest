@@ -9,8 +9,8 @@ import {
     getQuery,
     getKeyData,
     getOrderBy,
-} from '../src/urlBuilder';
-import { SINGLE_CONTACT, SINGLE_LICENSE, SINGLE_TODO } from './mockup.data';
+} from '../../src/urlBuilder';
+import { SINGLE_CONTACT, SINGLE_LICENSE, SINGLE_TODO } from '../mockup.data';
 
 const primaryKeySingle: PrimaryKey = ['id'];
 const primaryKeyMulti: PrimaryKey = ['id', 'type'];
