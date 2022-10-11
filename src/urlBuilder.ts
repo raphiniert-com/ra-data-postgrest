@@ -150,14 +150,12 @@ export const getQuery = (
         }
 
         if (isCompoundKey(primaryKey)) {
-            return `or=(
-            ${ids.map(id => {
+            return `or=(${ids.map(id => {
                 const primaryKeyParams = decodeId(id, primaryKey);
                 return `and(${primaryKey
                     .map((key, i) => `${key}.eq.${primaryKeyParams[i]}`)
                     .join(',')})`;
-            })}
-          )`;
+            })})`;
         } else {
             return new URLSearchParams({
                 [primaryKey[0]]: `in.(${ids.join(',')})`,
