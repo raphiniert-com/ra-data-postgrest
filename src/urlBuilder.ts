@@ -150,6 +150,7 @@ export const getQuery = (
         }
 
         if (isCompoundKey(primaryKey)) {
+            // TODO: Should be URL encoded
             return `or=(${ids.map(id => {
                 const primaryKeyParams = decodeId(id, primaryKey);
                 return `and(${primaryKey
@@ -168,11 +169,13 @@ export const getQuery = (
 
         if (isCompoundKey(primaryKey)) {
             if (resource.startsWith('rpc/'))
+                // TODO: Should be URL encoded
                 return `${primaryKey
                     .map(
                         (key: string, i: any) => `${key}=${primaryKeyParams[i]}`
                     )
                     .join('&')}`;
+            // TODO: Should be URL encoded
             else
                 return `and=(${primaryKey
                     .map(

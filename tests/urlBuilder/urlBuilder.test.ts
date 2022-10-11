@@ -11,6 +11,7 @@ import {
     getOrderBy,
 } from '../../src/urlBuilder';
 import { SINGLE_CONTACT, SINGLE_LICENSE, SINGLE_TODO } from '../mockup.data';
+import { qs } from './helper';
 
 const primaryKeySingle: PrimaryKey = ['id'];
 const primaryKeyMulti: PrimaryKey = ['id', 'type'];
@@ -89,7 +90,71 @@ describe('isCompoundKey', () => {
 });
 
 describe('getQuery', () => {
-    // TODO: add tests
+    // Testing all combinations:
+    // - non-rpc vs rpc resource x
+    // - single vs compound key x
+    // - single vs multiple ids
+    it('should return the query for a single id of normal resource', () => {
+        const resource = 'todos';
+        const id = 2;
+        const query = getQuery(primaryKeySingle, id, resource);
+
+        expect(query).toEqual(qs({ id: 'eq.2' }));
+    });
+
+    it('should return the query for multiple ids of normal resource', () => {
+        const resource = 'todos';
+        const ids = [1, 2, 3];
+        const query = getQuery(primaryKeySingle, ids, resource);
+
+        expect(query).toEqual(qs({ id: 'in.(1,2,3)' }));
+    });
+    it('should return the query for a single id of a resource with a compound key', () => {
+        const resource = 'todos';
+        const id = '[1,"X"]';
+        const query = getQuery(primaryKeyMulti, id, resource);
+
+        expect(query).toEqual('and=(id.eq.1,type.eq.X)');
+    });
+
+    it('should return the query for multiple ids of a resource with a compound key', () => {
+        const resource = 'todos';
+        const ids = ['[1,"X"]', '[2,"Y"]'];
+        const query = getQuery(primaryKeyMulti, ids, resource);
+
+        expect(query).toEqual(
+            'or=(and(id.eq.1,type.eq.X),and(id.eq.2,type.eq.Y))'
+        );
+    });
+    it('should return the query for a single id of an rpc resource', () => {
+        const resource = 'rpc/get_todo';
+        const id = 2;
+        const query = getQuery(primaryKeySingle, id, resource);
+
+        expect(query).toEqual(qs({ id: 'eq.2' }));
+    });
+
+    it('should log to console.error that calling an rpc with multiple ids is not supported', () => {
+        const resource = 'rpc/get';
+        const ids = [1, 2, 3];
+
+        const spiedConsoleError = jest
+            .spyOn(console, 'error')
+            .mockImplementation(() => {});
+
+        const query = getQuery(primaryKeySingle, ids, resource);
+        expect(spiedConsoleError.mock.calls[0][0]).toMatch(
+            /no query generation for multiple key values implemented/i
+        );
+    });
+
+    it('should return the query for a single id of an rpc resource with a compound key', () => {
+        const resource = 'rpc/get_todo';
+        const id = '[1,"X"]';
+        const query = getQuery(primaryKeyMulti, id, resource);
+
+        expect(query).toEqual('id=1&type=X');
+    });
 });
 
 describe('getKeyData', () => {
