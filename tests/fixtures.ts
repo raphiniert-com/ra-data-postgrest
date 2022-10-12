@@ -1,3 +1,11 @@
+import { PrimaryKey } from '../src/urlBuilder';
+
+export const primaryKeySingle: PrimaryKey = ['id'];
+export const primaryKeyCompound: PrimaryKey = ['id', 'type'];
+export const resourcePimaryKeys = new Map<string, PrimaryKey>();
+resourcePimaryKeys.set('contacts', primaryKeyCompound);
+resourcePimaryKeys.set('licenses', ['license_id']);
+
 export const SINGLE_TODO = {
     id: 2,
     todo: 'item_2',

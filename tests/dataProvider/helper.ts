@@ -1,5 +1,6 @@
 import { fetchUtils } from 'ra-core';
 import raPostgrestProvider from '../../src/index';
+import { resourcePimaryKeys } from '../fixtures';
 
 type HTTPClientMock = typeof fetchUtils.fetchJson;
 const BASE_URL = 'http://localhost:3000';
@@ -18,7 +19,12 @@ function createDataProviderMock(
             headers: new Headers(expectedOptions),
         })
     );
-    const dataPovider = raPostgrestProvider(BASE_URL, httpClient);
+    const dataPovider = raPostgrestProvider(
+        BASE_URL,
+        httpClient,
+        'eq',
+        resourcePimaryKeys
+    );
 
     return { httpClient, dataPovider };
 }

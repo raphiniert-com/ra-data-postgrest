@@ -1,5 +1,4 @@
 import {
-    PrimaryKey,
     parseFilters,
     getPrimaryKey,
     decodeId,
@@ -10,14 +9,15 @@ import {
     getKeyData,
     getOrderBy,
 } from '../../src/urlBuilder';
-import { SINGLE_CONTACT, SINGLE_LICENSE, SINGLE_TODO } from '../mockup.data';
+import {
+    SINGLE_CONTACT,
+    SINGLE_LICENSE,
+    SINGLE_TODO,
+    primaryKeyCompound,
+    primaryKeySingle,
+    resourcePimaryKeys,
+} from '../fixtures';
 import { qs } from './helper';
-
-const primaryKeySingle: PrimaryKey = ['id'];
-const primaryKeyCompound: PrimaryKey = ['id', 'type'];
-const resourcePimaryKeys = new Map<string, PrimaryKey>();
-resourcePimaryKeys.set('contacts', primaryKeyCompound);
-resourcePimaryKeys.set('licenses', ['license_id']);
 
 describe('parseFilters', () => {
     it('should parse filters', () => {
