@@ -77,7 +77,15 @@ describe('encodeId', () => {
 });
 
 describe('dataWithId', () => {
-    // TODO: add tests
+    it('should return the data as-is if the primary key is the default one', () => {
+        expect(dataWithId(SINGLE_TODO, primaryKeySingle)).toEqual(SINGLE_TODO);
+    });
+    it('should return the data with the id field added if the primary key is a compound', () => {
+        expect(dataWithId(SINGLE_CONTACT, primaryKeyCompound)).toEqual({
+            ...SINGLE_CONTACT,
+            id: '[1,"X"]',
+        });
+    });
 });
 
 describe('isCompoundKey', () => {
