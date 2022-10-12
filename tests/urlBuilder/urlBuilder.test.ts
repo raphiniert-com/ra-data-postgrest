@@ -14,9 +14,9 @@ import { SINGLE_CONTACT, SINGLE_LICENSE, SINGLE_TODO } from '../mockup.data';
 import { qs } from './helper';
 
 const primaryKeySingle: PrimaryKey = ['id'];
-const primaryKeyMulti: PrimaryKey = ['id', 'type'];
+const primaryKeyCompound: PrimaryKey = ['id', 'type'];
 const resourcePimaryKeys = new Map<string, PrimaryKey>();
-resourcePimaryKeys.set('contacts', primaryKeyMulti);
+resourcePimaryKeys.set('contacts', primaryKeyCompound);
 resourcePimaryKeys.set('licenses', ['license_id']);
 
 describe('parseFilters', () => {
@@ -43,7 +43,7 @@ describe('parseFilters', () => {
 describe('getPrimaryKey', () => {
     it('should return the special primary for any resource in the resourcePimaryKeys map', () => {
         expect(getPrimaryKey('contacts', resourcePimaryKeys)).toEqual(
-            primaryKeyMulti
+            primaryKeyCompound
         );
         expect(getPrimaryKey('licenses', resourcePimaryKeys)).toEqual([
             'license_id',
@@ -60,7 +60,7 @@ describe('decodeId', () => {
     it('should decode from the encoded id the original id', () => {
         expect(decodeId(1, primaryKeySingle)).toEqual(['1']);
         expect(decodeId(1, ['license_id'])).toEqual(['1']);
-        expect(decodeId('[1,"X"]', primaryKeyMulti)).toEqual([1, 'X']);
+        expect(decodeId('[1,"X"]', primaryKeyCompound)).toEqual([1, 'X']);
     });
 });
 
@@ -72,7 +72,7 @@ describe('encodeId', () => {
         );
     });
     it('should encode from the data the ids as a json stringified array of the id values', () => {
-        expect(encodeId(SINGLE_CONTACT, primaryKeyMulti)).toEqual('[1,"X"]');
+        expect(encodeId(SINGLE_CONTACT, primaryKeyCompound)).toEqual('[1,"X"]');
     });
 });
 
@@ -85,7 +85,7 @@ describe('isCompoundKey', () => {
         expect(isCompoundKey(primaryKeySingle)).toBe(false);
     });
     it('should return true if the primaryKey consists of multiple columns', () => {
-        expect(isCompoundKey(primaryKeyMulti)).toBe(true);
+        expect(isCompoundKey(primaryKeyCompound)).toBe(true);
     });
 });
 
@@ -112,7 +112,7 @@ describe('getQuery', () => {
     it('should return the query for a single id of a resource with a compound key', () => {
         const resource = 'todos';
         const id = '[1,"X"]';
-        const query = getQuery(primaryKeyMulti, id, resource);
+        const query = getQuery(primaryKeyCompound, id, resource);
 
         expect(query).toEqual('and=(id.eq.1,type.eq.X)');
     });
@@ -120,7 +120,7 @@ describe('getQuery', () => {
     it('should return the query for multiple ids of a resource with a compound key', () => {
         const resource = 'todos';
         const ids = ['[1,"X"]', '[2,"Y"]'];
-        const query = getQuery(primaryKeyMulti, ids, resource);
+        const query = getQuery(primaryKeyCompound, ids, resource);
 
         expect(query).toEqual(
             'or=(and(id.eq.1,type.eq.X),and(id.eq.2,type.eq.Y))'
@@ -151,7 +151,7 @@ describe('getQuery', () => {
     it('should return the query for a single id of an rpc resource with a compound key', () => {
         const resource = 'rpc/get_todo';
         const id = '[1,"X"]';
-        const query = getQuery(primaryKeyMulti, id, resource);
+        const query = getQuery(primaryKeyCompound, id, resource);
 
         expect(query).toEqual('id=1&type=X');
     });
