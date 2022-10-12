@@ -1,10 +1,12 @@
 import { makeTestFromCase, Case } from './helper';
 
 describe('getList specific', () => {
+    const method = 'getList';
+
     const cases: Case[] = [
         {
             test: 'simple request with sorting and pagination',
-            method: 'getList',
+            method,
             resource: 'posts',
             params: {
                 pagination: {
@@ -31,7 +33,7 @@ describe('getList specific', () => {
         {
             test:
                 'throws error when no content-range response header is present',
-            method: 'getList',
+            method,
             resource: 'posts',
             params: {
                 pagination: {
