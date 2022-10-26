@@ -102,14 +102,26 @@ const cases: Case[] = [
             },
         },
     },
-    // TODO: fails because dataProvider expects data to be an array, but it should be an object
-    // {
-    //     test: 'Update multiple resources',
-    //     method: 'updateMany',
-    //     resource: 'posts',
-    //     params: { ids: [1, 2, 3], data: { title: 'hello, world!' }, meta: {} },
-    //     expectedUrl: '/posts?xxx',
-    // },
+    {
+        test: 'Update multiple resources',
+        method: 'updateMany',
+        resource: 'posts',
+        params: { ids: [1, 2, 3], data: { title: 'hello, world!' }, meta: {} },
+        expectedUrl: '/posts',
+        expectedOptions: {
+            method: 'PATCH',
+            // TODO: The id's in the body should actually be numbers!
+            body: JSON.stringify([
+                { title: 'hello, world!', id: '1' },
+                { title: 'hello, world!', id: '2' },
+                { title: 'hello, world!', id: '3' },
+            ]),
+            headers: {
+                prefer: 'return=representation',
+                'content-type': 'application/json',
+            },
+        },
+    },
     {
         test: 'Delete a single resource',
         method: 'delete',

@@ -9,6 +9,8 @@ import {
     getQuery,
     getKeyData,
     encodeId,
+    decodeId,
+    isCompoundKey,
 } from './urlBuilder';
 /**
  * Maps react-admin queries to a postgrest REST API
@@ -206,13 +208,19 @@ export default (
         const ids = params.ids;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-        const query = getQuery(primaryKey, ids, resource);
-
         const body = JSON.stringify(
-            // TODO: this is probably wrong, because for updateMany RA expects data to be an object and not an array. Also the tests fails because it throughs: TypeError: params.data.map is not a function
-            params.data.map(obj => {
-                const { id, ...data } = obj;
-                const primaryKeyData = getKeyData(primaryKey, data);
+            params.ids.map(id => {
+                const { data } = params;
+                const primaryKeyParams = decodeId(id, primaryKey);
+
+                const primaryKeyData = {};
+                if (isCompoundKey(primaryKey)) {
+                    primaryKey.forEach((key, index) => {
+                        primaryKeyData[key] = primaryKeyParams[index];
+                    });
+                } else {
+                    primaryKeyData[primaryKey[0]] = primaryKeyParams[0];
+                }
 
                 return {
                     ...data,
@@ -221,7 +229,7 @@ export default (
             })
         );
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}`;
 
         return httpClient(url, {
             method: 'PATCH',

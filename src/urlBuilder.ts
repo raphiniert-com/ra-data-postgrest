@@ -104,7 +104,10 @@ export const getPrimaryKey = (
     return primaryKeys.get(resource) || ['id'];
 };
 
-export const decodeId = (id: Identifier, primaryKey: PrimaryKey): string[] => {
+export const decodeId = (
+    id: Identifier,
+    primaryKey: PrimaryKey
+): string[] | number[] => {
     if (isCompoundKey(primaryKey)) {
         return JSON.parse(id.toString());
     } else {

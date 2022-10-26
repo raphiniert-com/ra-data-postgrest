@@ -63,6 +63,7 @@ export const SINGLE_CONTACT = {
     id: 1,
     type: 'X',
     labels: ['A', 'B'],
+    name: 'Mister X',
 };
 
 export const CONTACT_LIST = [
@@ -71,6 +72,7 @@ export const CONTACT_LIST = [
         id: 2,
         type: 'Y',
         labels: ['A', 'C'],
+        name: 'Mister Y',
     },
 ];
 
