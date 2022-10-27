@@ -1,18 +1,13 @@
 import { encodeId } from '../../src/urlBuilder';
 import { makeTestFromCase, Case } from './helper';
 
-describe('getOne specific', () => {
-    const method = 'getOne';
-    const expectedOptions = {
-        headers: {
-            accept: 'application/vnd.pgrst.object+json',
-        },
-    };
+describe('updateMany specific', () => {
+    const method = 'updateMany';
 
     const cases: Case[] = [
         {
             test: 'Update multiple resources with compound primary key',
-            method: 'updateMany',
+            method,
             resource: 'contacts',
             params: {
                 ids: [JSON.stringify([1, 'X']), JSON.stringify([2, 'Y'])],
