@@ -1,3 +1,4 @@
+import { enc } from '../urlBuilder/helper';
 import { makeTestFromCase, Case } from './helper';
 
 const cases: Case[] = [
@@ -39,7 +40,7 @@ const cases: Case[] = [
         method: 'getMany',
         resource: 'posts',
         params: { ids: [1, 2, 3], meta: {} },
-        expectedUrl: '/posts?id=in.%281%2C2%2C3%29',
+        expectedUrl: `/posts?id=in.${enc('(1,2,3)')}`,
     },
     {
         test: 'Read a list of resources related to another one',
@@ -142,7 +143,7 @@ const cases: Case[] = [
         method: 'deleteMany',
         resource: 'posts',
         params: { ids: [1, 2, 3], meta: {} },
-        expectedUrl: '/posts?id=in.%281%2C2%2C3%29',
+        expectedUrl: `/posts?id=in.${enc('(1,2,3)')}`,
         expectedOptions: {
             method: 'DELETE',
             headers: {
