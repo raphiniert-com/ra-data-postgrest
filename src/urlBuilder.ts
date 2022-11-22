@@ -219,6 +219,3 @@ export const getOrderBy = (
         return `${field}.${order.toLowerCase()}`;
     }
 };
-
-// TODO: create function such as generatePostgRestUrl(), taking filter props,
-//       ids etc. and return the generated PostgREST uri
