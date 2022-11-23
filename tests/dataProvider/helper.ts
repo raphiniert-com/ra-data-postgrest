@@ -77,10 +77,8 @@ export const makeTestFromCase = ({
             actualOptions ||
             (expectedOptions && Object.keys(expectedOptions).length)
         ) {
-            const {
-                headers: actualHeaders,
-                ...actualRestOptions
-            } = actualOptions;
+            const { headers: actualHeaders, ...actualRestOptions } =
+                actualOptions;
 
             // transform Headers to an object so it can be compared to the expectations (that is an object)
             const actualOptionsPreparedForTesting = {

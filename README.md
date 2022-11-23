@@ -14,17 +14,17 @@ npm install --save @promitheus/ra-data-postgrest
 
 This Data Provider fits REST APIs using simple GET parameters for filters and sorting. This is the dialect used for instance in [PostgREST](http://postgrest.org).
 
-| Method             | API calls
-|--------------------|----------------------------------------------------------------
-| `getList`          | `GET http://my.api.url/posts?order=title.asc&offset=0&limit=24&filterField=eq.value`
-| `getOne`           | `GET http://my.api.url/posts?id=eq.123`
-| `getMany`          | `GET http://my.api.url/posts?id=in.(123,456,789)`
-| `getManyReference` | `GET http://my.api.url/posts?author_id=eq.345`
-| `create`           | `POST http://my.api.url/posts`
-| `update`           | `PATCH http://my.api.url/posts?id=eq.123`
-| `updateMany`       | `PATCH http://my.api.url/posts?id=in.(123,456,789)`
-| `delete`           | `DELETE http://my.api.url/posts?id=eq.123`
-| `deleteMany`       | `DELETE http://my.api.url/posts?id=in.(123,456,789)`
+| Method             | API calls                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| `getList`          | `GET http://my.api.url/posts?order=title.asc&offset=0&limit=24&filterField=eq.value` |
+| `getOne`           | `GET http://my.api.url/posts?id=eq.123`                                              |
+| `getMany`          | `GET http://my.api.url/posts?id=in.(123,456,789)`                                    |
+| `getManyReference` | `GET http://my.api.url/posts?author_id=eq.345`                                       |
+| `create`           | `POST http://my.api.url/posts`                                                       |
+| `update`           | `PATCH http://my.api.url/posts?id=eq.123`                                            |
+| `updateMany`       | `PATCH http://my.api.url/posts?id=in.(123,456,789)`                                  |
+| `delete`           | `DELETE http://my.api.url/posts?id=eq.123`                                           |
+| `deleteMany`       | `DELETE http://my.api.url/posts?id=in.(123,456,789)`                                 |
 
 **Note**: The PostgREST data provider expects the API to include a `Content-Range` header in the response to `getList` calls. The value must be the total number of resources in the collection. This allows react-admin to know how many pages of resources there are in total, and build the pagination controls.
 
@@ -61,7 +61,7 @@ export default App;
 
 The provider function accepts an HTTP client function as second argument. By default, they use react-admin's `fetchUtils.fetchJson()` as HTTP client. It's similar to HTML5 `fetch()`, except it handles JSON decoding and HTTP error codes automatically.
 
-That means that if you need to add custom headers to your requests, you just need to *wrap* the `fetchJson()` call inside your own function:
+That means that if you need to add custom headers to your requests, you just need to _wrap_ the `fetchJson()` call inside your own function:
 
 ```jsx
 import { fetchUtils, Admin, Resource } from 'react-admin';
@@ -79,7 +79,7 @@ const dataProvider = postgrestRestProvider('http://localhost:3000', httpClient);
 
 render(
     <Admin dataProvider={dataProvider} title="Example Admin">
-       ...
+        ...
     </Admin>,
     document.getElementById('root')
 );
@@ -93,7 +93,7 @@ Now all the requests to the REST API will contain the `X-Custom-Header: foobar` 
 const httpClient = (url, options = {}) => {
     options.user = {
         authenticated: true,
-        token: 'SRTRDFVESGNJYTUKTYTHRG'
+        token: 'SRTRDFVESGNJYTUKTYTHRG',
     };
     return fetchUtils.fetchJson(url, options);
 };
@@ -102,20 +102,26 @@ const httpClient = (url, options = {}) => {
 Now all the requests to the REST API will contain the `Authorization: SRTRDFVESGNJYTUKTYTHRG` header.
 
 ### Using authProvider
+
 This package also comes with an [authProvider](https://github.com/marmelab/react-admin/blob/master/docs/Authentication.md) for react-admin which enables you to enable authentification. The provider is designed to work together with [subzero-starter-kit](https://github.com/subzerocloud/subzero-starter-kit). This starter kit sends the JWT within a session cookie. The authProvider expects that. If you want to use postgREST without the starter kit you'll need to write your own. Feel free to contribute!
 
 With one of the starter kits it is very easy to use the authProvider:
+
 ```jsx
 // in src/App.js
 import React from 'react';
 import { Admin, Resource } from 'react-admin';
-import postgrestRestProvider, { authProvider } from '@promitheus/ra-data-postgrest';
+import postgrestRestProvider, {
+    authProvider,
+} from '@promitheus/ra-data-postgrest';
 
 import { PostList } from './posts';
 
 const App = () => (
-    <Admin dataProvider={postgrestRestProvider('http://path.to.my.api/')} 
-           authProvider={authProvider}>
+    <Admin
+        dataProvider={postgrestRestProvider('http://path.to.my.api/')}
+        authProvider={authProvider}
+    >
         <Resource name="posts" list={PostList} />
     </Admin>
 );
@@ -124,43 +130,50 @@ export default App;
 ```
 
 ### Special Filter Feature
-As postgRest allows several comparators, e.g. `ilike`, `like`, `eq`... 
+
+As postgRest allows several comparators, e.g. `ilike`, `like`, `eq`...
 The dataProvider is designed to enable you to specify the comparator in your react filter component:
 
 ```jsx
 <Filter {...props}>
-  <TextInput label="Search" source="post_title@ilike" alwaysOn />
-  <TextInput label="Search" source="post_author" alwaysOn />
-  // some more filters
+    <TextInput label="Search" source="post_title@ilike" alwaysOn />
+    <TextInput label="Search" source="post_author" alwaysOn />
+    // some more filters
 </Filter>
 ```
 
 One can simply append the comparator with an `@` to the source. In this example the field `post_title` would be filtered with `ilike` whereas `post_author` would be filtered using `eq` which is the default if no special comparator is specified.
 
 #### RPC Functions
-Given a RPC call as ```GET /rpc/add_them?post_author=Herbert HTTP/1.1```, the dataProvider allows you to filter such endpoints. As they are no view, but a SQL procedure, several postgREST features do not apply. I.e. no comparators such as `ilike`, `like`, `eq` are applicable. Only the raw value without comparator needs to be send to the API. In order to realize this behavior, just add an "empty" comparator to the field, i.e. end `source` with an `@` as in the example:
+
+Given a RPC call as `GET /rpc/add_them?post_author=Herbert HTTP/1.1`, the dataProvider allows you to filter such endpoints. As they are no view, but a SQL procedure, several postgREST features do not apply. I.e. no comparators such as `ilike`, `like`, `eq` are applicable. Only the raw value without comparator needs to be send to the API. In order to realize this behavior, just add an "empty" comparator to the field, i.e. end `source` with an `@` as in the example:
 
 ```jsx
 <Filter {...props}>
-  <TextInput label="Search" source="post_author@" alwaysOn />
-  // some more filters
+    <TextInput label="Search" source="post_author@" alwaysOn />
+    // some more filters
 </Filter>
 ```
 
 ### Compound primary keys
+
 If one has data resources without primary keys named `id`, one will have to define this specifically. Also, if there is a primary key, which is defined over multiple columns:
 
 ```jsx
-const dataProvider = postgrestRestProvider(API_URL, fetchUtils.fetchJson, 'eq', new Map([
-  ['some_table',    ['custom_id']],
-  ['another_table', ['first_column', 'second_column']],
-]));
+const dataProvider = postgrestRestProvider(
+    API_URL,
+    fetchUtils.fetchJson,
+    'eq',
+    new Map([
+        ['some_table', ['custom_id']],
+        ['another_table', ['first_column', 'second_column']],
+    ])
+);
 ```
 
 ## Developers notes
 
 The current development of this library was done with node v19.10 and npm 8.19.3. In this version the unit tests and the development environment should work.
-
 
 ## License
 
