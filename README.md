@@ -157,6 +157,11 @@ const dataProvider = postgrestRestProvider(API_URL, fetchUtils.fetchJson, 'eq', 
 ]));
 ```
 
+## Developers notes
+
+The current development of this library was done with node v19.10 and npm 8.19.3. In this version the unit tests and the development environment should work.
+
+
 ## License
 
 This data provider is licensed under the MIT License and sponsored by [raphiniert.com](https://raphiniert.com).
