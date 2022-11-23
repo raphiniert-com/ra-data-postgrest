@@ -31,8 +31,7 @@ describe('getList specific', () => {
             },
         },
         {
-            test:
-                'throws error when no content-range response header is present',
+            test: 'throws error when no content-range response header is present',
             method,
             resource: 'posts',
             params: {
