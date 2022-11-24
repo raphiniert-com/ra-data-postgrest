@@ -6,17 +6,17 @@ type HTTPClientMock = typeof fetchUtils.fetchJson;
 const BASE_URL = 'http://localhost:3000';
 
 function createDataProviderMock(
-    expectedStatus: number,
-    expectedBody: string,
-    expectedJSON?: any,
-    expectedOptions?: Record<string, any>
+    mockedResponseStatus: number,
+    mockedResponseBody: string,
+    mockedResponseJSON?: any,
+    mockedResponseOptions?: Record<string, any>
 ) {
     const httpClient = jest.fn((url, options) =>
         Promise.resolve({
-            status: expectedStatus,
-            body: expectedBody,
-            json: expectedJSON,
-            headers: new Headers(expectedOptions),
+            status: mockedResponseStatus,
+            body: mockedResponseBody,
+            json: mockedResponseJSON,
+            headers: new Headers(mockedResponseOptions),
         })
     );
     const dataPovider = raPostgrestProvider(
@@ -34,9 +34,11 @@ export type Case = {
     method: string;
     resource: string;
     params: Record<string, any>;
-    responseHeaders?: Record<string, string>;
+    httpClientResponseHeaders?: Record<string, string>;
+    httpClientResponseBody?: any;
     expectedUrl?: string;
     expectedOptions?: Record<string, any>;
+    expectedResult?: any;
     throws?: RegExp;
 };
 
@@ -45,21 +47,25 @@ export const makeTestFromCase = ({
     method,
     resource,
     params,
-    responseHeaders,
+    httpClientResponseHeaders,
+    httpClientResponseBody = [],
     expectedUrl,
     expectedOptions,
+    expectedResult,
     throws,
 }: Case) => {
     it(`${method} > ${test}`, async () => {
         const { httpClient, dataPovider } = createDataProviderMock(
             200,
             '',
-            [],
-            responseHeaders
+            httpClientResponseBody,
+            httpClientResponseHeaders
         );
 
+        let dataProviderResult;
+
         try {
-            await dataPovider[method](resource, params);
+            dataProviderResult = await dataPovider[method](resource, params);
         } catch (e) {
             if (throws) {
                 expect(e.message).toMatch(throws);
@@ -89,6 +95,9 @@ export const makeTestFromCase = ({
             expect(actualOptionsPreparedForTesting).toStrictEqual(
                 expectedOptions
             );
+        }
+        if (expectedResult) {
+            expect(dataProviderResult).toStrictEqual(expectedResult);
         }
     });
 };

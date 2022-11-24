@@ -19,15 +19,15 @@ describe('getList specific', () => {
                 },
                 filter: {},
             },
-            responseHeaders: {
-                'content-range': '0-9/100',
-            },
             expectedUrl: `/posts?order=id.asc&offset=0&limit=10`,
             expectedOptions: {
                 headers: {
                     accept: 'application/json',
                     prefer: 'count=exact',
                 },
+            },
+            httpClientResponseHeaders: {
+                'content-range': '0-9/100',
             },
         },
         {
