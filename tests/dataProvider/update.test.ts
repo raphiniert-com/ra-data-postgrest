@@ -1,4 +1,5 @@
 import { encodeId } from '../../src/urlBuilder';
+import { qs } from '../urlBuilder/helper';
 import { makeTestFromCase, Case } from './helper';
 
 describe('update specific', () => {
@@ -14,7 +15,7 @@ describe('update specific', () => {
                 data: { name: 'new name' },
                 meta: {},
             },
-            expectedUrl: '/contacts?and=(id.eq.1,type.eq.X)',
+            expectedUrl: `/contacts?${qs({ and: '(id.eq.1,type.eq.X)' })}`,
             expectedOptions: {
                 method: 'PATCH',
                 body: JSON.stringify({ name: 'new name' }),

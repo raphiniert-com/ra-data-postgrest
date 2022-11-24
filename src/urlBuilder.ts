@@ -142,6 +142,8 @@ export const getQuery = (
     ids: Identifier | Array<Identifier>,
     resource: string
 ): string => {
+    let searchParams = new URLSearchParams();
+
     if (Array.isArray(ids) && ids.length > 1) {
         // no standardized query with multiple ids possible for rpc endpoints which are api-exposed database functions
         if (resource.startsWith('rpc/')) {
@@ -153,17 +155,17 @@ export const getQuery = (
         }
 
         if (isCompoundKey(primaryKey)) {
-            // TODO: Should be URL encoded
-            return `or=(${ids.map(id => {
-                const primaryKeyParams = decodeId(id, primaryKey);
-                return `and(${primaryKey
-                    .map((key, i) => `${key}.eq.${primaryKeyParams[i]}`)
-                    .join(',')})`;
-            })})`;
+            searchParams.append(
+                'or',
+                `(${ids.map(id => {
+                    const primaryKeyParams = decodeId(id, primaryKey);
+                    return `and(${primaryKey
+                        .map((key, i) => `${key}.eq.${primaryKeyParams[i]}`)
+                        .join(',')})`;
+                })})`
+            );
         } else {
-            return new URLSearchParams({
-                [primaryKey[0]]: `in.(${ids.join(',')})`,
-            }).toString();
+            searchParams.append(primaryKey[0], `in.(${ids.join(',')})`);
         }
     } else {
         // if ids is one Identifier
@@ -172,26 +174,25 @@ export const getQuery = (
 
         if (isCompoundKey(primaryKey)) {
             if (resource.startsWith('rpc/'))
-                // TODO: Should be URL encoded
-                return `${primaryKey
-                    .map(
-                        (key: string, i: any) => `${key}=${primaryKeyParams[i]}`
-                    )
-                    .join('&')}`;
-            // TODO: Should be URL encoded
+                primaryKey.forEach((key: string, i: any) => {
+                    searchParams.append(key, String(primaryKeyParams[i]));
+                });
             else
-                return `and=(${primaryKey
-                    .map(
-                        (key: string, i: any) =>
-                            `${key}.eq.${primaryKeyParams[i]}`
-                    )
-                    .join(',')})`;
+                searchParams.append(
+                    'and',
+                    `(${primaryKey
+                        .map(
+                            (key: string, i: any) =>
+                                `${key}.eq.${primaryKeyParams[i]}`
+                        )
+                        .join(',')})`
+                );
         } else {
-            return new URLSearchParams([
-                [primaryKey[0], `eq.${id}`],
-            ]).toString();
+            searchParams.append(primaryKey[0], `eq.${id}`);
         }
     }
+
+    return searchParams.toString();
 };
 
 export const getKeyData = (primaryKey: PrimaryKey, data: object): object => {

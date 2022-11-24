@@ -122,7 +122,7 @@ describe('getQuery', () => {
         const id = '[1,"X"]';
         const query = getQuery(primaryKeyCompound, id, resource);
 
-        expect(query).toEqual('and=(id.eq.1,type.eq.X)');
+        expect(query).toEqual(qs({ and: '(id.eq.1,type.eq.X)' }));
     });
 
     it('should return the query for multiple ids of a resource with a compound key', () => {
@@ -131,7 +131,7 @@ describe('getQuery', () => {
         const query = getQuery(primaryKeyCompound, ids, resource);
 
         expect(query).toEqual(
-            'or=(and(id.eq.1,type.eq.X),and(id.eq.2,type.eq.Y))'
+            qs({ or: '(and(id.eq.1,type.eq.X),and(id.eq.2,type.eq.Y))' })
         );
     });
     it('should return the query for a single id of an rpc resource', () => {
@@ -161,7 +161,7 @@ describe('getQuery', () => {
         const id = '[1,"X"]';
         const query = getQuery(primaryKeyCompound, id, resource);
 
-        expect(query).toEqual('id=1&type=X');
+        expect(query).toEqual(qs({ id: 1, type: 'X' }));
     });
 });
 
