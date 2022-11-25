@@ -105,7 +105,7 @@ export default (
 
         const query = getQuery(primaryKey, id, resource);
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
 
         return httpClient(url, {
             headers: new Headers({
@@ -122,7 +122,7 @@ export default (
 
         const query = getQuery(primaryKey, ids, resource);
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
 
         return httpClient(url).then(({ json }) => ({
             data: json.map(data => dataWithId(data, primaryKey)),
@@ -186,7 +186,7 @@ export default (
 
         const primaryKeyData = getKeyData(primaryKey, data);
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
 
         const body = JSON.stringify({
             ...data,
@@ -270,7 +270,7 @@ export default (
 
         const query = getQuery(primaryKey, id, resource);
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
 
         return httpClient(url, {
             method: 'DELETE',
@@ -288,7 +288,7 @@ export default (
 
         const query = getQuery(primaryKey, ids, resource);
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
 
         return httpClient(url, {
             method: 'DELETE',

@@ -105,7 +105,9 @@ describe('getQuery', () => {
     it('should return the query for a single id of normal resource', () => {
         const resource = 'todos';
         const id = 2;
-        const query = getQuery(primaryKeySingle, id, resource);
+        const query = new URLSearchParams(
+            getQuery(primaryKeySingle, id, resource)
+        ).toString();
 
         expect(query).toEqual(qs({ id: 'eq.2' }));
     });
@@ -113,14 +115,18 @@ describe('getQuery', () => {
     it('should return the query for multiple ids of normal resource', () => {
         const resource = 'todos';
         const ids = [1, 2, 3];
-        const query = getQuery(primaryKeySingle, ids, resource);
+        const query = new URLSearchParams(
+            getQuery(primaryKeySingle, ids, resource)
+        ).toString();
 
         expect(query).toEqual(qs({ id: 'in.(1,2,3)' }));
     });
     it('should return the query for a single id of a resource with a compound key', () => {
         const resource = 'todos';
         const id = '[1,"X"]';
-        const query = getQuery(primaryKeyCompound, id, resource);
+        const query = new URLSearchParams(
+            getQuery(primaryKeyCompound, id, resource)
+        ).toString();
 
         expect(query).toEqual(qs({ and: '(id.eq.1,type.eq.X)' }));
     });
@@ -128,7 +134,9 @@ describe('getQuery', () => {
     it('should return the query for multiple ids of a resource with a compound key', () => {
         const resource = 'todos';
         const ids = ['[1,"X"]', '[2,"Y"]'];
-        const query = getQuery(primaryKeyCompound, ids, resource);
+        const query = new URLSearchParams(
+            getQuery(primaryKeyCompound, ids, resource)
+        ).toString();
 
         expect(query).toEqual(
             qs({ or: '(and(id.eq.1,type.eq.X),and(id.eq.2,type.eq.Y))' })
@@ -137,7 +145,9 @@ describe('getQuery', () => {
     it('should return the query for a single id of an rpc resource', () => {
         const resource = 'rpc/get_todo';
         const id = 2;
-        const query = getQuery(primaryKeySingle, id, resource);
+        const query = new URLSearchParams(
+            getQuery(primaryKeySingle, id, resource)
+        ).toString();
 
         expect(query).toEqual(qs({ id: 'eq.2' }));
     });
@@ -150,7 +160,9 @@ describe('getQuery', () => {
             .spyOn(console, 'error')
             .mockImplementation(() => {});
 
-        const query = getQuery(primaryKeySingle, ids, resource);
+        const query = new URLSearchParams(
+            getQuery(primaryKeySingle, ids, resource)
+        ).toString();
         expect(spiedConsoleError.mock.calls[0][0]).toMatch(
             /no query generation for multiple key values implemented/i
         );
@@ -159,7 +171,9 @@ describe('getQuery', () => {
     it('should return the query for a single id of an rpc resource with a compound key', () => {
         const resource = 'rpc/get_todo';
         const id = '[1,"X"]';
-        const query = getQuery(primaryKeyCompound, id, resource);
+        const query = new URLSearchParams(
+            getQuery(primaryKeyCompound, id, resource)
+        ).toString();
 
         expect(query).toEqual(qs({ id: 1, type: 'X' }));
     });

@@ -50,7 +50,7 @@ export const parseFilters = (
     filter: Record<string, any>,
     defaultListOp: PostgRestOperator
 ) => {
-    let result = {};
+    let searchParams = {};
     Object.keys(filter).forEach(function (key) {
         // key: the name of the object key
 
@@ -76,22 +76,22 @@ export const parseFilters = (
                 ? `${value}`
                 : `${operation}.${value}`;
 
-            if (result[splitKey[0]] === undefined) {
+            if (searchParams[splitKey[0]] === undefined) {
                 // first operator for the key, we add it to the dict
-                result[splitKey[0]] = op;
+                searchParams[splitKey[0]] = op;
             } else {
-                if (!Array.isArray(result[splitKey[0]])) {
+                if (!Array.isArray(searchParams[splitKey[0]])) {
                     // second operator, we transform to an array
-                    result[splitKey[0]] = [result[splitKey[0]], op];
+                    searchParams[splitKey[0]] = [searchParams[splitKey[0]], op];
                 } else {
                     // third and subsequent, we add to array
-                    result[splitKey[0]].push(op);
+                    searchParams[splitKey[0]].push(op);
                 }
             }
         });
     });
 
-    return result;
+    return searchParams;
 };
 
 // compound keys capability
@@ -141,8 +141,8 @@ export const getQuery = (
     primaryKey: PrimaryKey,
     ids: Identifier | Array<Identifier>,
     resource: string
-): string => {
-    let searchParams = new URLSearchParams();
+): Record<string, string> => {
+    let searchParams = {};
 
     if (Array.isArray(ids) && ids.length > 1) {
         // no standardized query with multiple ids possible for rpc endpoints which are api-exposed database functions
@@ -151,21 +151,18 @@ export const getQuery = (
                 "PostgREST's rpc endpoints are not intended to be handled as views. Therefore, no query generation for multiple key values implemented!"
             );
 
-            return;
+            return searchParams;
         }
 
         if (isCompoundKey(primaryKey)) {
-            searchParams.append(
-                'or',
-                `(${ids.map(id => {
-                    const primaryKeyParams = decodeId(id, primaryKey);
-                    return `and(${primaryKey
-                        .map((key, i) => `${key}.eq.${primaryKeyParams[i]}`)
-                        .join(',')})`;
-                })})`
-            );
+            searchParams['or'] = `(${ids.map(id => {
+                const primaryKeyParams = decodeId(id, primaryKey);
+                return `and(${primaryKey
+                    .map((key, i) => `${key}.eq.${primaryKeyParams[i]}`)
+                    .join(',')})`;
+            })})`;
         } else {
-            searchParams.append(primaryKey[0], `in.(${ids.join(',')})`);
+            searchParams[primaryKey[0]] = `in.(${ids.join(',')})`;
         }
     } else {
         // if ids is one Identifier
@@ -175,24 +172,21 @@ export const getQuery = (
         if (isCompoundKey(primaryKey)) {
             if (resource.startsWith('rpc/'))
                 primaryKey.forEach((key: string, i: any) => {
-                    searchParams.append(key, String(primaryKeyParams[i]));
+                    searchParams[key] = String(primaryKeyParams[i]);
                 });
             else
-                searchParams.append(
-                    'and',
-                    `(${primaryKey
-                        .map(
-                            (key: string, i: any) =>
-                                `${key}.eq.${primaryKeyParams[i]}`
-                        )
-                        .join(',')})`
-                );
+                searchParams['and'] = `(${primaryKey
+                    .map(
+                        (key: string, i: any) =>
+                            `${key}.eq.${primaryKeyParams[i]}`
+                    )
+                    .join(',')})`;
         } else {
-            searchParams.append(primaryKey[0], `eq.${id}`);
+            searchParams[primaryKey[0]] = `eq.${id}`;
         }
     }
 
-    return searchParams.toString();
+    return searchParams;
 };
 
 export const getKeyData = (primaryKey: PrimaryKey, data: object): object => {
