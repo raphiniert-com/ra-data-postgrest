@@ -101,34 +101,6 @@ const httpClient = (url, options = {}) => {
 
 Now all the requests to the REST API will contain the `Authorization: SRTRDFVESGNJYTUKTYTHRG` header.
 
-### Using authProvider
-
-This package also comes with an [authProvider](https://github.com/marmelab/react-admin/blob/master/docs/Authentication.md) for react-admin which enables you to enable authentification. The provider is designed to work together with [subzero-starter-kit](https://github.com/subzerocloud/subzero-starter-kit). This starter kit sends the JWT within a session cookie. The authProvider expects that. If you want to use postgREST without the starter kit you'll need to write your own. Feel free to contribute!
-
-With one of the starter kits it is very easy to use the authProvider:
-
-```jsx
-// in src/App.js
-import React from 'react';
-import { Admin, Resource } from 'react-admin';
-import postgrestRestProvider, {
-    authProvider,
-} from '@promitheus/ra-data-postgrest';
-
-import { PostList } from './posts';
-
-const App = () => (
-    <Admin
-        dataProvider={postgrestRestProvider('http://path.to.my.api/')}
-        authProvider={authProvider}
-    >
-        <Resource name="posts" list={PostList} />
-    </Admin>
-);
-
-export default App;
-```
-
 ### Special Filter Feature
 
 As postgRest allows several comparators, e.g. `ilike`, `like`, `eq`...
