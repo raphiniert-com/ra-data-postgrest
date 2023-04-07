@@ -258,7 +258,7 @@ export default (
             body: JSON.stringify(params.data),
         }).then(({ json }) => ({
             data: {
-                ...params.data,
+                ...json,
                 id: encodeId(json, primaryKey),
             },
         }));

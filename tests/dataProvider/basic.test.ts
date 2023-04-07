@@ -12,15 +12,15 @@ const cases: Case[] = [
             filter: {},
             meta: {},
         },
-        responseHeaders: {
-            'content-range': '0-9/100',
-        },
         expectedUrl: '/posts?order=title.desc&offset=0&limit=10',
         expectedOptions: {
             headers: {
                 accept: 'application/json',
                 prefer: 'count=exact',
             },
+        },
+        httpClientResponseHeaders: {
+            'content-range': '0-9/100',
         },
     },
     {
@@ -54,9 +54,6 @@ const cases: Case[] = [
             filter: {},
             meta: {},
         },
-        responseHeaders: {
-            'content-range': '0-9/100',
-        },
         expectedUrl:
             '/comments?post_id=eq.1&order=title.desc&offset=0&limit=10',
         expectedOptions: {
@@ -64,6 +61,9 @@ const cases: Case[] = [
                 accept: 'application/json',
                 prefer: 'count=exact',
             },
+        },
+        httpClientResponseHeaders: {
+            'content-range': '0-9/100',
         },
     },
     {
