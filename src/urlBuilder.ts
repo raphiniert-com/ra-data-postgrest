@@ -44,7 +44,7 @@ const postgrestOperators = [
     'and',
 ] as const;
 
-export type PostgRestOperator = typeof postgrestOperators[number];
+export type PostgRestOperator = (typeof postgrestOperators)[number];
 
 export const parseFilters = (
     filter: Record<string, any>,
