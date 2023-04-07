@@ -2,6 +2,14 @@
 
 Find all notable changes of this project in this file.
 
+## unpublished (v2.0.0)
+- package updates
+
+
+## v1.2.1 - 2023-04-07
+- small fix in condition
+- fixed package name
+
 ## v2.0.0-alpha.0 - 2022-11-23
 
 -   [#42](https://github.com/raphiniert-com/ra-data-postgrest/issues/42), started adding some unit tests - @[christiaanwesterbeek](https://github.com/christiaanwesterbeek)

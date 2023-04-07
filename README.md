@@ -5,7 +5,7 @@ PostgREST Data Provider for [react-admin](https://github.com/marmelab/react-admi
 ## Installation
 
 ```sh
-npm install --save @promitheus/ra-data-postgrest
+npm install --save @raphiniert/ra-data-postgrest
 ```
 
 **NOTE**: When using RA 3.x.x, use the data-provider 1.x.x. For RA >= 4.1.x use the data-provider starting from 1.2.x.
@@ -44,7 +44,7 @@ Access-Control-Expose-Headers: Content-Range
 // in src/App.js
 import React from 'react';
 import { Admin, Resource } from 'react-admin';
-import postgrestRestProvider from '@promitheus/ra-data-postgrest';
+import postgrestRestProvider from '@raphiniert/ra-data-postgrest';
 
 import { PostList } from './posts';
 
@@ -65,7 +65,7 @@ That means that if you need to add custom headers to your requests, you just nee
 
 ```jsx
 import { fetchUtils, Admin, Resource } from 'react-admin';
-import postgrestRestProvider from '@promitheus/ra-data-postgrest';
+import postgrestRestProvider from '@raphiniert/ra-data-postgrest';
 
 const httpClient = (url, options = {}) => {
     if (!options.headers) {
