@@ -1,7 +1,7 @@
 # PostgREST Data Provider For React-Admin
 [![npm](https://img.shields.io/npm/v/@raphiniert/ra-data-postgrest.svg)](https://www.npmjs.com/package/@raphiniert/ra-data-postgrest)
 [![npm downloads](https://img.shields.io/npm/dm/@raphiniert/ra-data-postgrest.svg)](https://www.npmjs.com/package/@raphiniert/ra-data-postgrest)
-[![test coverage](https://gitlab.com/mri-tum/aiim/libs/ra-data-fhir/badges/master/coverage.svg?job=test)](https://gitlab.com/mri-tum/aiim/libs/ra-data-fhir/-/jobs)
+[![test coverage](https://img.shields.io/codecov/c/github/raphiniert/ra-data-postgrest/master.svg)](https://codecov.io/gh/raphiniert/ra-data-postgrest/branch/master)
 [![License: MIT](https://img.shields.io/gitlab/license/24181795)](https://github.com/raphiniert-com/ra-data-postgrest/blob/master/LICENSE)
 
 
