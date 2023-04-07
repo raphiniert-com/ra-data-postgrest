@@ -148,6 +148,48 @@ const dataProvider = postgrestRestProvider(
 );
 ```
 
+### Passing extra headers via meta
+Postgrest supports calling functions with a single JSON parameter by sending the header Prefer: params=single-object with your request according to its [docs](https://postgrest.org/en/stable/api.html#calling-functions-with-a-single-json-parameter).
+
+Within the data provider one can add any kind of header to the request while calling react-admin hooks, e.g.:
+```
+const [create, { isLoading, error }] = useCreate(
+    'rpc/my-function',
+    {
+        data: { ... },
+        meta: { headers: { Prefer: 'params=single-object' } },
+    }
+);
+```
+
+### Vertical filtering
+Postgrest supports a feature of [Vertical Filtering (Columns)](https://postgrest.org/en/stable/api.html#vertical-filtering-columns). Within the react-admin hooks this feature can be used as in the following example:
+```
+const { data, total, isLoading, error } = useGetList(
+    'posts',
+    { 
+        pagination: { page: 1, perPage: 10 },
+        sort: { field: 'published_at', order: 'DESC' }
+        meta: { columns: ['id', 'title'] }
+    }
+);
+```
+
+Further, one should be able to leverage this feature to rename columns:
+```
+columns: ['id', 'somealias:title']
+```
+, to cast columns:
+```
+columns: ['id::text', 'title']
+```
+and even get bits from a json or jsonb column"
+```
+columns: ['id', 'json_data->>blood_type', 'json_data->phones']
+```
+
+**Note**: currently this feature is limited to `getList` and `getManyReference`. `getOne` and `getMany` is still missing.
+
 ## Developers notes
 
 The current development of this library was done with node v19.10 and npm 8.19.3. In this version the unit tests and the development environment should work.
