@@ -32,12 +32,12 @@
     "devDependencies": {
         "@types/jest": "^28.1.4",
         "cross-env": "^7.0.3",
-        "eslint-config-prettier": "^8.5.0",
+        "eslint-config-prettier": "^8.8.0",
         "eslint-plugin-prettier": "^4.2.1",
         "install-peers-cli": "^2.2.0",
         "jest": "^28.1.2",
         "prettier": "~2.8.7",
-        "rimraf": "^3.0.2",
+        "rimraf": "^4.4.1",
         "ts-jest": "^28.0.5",
         "typescript": "^4.9.5"
     },
