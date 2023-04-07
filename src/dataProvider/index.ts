@@ -100,7 +100,7 @@ const encodeId = (data: any, primaryKey: PrimaryKey): Identifier => {
 }
 
 const dataWithId = (data: any, primaryKey: PrimaryKey) => {
-  if (primaryKey === ['id']) {
+  if (primaryKey.length == 1 && primaryKey.keys()[0] === 'id') {
     return data;
   }
 
