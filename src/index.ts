@@ -62,16 +62,19 @@ export default (
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
         const { page, perPage } = params.pagination;
-        const { field, order } = params.sort;
+        const { field, order } = params.sort || {};
         const { filter, select } = parseFilters(params, defaultListOp);
 
         let query = {
-            order: getOrderBy(field, order, primaryKey),
             offset: String((page - 1) * perPage),
             limit: String(perPage),
             // append filters
             ...filter
         };
+
+        if (field) {
+            query.order = getOrderBy(field, order, primaryKey);
+        }
 
         if (select) {
             query.select = select;
