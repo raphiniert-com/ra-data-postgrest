@@ -17,27 +17,79 @@ import {
     primaryKeySingle,
     resourcePimaryKeys,
 } from '../fixtures';
-import { qs } from './helper';
 
 describe('parseFilters', () => {
     it('should parse filters', () => {
         expect(
             parseFilters(
                 {
-                    q1: 'foo',
-                    'q2@ilike': 'bar',
-                    'q3@like': 'baz qux',
-                    'q4@gt': 'c',
+                    filter: {
+                        q1: 'foo',
+                        'q2@ilike': 'bar',
+                        'q3@like': 'baz qux',
+                        'q4@gt': 'c',
+                    }
                 },
                 'eq'
             )
         ).toEqual({
-            q1: 'eq.foo',
-            q2: 'ilike.*bar*',
-            q3: ['like.*baz*', 'like.*qux*'],
-            q4: 'gt.c',
-        });
+            filter: {
+                q1: 'eq.foo',
+                q2: 'ilike.*bar*',
+                q3: ['like.*baz*', 'like.*qux*'],
+                q4: 'gt.c',
+            }
+         });
     });
+    it('should parse filters with one select fields', () => {
+        expect(
+            parseFilters(
+                {
+                    filter: {
+                        q1: 'foo',
+                        'q2@ilike': 'bar',
+                        'q3@like': 'baz qux',
+                        'q4@gt': 'c',
+                    },
+                    meta: { columns: 'title' }
+                },
+                'eq'
+            )
+        ).toEqual({
+            filter: {
+                q1: 'eq.foo',
+                q2: 'ilike.*bar*',
+                q3: ['like.*baz*', 'like.*qux*'],
+                q4: 'gt.c'
+            },
+            select: 'title'
+         });
+    });
+    it('should parse filters with multiple select fields', () => {
+        expect(
+            parseFilters(
+                {
+                    filter: {
+                        q1: 'foo',
+                        'q2@ilike': 'bar',
+                        'q3@like': 'baz qux',
+                        'q4@gt': 'c',
+                    },
+                    meta: { columns: ['id', 'title'] }
+                },
+                'eq'
+            )
+        ).toEqual({
+            filter: {
+                q1: 'eq.foo',
+                q2: 'ilike.*bar*',
+                q3: ['like.*baz*', 'like.*qux*'],
+                q4: 'gt.c'
+            },
+            select: 'id,title'
+         });
+    });
+
 });
 
 describe('getPrimaryKey', () => {
@@ -107,7 +159,25 @@ describe('getQuery', () => {
         const id = 2;
         const query = getQuery(primaryKeySingle, id, resource);
 
-        expect(query).toEqual(qs({ id: 'eq.2' }));
+        expect(query).toEqual({ id: 'eq.2' });
+    });
+
+    it('should return the query for a single id of normal resource with one select fields', () => {
+        const resource = 'todos';
+        const id = 2;
+        const meta = { columns: 'field' };
+        const query = getQuery(primaryKeySingle, id, resource, meta);
+
+        expect(query).toEqual({ id: 'eq.2', select: 'field' });
+    });
+
+    it('should return the query for a single id of normal resource with multiple select fields', () => {
+        const resource = 'todos';
+        const id = 2;
+        const meta = { columns: ['id', 'field'] };
+        const query = getQuery(primaryKeySingle, id, resource, meta);
+
+        expect(query).toEqual({ id: 'eq.2', select: 'id,field' });
     });
 
     it('should return the query for multiple ids of normal resource', () => {
@@ -115,14 +185,14 @@ describe('getQuery', () => {
         const ids = [1, 2, 3];
         const query = getQuery(primaryKeySingle, ids, resource);
 
-        expect(query).toEqual(qs({ id: 'in.(1,2,3)' }));
+        expect(query).toEqual({ id: 'in.(1,2,3)' });
     });
     it('should return the query for a single id of a resource with a compound key', () => {
         const resource = 'todos';
         const id = '[1,"X"]';
         const query = getQuery(primaryKeyCompound, id, resource);
 
-        expect(query).toEqual('and=(id.eq.1,type.eq.X)');
+        expect(query).toEqual({and: '(id.eq.1,type.eq.X)'});
     });
 
     it('should return the query for multiple ids of a resource with a compound key', () => {
@@ -130,16 +200,16 @@ describe('getQuery', () => {
         const ids = ['[1,"X"]', '[2,"Y"]'];
         const query = getQuery(primaryKeyCompound, ids, resource);
 
-        expect(query).toEqual(
-            'or=(and(id.eq.1,type.eq.X),and(id.eq.2,type.eq.Y))'
-        );
+        expect(query).toEqual({
+            or: '(and(id.eq.1,type.eq.X),and(id.eq.2,type.eq.Y))'
+        });
     });
     it('should return the query for a single id of an rpc resource', () => {
         const resource = 'rpc/get_todo';
         const id = 2;
         const query = getQuery(primaryKeySingle, id, resource);
 
-        expect(query).toEqual(qs({ id: 'eq.2' }));
+        expect(query).toEqual({ id: 'eq.2' });
     });
 
     it('should log to console.error that calling an rpc with multiple ids is not supported', () => {
@@ -161,7 +231,7 @@ describe('getQuery', () => {
         const id = '[1,"X"]';
         const query = getQuery(primaryKeyCompound, id, resource);
 
-        expect(query).toEqual('id=1&type=X');
+        expect(query).toEqual({id: '1', type:'X'});
     });
 });
 

@@ -12,6 +12,8 @@ import {
     decodeId,
     isCompoundKey,
 } from './urlBuilder';
+import qs from 'qs';
+
 /**
  * Maps react-admin queries to a postgrest REST API
  *
@@ -61,15 +63,19 @@ export default (
 
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort;
-        const parsedFilter = parseFilters(params.filter, defaultListOp);
+        const { filter, select } = parseFilters(params, defaultListOp);
 
-        const query = {
+        let query = {
             order: getOrderBy(field, order, primaryKey),
             offset: String((page - 1) * perPage),
             limit: String(perPage),
             // append filters
-            ...parsedFilter,
+            ...filter
         };
+
+        if (select) {
+            query.select = select;
+        }
 
         // add header that Content-Range is in returned header
         const options = {
@@ -79,7 +85,7 @@ export default (
             }),
         };
 
-        const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         return httpClient(url, options).then(({ headers, json }) => {
             if (!headers.has('content-range')) {
@@ -100,12 +106,12 @@ export default (
     },
 
     getOne: (resource, params) => {
-        const id = params.id;
+        const { id, meta } = params;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-        const query = getQuery(primaryKey, id, resource);
+        const query = getQuery(primaryKey, id, resource, meta);
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         return httpClient(url, {
             headers: new Headers({
@@ -120,9 +126,8 @@ export default (
         const ids = params.ids;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-        const query = getQuery(primaryKey, ids, resource);
-
-        const url = `${apiUrl}/${resource}?${query}`;
+        const query = getQuery(primaryKey, ids, resource, params.meta);
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;        
 
         return httpClient(url).then(({ json }) => ({
             data: json.map(data => dataWithId(data, primaryKey)),
@@ -132,23 +137,28 @@ export default (
     getManyReference: (resource, params) => {
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort;
-        const parsedFilter = parseFilters(params.filter, defaultListOp);
+
+        const { filter, select } = parseFilters(params, defaultListOp);
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-        const query = params.target
+        let query = params.target
             ? {
                   [params.target]: `eq.${params.id}`,
                   order: getOrderBy(field, order, primaryKey),
                   offset: String((page - 1) * perPage),
                   limit: String(perPage),
-                  ...parsedFilter,
+                  ...filter
               }
             : {
                   order: getOrderBy(field, order, primaryKey),
                   offset: String((page - 1) * perPage),
                   limit: String(perPage),
-                  ...parsedFilter,
+                  ...filter,
               };
+
+        if (select) {
+            query.select = select;
+        }
 
         // add header that Content-Range is in returned header
         const options = {
@@ -158,7 +168,7 @@ export default (
             }),
         };
 
-        const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         return httpClient(url, options).then(({ headers, json }) => {
             if (!headers.has('content-range')) {
@@ -179,14 +189,14 @@ export default (
     },
 
     update: (resource, params) => {
-        const { id, data } = params;
+        const { id, data, meta } = params;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-        const query = getQuery(primaryKey, id, resource);
+        const query = getQuery(primaryKey, id, resource, meta);
 
         const primaryKeyData = getKeyData(primaryKey, data);
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         const body = JSON.stringify({
             ...data,
@@ -229,6 +239,7 @@ export default (
             })
         );
 
+        // TODO: query?
         const url = `${apiUrl}/${resource}`;
 
         return httpClient(url, {
@@ -245,7 +256,7 @@ export default (
 
     create: (resource, params) => {
         const primaryKey = getPrimaryKey(resource, primaryKeys);
-
+        // TODO: query?
         const url = `${apiUrl}/${resource}`;
 
         return httpClient(url, {
@@ -265,12 +276,12 @@ export default (
     },
 
     delete: (resource, params) => {
-        const id = params.id;
+        const { id, meta } = params;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-        const query = getQuery(primaryKey, id, resource);
+        const query = getQuery(primaryKey, id, resource, meta);
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         return httpClient(url, {
             method: 'DELETE',
@@ -283,12 +294,12 @@ export default (
     },
 
     deleteMany: (resource, params) => {
-        const ids = params.ids;
+        const { ids, meta } = params;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-        const query = getQuery(primaryKey, ids, resource);
+        const query = getQuery(primaryKey, ids, resource, meta);
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         return httpClient(url, {
             method: 'DELETE',
