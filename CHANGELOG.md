@@ -3,10 +3,12 @@
 Find all notable changes of this project in this file.
 
 ## unpublished (v2.0.0)
-- update dependencies
+- updated dependencies
+- updated `urlBuilder` and integrated URL encoding
 - [#48](https://github.com/raphiniert-com/ra-data-postgrest/issues/48) solved by pull request [#55](https://github.com/raphiniert-com/ra-data-postgrest/pull/55), the create method should return the data returned by postgrest and not the posted data - @[christiaanwesterbeek](https://github.com/christiaanwesterbeek)
 - [#41](https://github.com/raphiniert-com/ra-data-postgrest/pull/41), allow columns filtering for getList and getManyReference - @[christiaanwesterbeek](https://github.com/christiaanwesterbeek)
-- [#39](https://github.com/raphiniert-com/ra-data-postgrest/pull/39), allow passing extra headers via meta for react-admin hooks - @[christiaanwesterbeek](https://github.com/christiaanwesterbeek)
+- added support of [#41](https://github.com/raphiniert-com/ra-data-postgrest/pull/41) for other functions, but `create` and `updateMany`
+
 
 
 ## v1.2.1 - 2023-04-07
