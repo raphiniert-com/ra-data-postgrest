@@ -1,4 +1,16 @@
-import { fetchUtils, DataProvider } from 'ra-core';
+import {
+    fetchUtils,
+    DataProvider,
+    GetListParams,
+    GetOneParams,
+    GetManyParams,
+    GetManyReferenceParams,
+    UpdateParams,
+    UpdateManyParams,
+    CreateParams,
+    DeleteParams,
+    DeleteManyParams,
+} from 'ra-core';
 import {
     PrimaryKey,
     PostgRestOperator,
@@ -58,7 +70,7 @@ export default (
     defaultListOp: PostgRestOperator = 'eq',
     primaryKeys: Map<string, PrimaryKey> = defaultPrimaryKeys
 ): DataProvider => ({
-    getList: (resource, params) => {
+    getList: (resource, params: Partial<GetListParams> = {}) => {
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
         const { page, perPage } = params.pagination;
@@ -85,6 +97,7 @@ export default (
             headers: new Headers({
                 Accept: 'application/json',
                 Prefer: 'count=exact',
+                ...(params.meta?.headers || {}),
             }),
         };
 
@@ -108,7 +121,7 @@ export default (
         });
     },
 
-    getOne: (resource, params) => {
+    getOne: (resource, params: Partial<GetOneParams> = {}) => {
         const { id, meta } = params;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
@@ -119,13 +132,14 @@ export default (
         return httpClient(url, {
             headers: new Headers({
                 accept: 'application/vnd.pgrst.object+json',
+                ...(params.meta?.headers || {}),
             }),
         }).then(({ json }) => ({
             data: dataWithId(json, primaryKey),
         }));
     },
 
-    getMany: (resource, params) => {
+    getMany: (resource, params: Partial<GetManyParams> = {}) => {
         const ids = params.ids;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
@@ -137,7 +151,10 @@ export default (
         }));
     },
 
-    getManyReference: (resource, params) => {
+    getManyReference: (
+        resource,
+        params: Partial<GetManyReferenceParams> = {}
+    ) => {
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort;
 
@@ -168,6 +185,7 @@ export default (
             headers: new Headers({
                 Accept: 'application/json',
                 Prefer: 'count=exact',
+                ...(params.meta?.headers || {}),
             }),
         };
 
@@ -191,7 +209,7 @@ export default (
         });
     },
 
-    update: (resource, params) => {
+    update: (resource, params: Partial<UpdateParams> = {}) => {
         const { id, data, meta } = params;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
@@ -212,12 +230,13 @@ export default (
                 Accept: 'application/vnd.pgrst.object+json',
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
+                ...(params.meta?.headers || {}),
             }),
             body,
         }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
     },
 
-    updateMany: (resource, params) => {
+    updateMany: (resource, params: Partial<UpdateManyParams> = {}) => {
         const ids = params.ids;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
@@ -249,6 +268,7 @@ export default (
             headers: new Headers({
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
+                ...(params.meta?.headers || {}),
             }),
             body,
         }).then(({ json }) => ({
@@ -256,7 +276,7 @@ export default (
         }));
     },
 
-    create: (resource, params) => {
+    create: (resource, params: Partial<CreateParams> = {}) => {
         const primaryKey = getPrimaryKey(resource, primaryKeys);
         const url = `${apiUrl}/${resource}`;
 
@@ -266,6 +286,7 @@ export default (
                 Accept: 'application/vnd.pgrst.object+json',
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
+                ...(params.meta?.headers || {}),
             }),
             body: JSON.stringify(params.data),
         }).then(({ json }) => ({
@@ -276,7 +297,7 @@ export default (
         }));
     },
 
-    delete: (resource, params) => {
+    delete: (resource, params: Partial<DeleteParams> = {}) => {
         const { id, meta } = params;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
@@ -290,11 +311,12 @@ export default (
                 Accept: 'application/vnd.pgrst.object+json',
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
+                ...(params.meta?.headers || {}),
             }),
         }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
     },
 
-    deleteMany: (resource, params) => {
+    deleteMany: (resource, params: Partial<DeleteManyParams> = {}) => {
         const { ids, meta } = params;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
@@ -307,6 +329,7 @@ export default (
             headers: new Headers({
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
+                ...(params.meta?.headers || {}),
             }),
         }).then(({ json }) => ({
             data: json.map(data => encodeId(data, primaryKey)),
