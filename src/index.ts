@@ -69,7 +69,7 @@ export default (
             offset: String((page - 1) * perPage),
             limit: String(perPage),
             // append filters
-            ...filter
+            ...filter,
         };
 
         if (field) {
@@ -130,7 +130,7 @@ export default (
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
         const query = getQuery(primaryKey, ids, resource, params.meta);
-        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;        
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         return httpClient(url).then(({ json }) => ({
             data: json.map(data => dataWithId(data, primaryKey)),
@@ -150,7 +150,7 @@ export default (
                   order: getOrderBy(field, order, primaryKey),
                   offset: String((page - 1) * perPage),
                   limit: String(perPage),
-                  ...filter
+                  ...filter,
               }
             : {
                   order: getOrderBy(field, order, primaryKey),

@@ -47,14 +47,14 @@ const postgrestOperators = [
 type ParsedFiltersResult = {
     filter: any;
     select: any;
-}
+};
 
 export type PostgRestOperator = (typeof postgrestOperators)[number];
 
 export const parseFilters = (
     params: any,
     defaultListOp: PostgRestOperator
-) : Partial<ParsedFiltersResult> => {
+): Partial<ParsedFiltersResult> => {
     const { filter, meta = {} } = params;
 
     let result: Partial<ParsedFiltersResult> = {};
@@ -90,7 +90,10 @@ export const parseFilters = (
             } else {
                 if (!Array.isArray(result[splitKey[0]])) {
                     // second operator, we transform to an array
-                    result.filter[splitKey[0]] = [result.filter[splitKey[0]], op];
+                    result.filter[splitKey[0]] = [
+                        result.filter[splitKey[0]],
+                        op,
+                    ];
                 } else {
                     // third and subsequent, we add to array
                     result.filter[splitKey[0]].push(op);
@@ -171,12 +174,11 @@ export const getQuery = (
         if (isCompoundKey(primaryKey)) {
             result = {
                 or: `(${ids.map(id => {
-                        const primaryKeyParams = decodeId(id, primaryKey);
-                        return `and(${primaryKey
-                            .map((key, i) => `${key}.eq.${primaryKeyParams[i]}`)
-                            .join(',')})`;
-                        })
-                    })`
+                    const primaryKeyParams = decodeId(id, primaryKey);
+                    return `and(${primaryKey
+                        .map((key, i) => `${key}.eq.${primaryKeyParams[i]}`)
+                        .join(',')})`;
+                })})`,
             };
         } else {
             result = {
@@ -192,19 +194,20 @@ export const getQuery = (
             if (resource.startsWith('rpc/')) {
                 result = {};
                 primaryKey.map(
-                        (key: string, i: any) => result[key] = `${primaryKeyParams[i]}`
-                    );
+                    (key: string, i: any) =>
+                        (result[key] = `${primaryKeyParams[i]}`)
+                );
             } else {
                 result = {
                     and: `(${primaryKey.map(
                         (key: string, i: any) =>
                             `${key}.eq.${primaryKeyParams[i]}`
-                    )})`
+                    )})`,
                 };
             }
         } else {
-            result = { 
-                [primaryKey[0]]: `eq.${id}` 
+            result = {
+                [primaryKey[0]]: `eq.${id}`,
             };
         }
     }
