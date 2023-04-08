@@ -188,7 +188,7 @@ and even get bits from a json or jsonb column"
 columns: ['id', 'json_data->>blood_type', 'json_data->phones']
 ```
 
-**Note**: currently this feature is limited to `getList` and `getManyReference`. `getOne` and `getMany` is still missing.
+**Note**: not working for `create` and `updateMany`.
 
 ## Developers notes
 
