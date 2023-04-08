@@ -239,7 +239,6 @@ export default (
             })
         );
 
-        // TODO: query?
         const url = `${apiUrl}/${resource}`;
 
         return httpClient(url, {
@@ -256,7 +255,6 @@ export default (
 
     create: (resource, params) => {
         const primaryKey = getPrimaryKey(resource, primaryKeys);
-        // TODO: query?
         const url = `${apiUrl}/${resource}`;
 
         return httpClient(url, {
