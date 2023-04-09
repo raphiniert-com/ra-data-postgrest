@@ -44,13 +44,21 @@ const postgrestOperators = [
     'and',
 ] as const;
 
+type ParsedFiltersResult = {
+    filter: any;
+    select: any;
+};
+
 export type PostgRestOperator = (typeof postgrestOperators)[number];
 
 export const parseFilters = (
-    filter: Record<string, any>,
+    params: any,
     defaultListOp: PostgRestOperator
-) => {
-    let result = {};
+): Partial<ParsedFiltersResult> => {
+    const { filter, meta = {} } = params;
+
+    let result: Partial<ParsedFiltersResult> = {};
+    result.filter = {};
     Object.keys(filter).forEach(function (key) {
         // key: the name of the object key
 
@@ -76,20 +84,29 @@ export const parseFilters = (
                 ? `${value}`
                 : `${operation}.${value}`;
 
-            if (result[splitKey[0]] === undefined) {
+            if (result.filter[splitKey[0]] === undefined) {
                 // first operator for the key, we add it to the dict
-                result[splitKey[0]] = op;
+                result.filter[splitKey[0]] = op;
             } else {
                 if (!Array.isArray(result[splitKey[0]])) {
                     // second operator, we transform to an array
-                    result[splitKey[0]] = [result[splitKey[0]], op];
+                    result.filter[splitKey[0]] = [
+                        result.filter[splitKey[0]],
+                        op,
+                    ];
                 } else {
                     // third and subsequent, we add to array
-                    result[splitKey[0]].push(op);
+                    result.filter[splitKey[0]].push(op);
                 }
             }
         });
     });
+
+    if (meta?.columns) {
+        result.select = Array.isArray(meta.columns)
+            ? meta.columns.join(',')
+            : meta.columns;
+    }
 
     return result;
 };
@@ -140,8 +157,10 @@ export const isCompoundKey = (primaryKey: PrimaryKey): Boolean => {
 export const getQuery = (
     primaryKey: PrimaryKey,
     ids: Identifier | Array<Identifier>,
-    resource: string
-): string => {
+    resource: string,
+    meta: any = null
+): any => {
+    let result: any = {};
     if (Array.isArray(ids) && ids.length > 1) {
         // no standardized query with multiple ids possible for rpc endpoints which are api-exposed database functions
         if (resource.startsWith('rpc/')) {
@@ -153,17 +172,18 @@ export const getQuery = (
         }
 
         if (isCompoundKey(primaryKey)) {
-            // TODO: Should be URL encoded
-            return `or=(${ids.map(id => {
-                const primaryKeyParams = decodeId(id, primaryKey);
-                return `and(${primaryKey
-                    .map((key, i) => `${key}.eq.${primaryKeyParams[i]}`)
-                    .join(',')})`;
-            })})`;
+            result = {
+                or: `(${ids.map(id => {
+                    const primaryKeyParams = decodeId(id, primaryKey);
+                    return `and(${primaryKey
+                        .map((key, i) => `${key}.eq.${primaryKeyParams[i]}`)
+                        .join(',')})`;
+                })})`,
+            };
         } else {
-            return new URLSearchParams({
+            result = {
                 [primaryKey[0]]: `in.(${ids.join(',')})`,
-            }).toString();
+            };
         }
     } else {
         // if ids is one Identifier
@@ -171,27 +191,34 @@ export const getQuery = (
         const primaryKeyParams = decodeId(id, primaryKey);
 
         if (isCompoundKey(primaryKey)) {
-            if (resource.startsWith('rpc/'))
-                // TODO: Should be URL encoded
-                return `${primaryKey
-                    .map(
-                        (key: string, i: any) => `${key}=${primaryKeyParams[i]}`
-                    )
-                    .join('&')}`;
-            // TODO: Should be URL encoded
-            else
-                return `and=(${primaryKey
-                    .map(
+            if (resource.startsWith('rpc/')) {
+                result = {};
+                primaryKey.map(
+                    (key: string, i: any) =>
+                        (result[key] = `${primaryKeyParams[i]}`)
+                );
+            } else {
+                result = {
+                    and: `(${primaryKey.map(
                         (key: string, i: any) =>
                             `${key}.eq.${primaryKeyParams[i]}`
-                    )
-                    .join(',')})`;
+                    )})`,
+                };
+            }
         } else {
-            return new URLSearchParams([
-                [primaryKey[0], `eq.${id}`],
-            ]).toString();
+            result = {
+                [primaryKey[0]]: `eq.${id}`,
+            };
         }
     }
+
+    if (meta && meta.columns) {
+        result.select = Array.isArray(meta.columns)
+            ? meta.columns.join(',')
+            : meta.columns;
+    }
+
+    return result;
 };
 
 export const getKeyData = (primaryKey: PrimaryKey, data: object): object => {

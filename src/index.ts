@@ -1,4 +1,16 @@
-import { fetchUtils, DataProvider } from 'ra-core';
+import {
+    fetchUtils,
+    DataProvider,
+    GetListParams,
+    GetOneParams,
+    GetManyParams,
+    GetManyReferenceParams,
+    UpdateParams,
+    UpdateManyParams,
+    CreateParams,
+    DeleteParams,
+    DeleteManyParams,
+} from 'ra-core';
 import {
     PrimaryKey,
     PostgRestOperator,
@@ -12,6 +24,8 @@ import {
     decodeId,
     isCompoundKey,
 } from './urlBuilder';
+import qs from 'qs';
+
 /**
  * Maps react-admin queries to a postgrest REST API
  *
@@ -56,30 +70,38 @@ export default (
     defaultListOp: PostgRestOperator = 'eq',
     primaryKeys: Map<string, PrimaryKey> = defaultPrimaryKeys
 ): DataProvider => ({
-    getList: (resource, params) => {
+    getList: (resource, params: Partial<GetListParams> = {}) => {
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
         const { page, perPage } = params.pagination;
-        const { field, order } = params.sort;
-        const parsedFilter = parseFilters(params.filter, defaultListOp);
+        const { field, order } = params.sort || {};
+        const { filter, select } = parseFilters(params, defaultListOp);
 
-        const query = {
-            order: getOrderBy(field, order, primaryKey),
+        let query = {
             offset: String((page - 1) * perPage),
             limit: String(perPage),
             // append filters
-            ...parsedFilter,
+            ...filter,
         };
+
+        if (field) {
+            query.order = getOrderBy(field, order, primaryKey);
+        }
+
+        if (select) {
+            query.select = select;
+        }
 
         // add header that Content-Range is in returned header
         const options = {
             headers: new Headers({
                 Accept: 'application/json',
                 Prefer: 'count=exact',
+                ...(params.meta?.headers || {}),
             }),
         };
 
-        const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         return httpClient(url, options).then(({ headers, json }) => {
             if (!headers.has('content-range')) {
@@ -99,66 +121,75 @@ export default (
         });
     },
 
-    getOne: (resource, params) => {
-        const id = params.id;
+    getOne: (resource, params: Partial<GetOneParams> = {}) => {
+        const { id, meta } = params;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-        const query = getQuery(primaryKey, id, resource);
+        const query = getQuery(primaryKey, id, resource, meta);
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         return httpClient(url, {
             headers: new Headers({
                 accept: 'application/vnd.pgrst.object+json',
+                ...(params.meta?.headers || {}),
             }),
         }).then(({ json }) => ({
             data: dataWithId(json, primaryKey),
         }));
     },
 
-    getMany: (resource, params) => {
+    getMany: (resource, params: Partial<GetManyParams> = {}) => {
         const ids = params.ids;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-        const query = getQuery(primaryKey, ids, resource);
-
-        const url = `${apiUrl}/${resource}?${query}`;
+        const query = getQuery(primaryKey, ids, resource, params.meta);
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         return httpClient(url).then(({ json }) => ({
             data: json.map(data => dataWithId(data, primaryKey)),
         }));
     },
 
-    getManyReference: (resource, params) => {
+    getManyReference: (
+        resource,
+        params: Partial<GetManyReferenceParams> = {}
+    ) => {
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort;
-        const parsedFilter = parseFilters(params.filter, defaultListOp);
+
+        const { filter, select } = parseFilters(params, defaultListOp);
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-        const query = params.target
+        let query = params.target
             ? {
                   [params.target]: `eq.${params.id}`,
                   order: getOrderBy(field, order, primaryKey),
                   offset: String((page - 1) * perPage),
                   limit: String(perPage),
-                  ...parsedFilter,
+                  ...filter,
               }
             : {
                   order: getOrderBy(field, order, primaryKey),
                   offset: String((page - 1) * perPage),
                   limit: String(perPage),
-                  ...parsedFilter,
+                  ...filter,
               };
+
+        if (select) {
+            query.select = select;
+        }
 
         // add header that Content-Range is in returned header
         const options = {
             headers: new Headers({
                 Accept: 'application/json',
                 Prefer: 'count=exact',
+                ...(params.meta?.headers || {}),
             }),
         };
 
-        const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         return httpClient(url, options).then(({ headers, json }) => {
             if (!headers.has('content-range')) {
@@ -178,15 +209,15 @@ export default (
         });
     },
 
-    update: (resource, params) => {
-        const { id, data } = params;
+    update: (resource, params: Partial<UpdateParams> = {}) => {
+        const { id, data, meta } = params;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-        const query = getQuery(primaryKey, id, resource);
+        const query = getQuery(primaryKey, id, resource, meta);
 
         const primaryKeyData = getKeyData(primaryKey, data);
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         const body = JSON.stringify({
             ...data,
@@ -199,12 +230,13 @@ export default (
                 Accept: 'application/vnd.pgrst.object+json',
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
+                ...(params.meta?.headers || {}),
             }),
             body,
         }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
     },
 
-    updateMany: (resource, params) => {
+    updateMany: (resource, params: Partial<UpdateManyParams> = {}) => {
         const ids = params.ids;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
@@ -236,6 +268,7 @@ export default (
             headers: new Headers({
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
+                ...(params.meta?.headers || {}),
             }),
             body,
         }).then(({ json }) => ({
@@ -243,9 +276,8 @@ export default (
         }));
     },
 
-    create: (resource, params) => {
+    create: (resource, params: Partial<CreateParams> = {}) => {
         const primaryKey = getPrimaryKey(resource, primaryKeys);
-
         const url = `${apiUrl}/${resource}`;
 
         return httpClient(url, {
@@ -254,6 +286,7 @@ export default (
                 Accept: 'application/vnd.pgrst.object+json',
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
+                ...(params.meta?.headers || {}),
             }),
             body: JSON.stringify(params.data),
         }).then(({ json }) => ({
@@ -264,13 +297,13 @@ export default (
         }));
     },
 
-    delete: (resource, params) => {
-        const id = params.id;
+    delete: (resource, params: Partial<DeleteParams> = {}) => {
+        const { id, meta } = params;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-        const query = getQuery(primaryKey, id, resource);
+        const query = getQuery(primaryKey, id, resource, meta);
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         return httpClient(url, {
             method: 'DELETE',
@@ -278,23 +311,25 @@ export default (
                 Accept: 'application/vnd.pgrst.object+json',
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
+                ...(params.meta?.headers || {}),
             }),
         }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
     },
 
-    deleteMany: (resource, params) => {
-        const ids = params.ids;
+    deleteMany: (resource, params: Partial<DeleteManyParams> = {}) => {
+        const { ids, meta } = params;
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
-        const query = getQuery(primaryKey, ids, resource);
+        const query = getQuery(primaryKey, ids, resource, meta);
 
-        const url = `${apiUrl}/${resource}?${query}`;
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
         return httpClient(url, {
             method: 'DELETE',
             headers: new Headers({
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
+                ...(params.meta?.headers || {}),
             }),
         }).then(({ json }) => ({
             data: json.map(data => encodeId(data, primaryKey)),

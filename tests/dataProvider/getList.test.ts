@@ -19,7 +19,7 @@ describe('getList specific', () => {
                 },
                 filter: {},
             },
-            expectedUrl: `/posts?order=id.asc&offset=0&limit=10`,
+            expectedUrl: `/posts?offset=0&limit=10&order=id.asc`,
             expectedOptions: {
                 headers: {
                     accept: 'application/json',
