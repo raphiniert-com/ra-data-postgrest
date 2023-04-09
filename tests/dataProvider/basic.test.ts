@@ -1,3 +1,4 @@
+import qs from 'querystring';
 import { enc } from '../urlBuilder/helper';
 import { makeTestFromCase, Case } from './helper';
 
@@ -12,7 +13,7 @@ const cases: Case[] = [
             filter: {},
             meta: {},
         },
-        expectedUrl: '/posts?order=title.desc&offset=0&limit=10',
+        expectedUrl: '/posts?offset=0&limit=10&order=title.desc',
         expectedOptions: {
             headers: {
                 accept: 'application/json',
