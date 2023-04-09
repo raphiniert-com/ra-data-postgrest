@@ -2,7 +2,7 @@
 
 Find all notable changes of this project in this file.
 
-## unpublished (v2.0.0)
+## v2.0.0-alpha.1 - 2023-04-09
 ### Improvements
 - updated dependencies
 - updated `urlBuilder` and integrated URL encoding
