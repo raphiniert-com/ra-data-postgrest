@@ -1,4 +1,3 @@
-import qs from 'querystring';
 import { enc } from '../urlBuilder/helper';
 import { makeTestFromCase, Case } from './helper';
 
