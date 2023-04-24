@@ -1,6 +1,6 @@
 {
     "name": "@raphiniert/ra-data-postgrest",
-    "version": "2.0.0-alpha.1",
+    "version": "2.0.0-alpha.2",
     "description": "postgREST data provider for react-admin",
     "main": "lib/index.js",
     "module": "esm/index.js",
@@ -31,12 +31,13 @@
     },
     "devDependencies": {
         "@types/jest": "^28.1.4",
+        "@types/qs": "^6.9.7",
         "cross-env": "^7.0.3",
         "eslint-config-prettier": "^8.8.0",
         "eslint-plugin-prettier": "^4.2.1",
         "install-peers-cli": "^2.2.0",
         "jest": "^28.1.2",
-        "prettier": "~2.8.7",
+        "prettier": "~2.8.8",
         "rimraf": "^5.0.0",
         "ts-jest": "^28.0.5",
         "typescript": "^4.9.5"

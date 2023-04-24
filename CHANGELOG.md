@@ -2,6 +2,13 @@
 
 Find all notable changes of this project in this file.
 
+## v2.0.0-alpha.2 - 2023-04-24
+### Improvements
+- updated dependencies
+
+### New feature
+- [#49](https://github.com/raphiniert-com/ra-data-postgrest/issues/49), custom schema name can be used
+
 ## v2.0.0-alpha.1 - 2023-04-09
 ### Improvements
 - updated dependencies

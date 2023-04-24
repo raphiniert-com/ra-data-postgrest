@@ -41,6 +41,7 @@ const cases: Case[] = [
         resource: 'posts',
         params: { ids: [1, 2, 3], meta: {} },
         expectedUrl: `/posts?id=in.${enc('(1,2,3)')}`,
+        expectedOptions: { 'headers': {} }
     },
     {
         test: 'Read a list of resources related to another one',
