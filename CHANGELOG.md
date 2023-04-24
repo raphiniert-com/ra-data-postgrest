@@ -2,7 +2,7 @@
 
 Find all notable changes of this project in this file.
 
-## v2.0.0-alpha.2 - 2023-04-09
+## v2.0.0-alpha.2 - 2023-04-24
 ### Improvements
 - updated dependencies
 
