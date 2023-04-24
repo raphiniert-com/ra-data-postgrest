@@ -66,33 +66,34 @@ export type MetaOption = string | undefined;
 
 export const defaultPrimaryKeys = new Map<string, PrimaryKey>();
 
-const useCustomSchema = (schema: () => string, metaSchema: MetaOption, method: string) => {
+const useCustomSchema = (
+    schema: () => string,
+    metaSchema: MetaOption,
+    method: string
+) => {
     let funcHeaderSchema = schema;
     if (metaSchema !== undefined) {
-        funcHeaderSchema = () => (metaSchema);
+        funcHeaderSchema = () => metaSchema;
     }
 
-
     if (funcHeaderSchema().length > 0) {
-        let schemaHeader = "";
+        let schemaHeader = '';
         if (['GET', 'HEAD'].includes(method)) {
-            schemaHeader = "Accept-Profile";
+            schemaHeader = 'Accept-Profile';
         } else if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
-            schemaHeader = "Content-Profile";
-        } else 
-            return {};
+            schemaHeader = 'Content-Profile';
+        } else return {};
 
-        return { [schemaHeader]: funcHeaderSchema()};
-    } else
-        return {};
-}
+        return { [schemaHeader]: funcHeaderSchema() };
+    } else return {};
+};
 
 export default (
     apiUrl: string,
     httpClient = fetchUtils.fetchJson,
     defaultListOp: PostgRestOperator = 'eq',
     primaryKeys: Map<string, PrimaryKey> = defaultPrimaryKeys,
-    schema: () => string = () => (""),
+    schema: () => string = () => ''
 ): DataProvider => ({
     getList: (resource, params: Partial<GetListParams> = {}) => {
         const primaryKey = getPrimaryKey(resource, primaryKeys);
