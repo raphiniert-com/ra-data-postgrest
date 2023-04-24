@@ -148,11 +148,27 @@ const dataProvider = postgrestRestProvider(
 );
 ```
 
+### Custom schema
+PostgREST allows to [select and switch the database schema](https://postgrest.org/en/stable/api.html#switching-schemas) by setting a custom header. Thus, one way to use this function would be adding the custom header as a string while using react-admin hooks within `meta.schema` (compare to next section) or to set it up as function of `() => (string)` while using the data provider just component based. The latter can be done as follows and gives the opportunity to use some central storage (e.g. localStorage) which can be changed at multiple points of the application:
+```jsx
+import { fetchUtils } from 'react-admin';
+import { defaultPrimaryKeys, default as postgrestRestProvider } from '@raphiniert/ra-data-postgrest';
+
+const dataProvider = postgrestRestProvider(
+    API_URL,
+    fetchUtils.fetchJson,
+    'eq',
+    defaultPrimaryKeys,
+    () => localStorage.getItem("schema") || "api"
+);
+```
+
 ### Passing extra headers via meta
 Postgrest supports calling functions with a single JSON parameter by sending the header Prefer: params=single-object with your request according to its [docs](https://postgrest.org/en/stable/api.html#calling-functions-with-a-single-json-parameter).
 
 Within the data provider one can add any kind of header to the request while calling react-admin hooks, e.g.:
-```
+
+```jsx
 const [create, { isLoading, error }] = useCreate(
     'rpc/my-function',
     {
@@ -164,7 +180,8 @@ const [create, { isLoading, error }] = useCreate(
 
 ### Vertical filtering
 Postgrest supports a feature of [Vertical Filtering (Columns)](https://postgrest.org/en/stable/api.html#vertical-filtering-columns). Within the react-admin hooks this feature can be used as in the following example:
-```
+
+```jsx
 const { data, total, isLoading, error } = useGetList(
     'posts',
     { 
@@ -176,15 +193,15 @@ const { data, total, isLoading, error } = useGetList(
 ```
 
 Further, one should be able to leverage this feature to rename columns:
-```
+```jsx
 columns: ['id', 'somealias:title']
 ```
 , to cast columns:
-```
+```jsx
 columns: ['id::text', 'title']
 ```
 and even get bits from a json or jsonb column"
-```
+```jsx
 columns: ['id', 'json_data->>blood_type', 'json_data->phones']
 ```
 

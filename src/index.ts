@@ -62,13 +62,37 @@ import qs from 'qs';
  * export default App;
  */
 
-const defaultPrimaryKeys = new Map<string, PrimaryKey>();
+export type MetaOption = string | undefined;
+
+export const defaultPrimaryKeys = new Map<string, PrimaryKey>();
+
+const useCustomSchema = (schema: () => string, metaSchema: MetaOption, method: string) => {
+    let funcHeaderSchema = schema;
+    if (metaSchema !== undefined) {
+        funcHeaderSchema = () => (metaSchema);
+    }
+
+
+    if (funcHeaderSchema().length > 0) {
+        let schemaHeader = "";
+        if (['GET', 'HEAD'].includes(method)) {
+            schemaHeader = "Accept-Profile";
+        } else if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
+            schemaHeader = "Content-Profile";
+        } else 
+            return {};
+
+        return { [schemaHeader]: funcHeaderSchema()};
+    } else
+        return {};
+}
 
 export default (
     apiUrl: string,
     httpClient = fetchUtils.fetchJson,
     defaultListOp: PostgRestOperator = 'eq',
-    primaryKeys: Map<string, PrimaryKey> = defaultPrimaryKeys
+    primaryKeys: Map<string, PrimaryKey> = defaultPrimaryKeys,
+    schema: () => string = () => (""),
 ): DataProvider => ({
     getList: (resource, params: Partial<GetListParams> = {}) => {
         const primaryKey = getPrimaryKey(resource, primaryKeys);
@@ -76,6 +100,7 @@ export default (
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort || {};
         const { filter, select } = parseFilters(params, defaultListOp);
+        const metaSchema = params.meta?.schema;
 
         let query = {
             offset: String((page - 1) * perPage),
@@ -98,6 +123,7 @@ export default (
                 Accept: 'application/json',
                 Prefer: 'count=exact',
                 ...(params.meta?.headers || {}),
+                ...useCustomSchema(schema, metaSchema, 'GET'),
             }),
         };
 
@@ -128,11 +154,13 @@ export default (
         const query = getQuery(primaryKey, id, resource, meta);
 
         const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
+        const metaSchema = params.meta?.schema;
 
         return httpClient(url, {
             headers: new Headers({
                 accept: 'application/vnd.pgrst.object+json',
                 ...(params.meta?.headers || {}),
+                ...useCustomSchema(schema, metaSchema, 'GET'),
             }),
         }).then(({ json }) => ({
             data: dataWithId(json, primaryKey),
@@ -144,9 +172,15 @@ export default (
         const primaryKey = getPrimaryKey(resource, primaryKeys);
 
         const query = getQuery(primaryKey, ids, resource, params.meta);
-        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
 
-        return httpClient(url).then(({ json }) => ({
+        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
+        const metaSchema = params.meta?.schema;
+
+        return httpClient(url, {
+            headers: new Headers({
+                ...useCustomSchema(schema, metaSchema, 'GET'),
+            }),
+        }).then(({ json }) => ({
             data: json.map(data => dataWithId(data, primaryKey)),
         }));
     },
@@ -160,6 +194,8 @@ export default (
 
         const { filter, select } = parseFilters(params, defaultListOp);
         const primaryKey = getPrimaryKey(resource, primaryKeys);
+
+        const metaSchema = params.meta?.schema;
 
         let query = params.target
             ? {
@@ -186,6 +222,7 @@ export default (
                 Accept: 'application/json',
                 Prefer: 'count=exact',
                 ...(params.meta?.headers || {}),
+                ...useCustomSchema(schema, metaSchema, 'GET'),
             }),
         };
 
@@ -218,6 +255,7 @@ export default (
         const primaryKeyData = getKeyData(primaryKey, data);
 
         const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
+        const metaSchema = params.meta?.schema;
 
         const body = JSON.stringify({
             ...data,
@@ -231,6 +269,7 @@ export default (
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
                 ...(params.meta?.headers || {}),
+                ...useCustomSchema(schema, metaSchema, 'PATCH'),
             }),
             body,
         }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
@@ -262,6 +301,7 @@ export default (
         );
 
         const url = `${apiUrl}/${resource}`;
+        const metaSchema = params.meta?.schema;
 
         return httpClient(url, {
             method: 'PATCH',
@@ -269,6 +309,7 @@ export default (
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
                 ...(params.meta?.headers || {}),
+                ...useCustomSchema(schema, metaSchema, 'PATCH'),
             }),
             body,
         }).then(({ json }) => ({
@@ -279,6 +320,7 @@ export default (
     create: (resource, params: Partial<CreateParams> = {}) => {
         const primaryKey = getPrimaryKey(resource, primaryKeys);
         const url = `${apiUrl}/${resource}`;
+        const metaSchema = params.meta?.schema;
 
         return httpClient(url, {
             method: 'POST',
@@ -287,6 +329,7 @@ export default (
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
                 ...(params.meta?.headers || {}),
+                ...useCustomSchema(schema, metaSchema, 'POST'),
             }),
             body: JSON.stringify(params.data),
         }).then(({ json }) => ({
@@ -304,6 +347,7 @@ export default (
         const query = getQuery(primaryKey, id, resource, meta);
 
         const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
+        const metaSchema = params.meta?.schema;
 
         return httpClient(url, {
             method: 'DELETE',
@@ -312,6 +356,7 @@ export default (
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
                 ...(params.meta?.headers || {}),
+                ...useCustomSchema(schema, metaSchema, 'DELETE'),
             }),
         }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
     },
@@ -323,6 +368,7 @@ export default (
         const query = getQuery(primaryKey, ids, resource, meta);
 
         const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
+        const metaSchema = params.meta?.schema;
 
         return httpClient(url, {
             method: 'DELETE',
@@ -330,6 +376,7 @@ export default (
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
                 ...(params.meta?.headers || {}),
+                ...useCustomSchema(schema, metaSchema, 'DELETE'),
             }),
         }).then(({ json }) => ({
             data: json.map(data => encodeId(data, primaryKey)),
