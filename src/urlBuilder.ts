@@ -80,6 +80,8 @@ export const parseFilters = (
             // if operator is intentionally blank, rpc syntax
             let op = operation.includes('like')
                 ? `${operation}.*${value}*`
+                : ['cs','cd'].includes(operation)
+                ? `${operation}.{${value}}`
                 : operation.length == 0
                 ? `${value}`
                 : `${operation}.${value}`;
