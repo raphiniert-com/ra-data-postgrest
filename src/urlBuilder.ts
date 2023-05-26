@@ -72,21 +72,48 @@ export const parseFilters = (
         if (['like', 'ilike'].includes(operation)) {
             // we split the search term in words
             values = filter[key].trim().split(/\s+/);
+        }
+        // CASE: Logical operator
+        else if (['or', 'and'].includes(operation)) {
+            // we extract each value entries and make it dot separated string.
+            const { filter: subFilter } = parseFilters(
+                { filter: filter[key] },
+                defaultListOp
+            );
+
+            const logics: string[] = [];
+            Object.entries(subFilter).forEach(([op, val]) => {
+                if (Array.isArray(val))
+                    logics.push(...val.map(v => [op, v].join('.')));
+                else logics.push([op, val].join('.'));
+            });
+
+            // finally we flatten all as single string and enclose with bracket.
+            values = [`(${logics.join(',')})`];
         } else {
             values = [filter[key]];
         }
 
         values.forEach(value => {
-            // if operator is intentionally blank, rpc syntax
-            let op = operation.includes('like')
-                ? `${operation}.*${value}*`
-                : operation.length == 0
-                ? `${value}`
-                : `${operation}.${value}`;
+            let op: string = (() => {
+                // if operator is intentionally blank, rpc syntax
+                if (operation.length === 0) return `${value}`;
+                
+                if (operation.includes('like'))
+                    return `${operation}.*${value}*`;
+                if (['and', 'or'].includes(operation)) return `${value}`;
+                return `${operation}.${value}`;
+            })();
 
+            // If resulting filter haven't contains the fieldname, then add it.
             if (result.filter[splitKey[0]] === undefined) {
-                // first operator for the key, we add it to the dict
-                result.filter[splitKey[0]] = op;
+                // first operator for the key,
+                if (['and', 'or'].includes(operation)) {
+                    result.filter[operation] = op;
+                } else {
+                    // we add it to the dict
+                    result.filter[splitKey[0]] = op;
+                }
             } else {
                 if (!Array.isArray(result[splitKey[0]])) {
                     // second operator, we transform to an array
