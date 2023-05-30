@@ -28,6 +28,10 @@ describe('parseFilters', () => {
                         'q2@ilike': 'bar',
                         'q3@like': 'baz qux',
                         'q4@gt': 'c',
+                        'q5@cs': 'foo',
+                        'q6@cs': ['foo', 'bar'],
+                        'q7@cd': 'foo',
+                        'q8@cd': ['foo', 'bar'],
                     }
                 },
                 'eq'
@@ -38,6 +42,10 @@ describe('parseFilters', () => {
                 q2: 'ilike.*bar*',
                 q3: ['like.*baz*', 'like.*qux*'],
                 q4: 'gt.c',
+                q5: 'cs.{foo}',
+                q6: 'cs.{foo,bar}',
+                q7: 'cd.{foo}',
+                q8: 'cd.{foo,bar}',
             }
          });
     });

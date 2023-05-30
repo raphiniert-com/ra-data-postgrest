@@ -78,13 +78,15 @@ export const parseFilters = (
 
         values.forEach(value => {
             // if operator is intentionally blank, rpc syntax
-            let op = operation.includes('like')
-                ? `${operation}.*${value}*`
-                : ['cs','cd'].includes(operation)
-                ? `${operation}.{${value}}`
-                : operation.length == 0
-                ? `${value}`
-                : `${operation}.${value}`;
+            let op = `${operation}.${value}`;
+            if (operation.length == 0) {
+                op = `${value}`;
+            }
+            if (operation.includes('like')) {
+                op = `${operation}.*${value}*`;
+            } else if (['cs', 'cd'].includes(operation)) {
+                op = `${operation}.{${value}}`;
+            }
 
             if (result.filter[splitKey[0]] === undefined) {
                 // first operator for the key, we add it to the dict
