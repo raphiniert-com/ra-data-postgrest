@@ -81,15 +81,16 @@ export const parseFilters = (
                 defaultListOp
             );
 
-            const logics: string[] = [];
+            // something like { "age@lt": 18 } and { "age@gt": 21 }
+            const filterExpressions: string[] = [];
             Object.entries(subFilter).forEach(([op, val]) => {
                 if (Array.isArray(val))
-                    logics.push(...val.map(v => [op, v].join('.')));
-                else logics.push([op, val].join('.'));
+                    filterExpressions.push(...val.map(v => [op, v].join('.')));
+                else filterExpressions.push([op, val].join('.'));
             });
 
             // finally we flatten all as single string and enclose with bracket.
-            values = [`(${logics.join(',')})`];
+            values = [`(${filterExpressions.join(',')})`];
         } else {
             values = [filter[key]];
         }
@@ -97,11 +98,15 @@ export const parseFilters = (
         values.forEach(value => {
             let op: string = (() => {
                 // if operator is intentionally blank, rpc syntax
-                if (operation.length === 0) return `${value}`;
-                
+                if (operation.length === 0) 
+                    return `${value}`;
+              
                 if (operation.includes('like'))
                     return `${operation}.*${value}*`;
-                if (['and', 'or'].includes(operation)) return `${value}`;
+                if (['and', 'or'].includes(operation)) 
+                    return `${value}`;
+                if (['cs', 'cd'].includes(operation))
+                    return `${operation}.{${value}}`;
                 return `${operation}.${value}`;
             })();
 
