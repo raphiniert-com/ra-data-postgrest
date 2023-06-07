@@ -92,12 +92,32 @@ describe('parseFilters', () => {
                 q1: 'eq.foo',
                 q2: 'ilike.*bar*',
                 q3: ['like.*baz*', 'like.*qux*'],
-                q4: 'gt.c'
+                q4: 'gt.c',
             },
-            select: 'id,title'
-         });
+            select: 'id,title',
+        });
     });
-
+    it('should parse filters of logical operator', () => {
+        const { filter } = parseFilters(
+            {
+                filter: {
+                    '@or': {
+                        'age@lt': 18,
+                        'age@gt': 21,
+                        q1: 'foo',
+                        'q2@ilike': 'bar',
+                        'q3@like': 'baz qux',
+                        'q4@gt': 'c',
+                    },
+                },
+                meta: { columns: ['id', 'title'] },
+            },
+            'eq'
+        );
+        expect(filter).toEqual({
+            or: '(age.lt.18,age.gt.21,q1.eq.foo,q2.ilike.*bar*,q3.like.*baz*,q3.like.*qux*,q4.gt.c)',
+        });
+    });
 });
 
 describe('getPrimaryKey', () => {

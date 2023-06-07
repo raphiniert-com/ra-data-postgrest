@@ -72,6 +72,25 @@ export const parseFilters = (
         if (['like', 'ilike'].includes(operation)) {
             // we split the search term in words
             values = filter[key].trim().split(/\s+/);
+        }
+        // CASE: Logical operator
+        else if (['or', 'and'].includes(operation)) {
+            // we extract each value entries and make it dot separated string.
+            const { filter: subFilter } = parseFilters(
+                { filter: filter[key] },
+                defaultListOp
+            );
+
+            // something like { "age@lt": 18 } and { "age@gt": 21 }
+            const filterExpressions: string[] = [];
+            Object.entries(subFilter).forEach(([op, val]) => {
+                if (Array.isArray(val))
+                    filterExpressions.push(...val.map(v => [op, v].join('.')));
+                else filterExpressions.push([op, val].join('.'));
+            });
+
+            // finally we flatten all as single string and enclose with bracket.
+            values = [`(${filterExpressions.join(',')})`];
         } else {
             values = [filter[key]];
         }
@@ -79,17 +98,27 @@ export const parseFilters = (
         values.forEach(value => {
             let op: string = (() => {
                 // if operator is intentionally blank, rpc syntax
-                if (operation.length === 0) return `${value}`;
+                if (operation.length === 0) 
+                    return `${value}`;
+              
                 if (operation.includes('like'))
                     return `${operation}.*${value}*`;
+                if (['and', 'or'].includes(operation)) 
+                    return `${value}`;
                 if (['cs', 'cd'].includes(operation))
                     return `${operation}.{${value}}`;
                 return `${operation}.${value}`;
             })();
 
+            // If resulting filter haven't contains the fieldname, then add it.
             if (result.filter[splitKey[0]] === undefined) {
-                // first operator for the key, we add it to the dict
-                result.filter[splitKey[0]] = op;
+                // first operator for the key,
+                if (['and', 'or'].includes(operation)) {
+                    result.filter[operation] = op;
+                } else {
+                    // we add it to the dict
+                    result.filter[splitKey[0]] = op;
+                }
             } else {
                 if (!Array.isArray(result[splitKey[0]])) {
                     // second operator, we transform to an array
