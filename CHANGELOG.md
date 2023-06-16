@@ -2,6 +2,37 @@
 
 Find all notable changes of this project in this file.
 
+## v2.0.0-alpha.3 - 2023-06-16
+### Improvements
+- updated dependencies
+
+### New feature
+- [#82](https://github.com/raphiniert-com/ra-data-postgrest/pull/82), add logical operator filter parsing - @[jordiyapz](https://github.com/jordiyapz)
+
+### Fixes
+- [#81](https://github.com/raphiniert-com/ra-data-postgrest/pull/81), use {} with cs and cd operators url - @[YannBeauxis](https://github.com/YannBeauxis)
+
+### Breaking changes
+- Changed from from regular parameters to instantiate the dataProvider to a configuration interface/class. Thus, in future initalize the dataProvider by creating a structure which implements the interface:
+
+```jsx
+import { fetchUtils } from 'react-admin';
+import postgrestRestProvider, 
+    { IDataProviderConfig, 
+      defaultPrimaryKeys, 
+      defaultSchema } from '@raphiniert/ra-data-postgrest';
+
+const config: IDataProviderConfig = {
+    apiUrl: 'http://path.to.my.api/',
+    httpClient: fetchUtils.fetchJson,
+    defaultListOp: 'eq',
+    primaryKeys: defaultPrimaryKeys,
+    schema: defaultSchema
+}
+
+dp = postgrestRestProvider(config);
+```
+
 ## v2.0.0-alpha.2 - 2023-04-24
 ### Improvements
 - updated dependencies
