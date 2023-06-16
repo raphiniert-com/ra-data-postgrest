@@ -48,23 +48,44 @@ import qs from 'qs';
  * @example
  *
  * import * as React from 'react';
- * import { Admin, Resource } from 'react-admin';
- * import postgrestRestProvider from '@raphiniert/ra-data-postgrest';
- *
+ * import { Admin, Resource, fetchUtils } from 'react-admin';
+ * import postgrestRestProvider, 
+ *      { IDataProviderConfig, 
+ *        defaultPrimaryKeys, 
+ *        defaultSchema } from '@raphiniert/ra-data-postgrest';
+ * 
  * import { PostList } from './posts';
- *
+ * 
+ * const config: IDataProviderConfig = {
+ *     apiUrl: 'http://path.to.my.api/',
+ *     httpClient: fetchUtils.fetchJson,
+ *     defaultListOp: 'eq',
+ *     primaryKeys: defaultPrimaryKeys,
+ *     schema: defaultSchema
+ * }
+ * 
  * const App = () => (
- *     <Admin dataProvider={postgrestRestProvider('http://path.to.my.api/')}>
+ *     <Admin dataProvider={postgrestRestProvider(config)}>
  *         <Resource name="posts" list={PostList} />
  *     </Admin>
  * );
- *
+ * 
  * export default App;
  */
 
 export type MetaOption = string | undefined;
 
 export const defaultPrimaryKeys = new Map<string, PrimaryKey>();
+
+export const defaultSchema = () => '';
+
+export interface IDataProviderConfig {
+    apiUrl: string;
+    httpClient: (string, Options) => Promise<any>;
+    defaultListOp: PostgRestOperator;
+    primaryKeys: Map<string, PrimaryKey>;
+    schema: () => string;
+}
 
 const useCustomSchema = (
     schema: () => string,
@@ -89,18 +110,14 @@ const useCustomSchema = (
 };
 
 export default (
-    apiUrl: string,
-    httpClient = fetchUtils.fetchJson,
-    defaultListOp: PostgRestOperator = 'eq',
-    primaryKeys: Map<string, PrimaryKey> = defaultPrimaryKeys,
-    schema: () => string = () => ''
+    config: IDataProviderConfig
 ): DataProvider => ({
     getList: (resource, params: Partial<GetListParams> = {}) => {
-        const primaryKey = getPrimaryKey(resource, primaryKeys);
+        const primaryKey = getPrimaryKey(resource, config.primaryKeys);
 
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort || {};
-        const { filter, select } = parseFilters(params, defaultListOp);
+        const { filter, select } = parseFilters(params, config.defaultListOp);
         const metaSchema = params.meta?.schema;
 
         let query = {
@@ -124,13 +141,13 @@ export default (
                 Accept: 'application/json',
                 Prefer: 'count=exact',
                 ...(params.meta?.headers || {}),
-                ...useCustomSchema(schema, metaSchema, 'GET'),
+                ...useCustomSchema(config.schema, metaSchema, 'GET'),
             }),
         };
 
-        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
+        const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
 
-        return httpClient(url, options).then(({ headers, json }) => {
+        return config.httpClient(url, options).then(({ headers, json }) => {
             if (!headers.has('content-range')) {
                 throw new Error(
                     `The Content-Range header is missing in the HTTP Response. The postgREST data provider expects 
@@ -150,18 +167,18 @@ export default (
 
     getOne: (resource, params: Partial<GetOneParams> = {}) => {
         const { id, meta } = params;
-        const primaryKey = getPrimaryKey(resource, primaryKeys);
+        const primaryKey = getPrimaryKey(resource, config.primaryKeys);
 
         const query = getQuery(primaryKey, id, resource, meta);
 
-        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
+        const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
         const metaSchema = params.meta?.schema;
 
-        return httpClient(url, {
+        return config.httpClient(url, {
             headers: new Headers({
                 accept: 'application/vnd.pgrst.object+json',
                 ...(params.meta?.headers || {}),
-                ...useCustomSchema(schema, metaSchema, 'GET'),
+                ...useCustomSchema(config.schema, metaSchema, 'GET'),
             }),
         }).then(({ json }) => ({
             data: dataWithId(json, primaryKey),
@@ -170,16 +187,16 @@ export default (
 
     getMany: (resource, params: Partial<GetManyParams> = {}) => {
         const ids = params.ids;
-        const primaryKey = getPrimaryKey(resource, primaryKeys);
+        const primaryKey = getPrimaryKey(resource, config.primaryKeys);
 
         const query = getQuery(primaryKey, ids, resource, params.meta);
 
-        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
+        const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
         const metaSchema = params.meta?.schema;
 
-        return httpClient(url, {
+        return config.httpClient(url, {
             headers: new Headers({
-                ...useCustomSchema(schema, metaSchema, 'GET'),
+                ...useCustomSchema(config.schema, metaSchema, 'GET'),
             }),
         }).then(({ json }) => ({
             data: json.map(data => dataWithId(data, primaryKey)),
@@ -193,8 +210,8 @@ export default (
         const { page, perPage } = params.pagination;
         const { field, order } = params.sort;
 
-        const { filter, select } = parseFilters(params, defaultListOp);
-        const primaryKey = getPrimaryKey(resource, primaryKeys);
+        const { filter, select } = parseFilters(params, config.defaultListOp);
+        const primaryKey = getPrimaryKey(resource, config.primaryKeys);
 
         const metaSchema = params.meta?.schema;
 
@@ -223,13 +240,13 @@ export default (
                 Accept: 'application/json',
                 Prefer: 'count=exact',
                 ...(params.meta?.headers || {}),
-                ...useCustomSchema(schema, metaSchema, 'GET'),
+                ...useCustomSchema(config.schema, metaSchema, 'GET'),
             }),
         };
 
-        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
+        const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
 
-        return httpClient(url, options).then(({ headers, json }) => {
+        return config.httpClient(url, options).then(({ headers, json }) => {
             if (!headers.has('content-range')) {
                 throw new Error(
                     `The Content-Range header is missing in the HTTP Response. The postgREST data provider expects 
@@ -249,13 +266,13 @@ export default (
 
     update: (resource, params: Partial<UpdateParams> = {}) => {
         const { id, data, meta } = params;
-        const primaryKey = getPrimaryKey(resource, primaryKeys);
+        const primaryKey = getPrimaryKey(resource, config.primaryKeys);
 
         const query = getQuery(primaryKey, id, resource, meta);
 
         const primaryKeyData = getKeyData(primaryKey, data);
 
-        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
+        const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
         const metaSchema = params.meta?.schema;
 
         const body = JSON.stringify({
@@ -263,14 +280,14 @@ export default (
             ...primaryKeyData,
         });
 
-        return httpClient(url, {
+        return config.httpClient(url, {
             method: 'PATCH',
             headers: new Headers({
                 Accept: 'application/vnd.pgrst.object+json',
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
                 ...(params.meta?.headers || {}),
-                ...useCustomSchema(schema, metaSchema, 'PATCH'),
+                ...useCustomSchema(config.schema, metaSchema, 'PATCH'),
             }),
             body,
         }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
@@ -278,7 +295,7 @@ export default (
 
     updateMany: (resource, params: Partial<UpdateManyParams> = {}) => {
         const ids = params.ids;
-        const primaryKey = getPrimaryKey(resource, primaryKeys);
+        const primaryKey = getPrimaryKey(resource, config.primaryKeys);
 
         const body = JSON.stringify(
             params.ids.map(id => {
@@ -301,16 +318,16 @@ export default (
             })
         );
 
-        const url = `${apiUrl}/${resource}`;
+        const url = `${config.apiUrl}/${resource}`;
         const metaSchema = params.meta?.schema;
 
-        return httpClient(url, {
+        return config.httpClient(url, {
             method: 'PATCH',
             headers: new Headers({
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
                 ...(params.meta?.headers || {}),
-                ...useCustomSchema(schema, metaSchema, 'PATCH'),
+                ...useCustomSchema(config.schema, metaSchema, 'PATCH'),
             }),
             body,
         }).then(({ json }) => ({
@@ -319,18 +336,18 @@ export default (
     },
 
     create: (resource, params: Partial<CreateParams> = {}) => {
-        const primaryKey = getPrimaryKey(resource, primaryKeys);
-        const url = `${apiUrl}/${resource}`;
+        const primaryKey = getPrimaryKey(resource, config.primaryKeys);
+        const url = `${config.apiUrl}/${resource}`;
         const metaSchema = params.meta?.schema;
 
-        return httpClient(url, {
+        return config.httpClient(url, {
             method: 'POST',
             headers: new Headers({
                 Accept: 'application/vnd.pgrst.object+json',
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
                 ...(params.meta?.headers || {}),
-                ...useCustomSchema(schema, metaSchema, 'POST'),
+                ...useCustomSchema(config.schema, metaSchema, 'POST'),
             }),
             body: JSON.stringify(params.data),
         }).then(({ json }) => ({
@@ -343,41 +360,41 @@ export default (
 
     delete: (resource, params: Partial<DeleteParams> = {}) => {
         const { id, meta } = params;
-        const primaryKey = getPrimaryKey(resource, primaryKeys);
+        const primaryKey = getPrimaryKey(resource, config.primaryKeys);
 
         const query = getQuery(primaryKey, id, resource, meta);
 
-        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
+        const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
         const metaSchema = params.meta?.schema;
 
-        return httpClient(url, {
+        return config.httpClient(url, {
             method: 'DELETE',
             headers: new Headers({
                 Accept: 'application/vnd.pgrst.object+json',
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
                 ...(params.meta?.headers || {}),
-                ...useCustomSchema(schema, metaSchema, 'DELETE'),
+                ...useCustomSchema(config.schema, metaSchema, 'DELETE'),
             }),
         }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
     },
 
     deleteMany: (resource, params: Partial<DeleteManyParams> = {}) => {
         const { ids, meta } = params;
-        const primaryKey = getPrimaryKey(resource, primaryKeys);
+        const primaryKey = getPrimaryKey(resource, config.primaryKeys);
 
         const query = getQuery(primaryKey, ids, resource, meta);
 
-        const url = `${apiUrl}/${resource}?${qs.stringify(query)}`;
+        const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
         const metaSchema = params.meta?.schema;
 
-        return httpClient(url, {
+        return config.httpClient(url, {
             method: 'DELETE',
             headers: new Headers({
                 Prefer: 'return=representation',
                 'Content-Type': 'application/json',
                 ...(params.meta?.headers || {}),
-                ...useCustomSchema(schema, metaSchema, 'DELETE'),
+                ...useCustomSchema(config.schema, metaSchema, 'DELETE'),
             }),
         }).then(({ json }) => ({
             data: json.map(data => encodeId(data, primaryKey)),

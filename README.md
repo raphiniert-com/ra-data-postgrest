@@ -47,14 +47,25 @@ Access-Control-Expose-Headers: Content-Range
 
 ```jsx
 // in src/App.js
-import React from 'react';
-import { Admin, Resource } from 'react-admin';
-import postgrestRestProvider from '@raphiniert/ra-data-postgrest';
+import * as React from 'react';
+import { Admin, Resource, fetchUtils } from 'react-admin';
+import postgrestRestProvider, 
+     { IDataProviderConfig, 
+       defaultPrimaryKeys, 
+       defaultSchema } from '@raphiniert/ra-data-postgrest';
 
 import { PostList } from './posts';
 
+const config: IDataProviderConfig = {
+    apiUrl: 'http://path.to.my.api/',
+    httpClient: fetchUtils.fetchJson,
+    defaultListOp: 'eq',
+    primaryKeys: defaultPrimaryKeys,
+    schema: defaultSchema
+}
+
 const App = () => (
-    <Admin dataProvider={postgrestRestProvider('http://path.to.my.api/')}>
+    <Admin dataProvider={postgrestRestProvider(config)}>
         <Resource name="posts" list={PostList} />
     </Admin>
 );
@@ -80,7 +91,14 @@ const httpClient = (url, options = {}) => {
     options.headers.set('X-Custom-Header', 'foobar');
     return fetchUtils.fetchJson(url, options);
 };
-const dataProvider = postgrestRestProvider('http://localhost:3000', httpClient);
+
+const config: IDataProviderConfig = {
+    ...
+    httpClient: httpClient,
+    ...
+}
+
+const dataProvider = postgrestRestProvider(config);
 
 render(
     <Admin dataProvider={dataProvider} title="Example Admin">
@@ -137,30 +155,28 @@ Given a RPC call as `GET /rpc/add_them?post_author=Herbert HTTP/1.1`, the dataPr
 If one has data resources without primary keys named `id`, one will have to define this specifically. Also, if there is a primary key, which is defined over multiple columns:
 
 ```jsx
-const dataProvider = postgrestRestProvider(
-    API_URL,
-    fetchUtils.fetchJson,
-    'eq',
-    new Map([
+const config: IDataProviderConfig = {
+    ...
+    primaryKeys: new Map([
         ['some_table', ['custom_id']],
         ['another_table', ['first_column', 'second_column']],
-    ])
-);
+    ]),
+    ...
+}
+
+const dataProvider = postgrestRestProvider(config);
 ```
 
 ### Custom schema
 PostgREST allows to [select and switch the database schema](https://postgrest.org/en/stable/api.html#switching-schemas) by setting a custom header. Thus, one way to use this function would be adding the custom header as a string while using react-admin hooks within `meta.schema` (compare to next section) or to set it up as function of `() => (string)` while using the data provider just component based. The latter can be done as follows and gives the opportunity to use some central storage (e.g. localStorage) which can be changed at multiple points of the application:
 ```jsx
-import { fetchUtils } from 'react-admin';
-import { defaultPrimaryKeys, default as postgrestRestProvider } from '@raphiniert/ra-data-postgrest';
+const config: IDataProviderConfig = {
+    ...
+    schema: localStorage.getItem("schema") || "api",
+    ...
+}
 
-const dataProvider = postgrestRestProvider(
-    API_URL,
-    fetchUtils.fetchJson,
-    'eq',
-    defaultPrimaryKeys,
-    () => localStorage.getItem("schema") || "api"
-);
+const dataProvider = postgrestRestProvider(config);
 ```
 
 ### Passing extra headers via meta

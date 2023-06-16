@@ -1,5 +1,5 @@
 import { fetchUtils } from 'ra-core';
-import raPostgrestProvider from '../../src/index';
+import raPostgrestProvider, { IDataProviderConfig } from '../../src/index';
 import { resourcePimaryKeys } from '../fixtures';
 
 type HTTPClientMock = typeof fetchUtils.fetchJson;
@@ -22,12 +22,17 @@ function createDataProviderMock(
     );
 
     const customSchema : () => string = mockedCustomSchema ? mockedCustomSchema : () => ("");
+
+    const dataProviderConfig: IDataProviderConfig = {
+        apiUrl: BASE_URL,
+        httpClient: httpClient,
+        defaultListOp: 'eq',
+        primaryKeys: resourcePimaryKeys,
+        schema: customSchema
+    }
+
     const dataPovider = raPostgrestProvider(
-        BASE_URL,
-        httpClient,
-        'eq',
-        resourcePimaryKeys,
-        customSchema
+        dataProviderConfig
     );
 
     return { httpClient, dataPovider };
