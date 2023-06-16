@@ -49,13 +49,13 @@ import qs from 'qs';
  *
  * import * as React from 'react';
  * import { Admin, Resource, fetchUtils } from 'react-admin';
- * import postgrestRestProvider, 
- *      { IDataProviderConfig, 
- *        defaultPrimaryKeys, 
+ * import postgrestRestProvider,
+ *      { IDataProviderConfig,
+ *        defaultPrimaryKeys,
  *        defaultSchema } from '@raphiniert/ra-data-postgrest';
- * 
+ *
  * import { PostList } from './posts';
- * 
+ *
  * const config: IDataProviderConfig = {
  *     apiUrl: 'http://path.to.my.api/',
  *     httpClient: fetchUtils.fetchJson,
@@ -63,13 +63,13 @@ import qs from 'qs';
  *     primaryKeys: defaultPrimaryKeys,
  *     schema: defaultSchema
  * }
- * 
+ *
  * const App = () => (
  *     <Admin dataProvider={postgrestRestProvider(config)}>
  *         <Resource name="posts" list={PostList} />
  *     </Admin>
  * );
- * 
+ *
  * export default App;
  */
 
@@ -109,9 +109,7 @@ const useCustomSchema = (
     } else return {};
 };
 
-export default (
-    config: IDataProviderConfig
-): DataProvider => ({
+export default (config: IDataProviderConfig): DataProvider => ({
     getList: (resource, params: Partial<GetListParams> = {}) => {
         const primaryKey = getPrimaryKey(resource, config.primaryKeys);
 
@@ -174,15 +172,17 @@ export default (
         const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
         const metaSchema = params.meta?.schema;
 
-        return config.httpClient(url, {
-            headers: new Headers({
-                accept: 'application/vnd.pgrst.object+json',
-                ...(params.meta?.headers || {}),
-                ...useCustomSchema(config.schema, metaSchema, 'GET'),
-            }),
-        }).then(({ json }) => ({
-            data: dataWithId(json, primaryKey),
-        }));
+        return config
+            .httpClient(url, {
+                headers: new Headers({
+                    accept: 'application/vnd.pgrst.object+json',
+                    ...(params.meta?.headers || {}),
+                    ...useCustomSchema(config.schema, metaSchema, 'GET'),
+                }),
+            })
+            .then(({ json }) => ({
+                data: dataWithId(json, primaryKey),
+            }));
     },
 
     getMany: (resource, params: Partial<GetManyParams> = {}) => {
@@ -194,13 +194,15 @@ export default (
         const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
         const metaSchema = params.meta?.schema;
 
-        return config.httpClient(url, {
-            headers: new Headers({
-                ...useCustomSchema(config.schema, metaSchema, 'GET'),
-            }),
-        }).then(({ json }) => ({
-            data: json.map(data => dataWithId(data, primaryKey)),
-        }));
+        return config
+            .httpClient(url, {
+                headers: new Headers({
+                    ...useCustomSchema(config.schema, metaSchema, 'GET'),
+                }),
+            })
+            .then(({ json }) => ({
+                data: json.map(data => dataWithId(data, primaryKey)),
+            }));
     },
 
     getManyReference: (
@@ -280,17 +282,19 @@ export default (
             ...primaryKeyData,
         });
 
-        return config.httpClient(url, {
-            method: 'PATCH',
-            headers: new Headers({
-                Accept: 'application/vnd.pgrst.object+json',
-                Prefer: 'return=representation',
-                'Content-Type': 'application/json',
-                ...(params.meta?.headers || {}),
-                ...useCustomSchema(config.schema, metaSchema, 'PATCH'),
-            }),
-            body,
-        }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
+        return config
+            .httpClient(url, {
+                method: 'PATCH',
+                headers: new Headers({
+                    Accept: 'application/vnd.pgrst.object+json',
+                    Prefer: 'return=representation',
+                    'Content-Type': 'application/json',
+                    ...(params.meta?.headers || {}),
+                    ...useCustomSchema(config.schema, metaSchema, 'PATCH'),
+                }),
+                body,
+            })
+            .then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
     },
 
     updateMany: (resource, params: Partial<UpdateManyParams> = {}) => {
@@ -321,18 +325,20 @@ export default (
         const url = `${config.apiUrl}/${resource}`;
         const metaSchema = params.meta?.schema;
 
-        return config.httpClient(url, {
-            method: 'PATCH',
-            headers: new Headers({
-                Prefer: 'return=representation',
-                'Content-Type': 'application/json',
-                ...(params.meta?.headers || {}),
-                ...useCustomSchema(config.schema, metaSchema, 'PATCH'),
-            }),
-            body,
-        }).then(({ json }) => ({
-            data: json.map(data => encodeId(data, primaryKey)),
-        }));
+        return config
+            .httpClient(url, {
+                method: 'PATCH',
+                headers: new Headers({
+                    Prefer: 'return=representation',
+                    'Content-Type': 'application/json',
+                    ...(params.meta?.headers || {}),
+                    ...useCustomSchema(config.schema, metaSchema, 'PATCH'),
+                }),
+                body,
+            })
+            .then(({ json }) => ({
+                data: json.map(data => encodeId(data, primaryKey)),
+            }));
     },
 
     create: (resource, params: Partial<CreateParams> = {}) => {
@@ -340,22 +346,24 @@ export default (
         const url = `${config.apiUrl}/${resource}`;
         const metaSchema = params.meta?.schema;
 
-        return config.httpClient(url, {
-            method: 'POST',
-            headers: new Headers({
-                Accept: 'application/vnd.pgrst.object+json',
-                Prefer: 'return=representation',
-                'Content-Type': 'application/json',
-                ...(params.meta?.headers || {}),
-                ...useCustomSchema(config.schema, metaSchema, 'POST'),
-            }),
-            body: JSON.stringify(params.data),
-        }).then(({ json }) => ({
-            data: {
-                ...json,
-                id: encodeId(json, primaryKey),
-            },
-        }));
+        return config
+            .httpClient(url, {
+                method: 'POST',
+                headers: new Headers({
+                    Accept: 'application/vnd.pgrst.object+json',
+                    Prefer: 'return=representation',
+                    'Content-Type': 'application/json',
+                    ...(params.meta?.headers || {}),
+                    ...useCustomSchema(config.schema, metaSchema, 'POST'),
+                }),
+                body: JSON.stringify(params.data),
+            })
+            .then(({ json }) => ({
+                data: {
+                    ...json,
+                    id: encodeId(json, primaryKey),
+                },
+            }));
     },
 
     delete: (resource, params: Partial<DeleteParams> = {}) => {
@@ -367,16 +375,18 @@ export default (
         const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
         const metaSchema = params.meta?.schema;
 
-        return config.httpClient(url, {
-            method: 'DELETE',
-            headers: new Headers({
-                Accept: 'application/vnd.pgrst.object+json',
-                Prefer: 'return=representation',
-                'Content-Type': 'application/json',
-                ...(params.meta?.headers || {}),
-                ...useCustomSchema(config.schema, metaSchema, 'DELETE'),
-            }),
-        }).then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
+        return config
+            .httpClient(url, {
+                method: 'DELETE',
+                headers: new Headers({
+                    Accept: 'application/vnd.pgrst.object+json',
+                    Prefer: 'return=representation',
+                    'Content-Type': 'application/json',
+                    ...(params.meta?.headers || {}),
+                    ...useCustomSchema(config.schema, metaSchema, 'DELETE'),
+                }),
+            })
+            .then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
     },
 
     deleteMany: (resource, params: Partial<DeleteManyParams> = {}) => {
@@ -388,16 +398,18 @@ export default (
         const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
         const metaSchema = params.meta?.schema;
 
-        return config.httpClient(url, {
-            method: 'DELETE',
-            headers: new Headers({
-                Prefer: 'return=representation',
-                'Content-Type': 'application/json',
-                ...(params.meta?.headers || {}),
-                ...useCustomSchema(config.schema, metaSchema, 'DELETE'),
-            }),
-        }).then(({ json }) => ({
-            data: json.map(data => encodeId(data, primaryKey)),
-        }));
+        return config
+            .httpClient(url, {
+                method: 'DELETE',
+                headers: new Headers({
+                    Prefer: 'return=representation',
+                    'Content-Type': 'application/json',
+                    ...(params.meta?.headers || {}),
+                    ...useCustomSchema(config.schema, metaSchema, 'DELETE'),
+                }),
+            })
+            .then(({ json }) => ({
+                data: json.map(data => encodeId(data, primaryKey)),
+            }));
     },
 });

@@ -98,13 +98,11 @@ export const parseFilters = (
         values.forEach(value => {
             let op: string = (() => {
                 // if operator is intentionally blank, rpc syntax
-                if (operation.length === 0) 
-                    return `${value}`;
-              
+                if (operation.length === 0) return `${value}`;
+
                 if (operation.includes('like'))
                     return `${operation}.*${value}*`;
-                if (['and', 'or'].includes(operation)) 
-                    return `${value}`;
+                if (['and', 'or'].includes(operation)) return `${value}`;
                 if (['cs', 'cd'].includes(operation))
                     return `${operation}.{${value}}`;
                 return `${operation}.${value}`;
