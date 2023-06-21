@@ -32,8 +32,14 @@ describe('parseFilters', () => {
                         'q6@cs': ['foo', 'bar'],
                         'q7@cd': 'foo',
                         'q8@cd': ['foo', 'bar'],
-                        q9: { 'name@ilike': 'ticket'},
-                        q10: { 'q10-1': {'name@ilike': 'ticket'}}
+                        q9: { 'foo@ilike': 'bar'},
+                        q10: { 'foo@like': 'baz qux'},
+                        q11: { 'foo@gt': 'c'},
+                        q12: { 'foo@cs': 'bar'},
+                        q13: { 'foo@cs': ['foo', 'bar']},
+                        q14: { 'foo@cd': 'bar'},
+                        q15: { 'foo@cd': ['foo', 'bar']},
+                        q16: { 'foo': {'bar@cs': ['foo', 'bar']}}
                     }
                 },
                 'eq'
@@ -48,8 +54,14 @@ describe('parseFilters', () => {
                 q6: 'cs.{foo,bar}',
                 q7: 'cd.{foo}',
                 q8: 'cd.{foo,bar}',
-                'q9.name': 'ilike.*ticket*',
-                'q10.q10-1.name': 'ilike.*ticket*'
+                'q9.foo':'ilike.*bar*',
+                'q10.foo': ['like.*baz*', 'like.*qux*'],
+                'q11.foo': 'gt.c',
+                'q12.foo': 'cs.{bar}',
+                'q13.foo': 'cs.{foo,bar}',
+                'q14.foo': 'cd.{bar}',
+                'q15.foo': 'cd.{foo,bar}',
+                'q16.foo.bar': 'cs.{foo,bar}'
             }
          });
     });
