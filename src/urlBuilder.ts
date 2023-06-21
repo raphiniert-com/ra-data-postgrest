@@ -79,6 +79,7 @@ export const parseFilters = (
 
         // in case of a nested object selection in a text field
         // RA returns object{ object } structure which is resolved here
+        // see issue https://github.com/raphiniert-com/ra-data-postgrest/issues/58
         if (key.split('@')[0] !== '' && isObject(filter[key])) {
             let innerVal = filter[key];
 
