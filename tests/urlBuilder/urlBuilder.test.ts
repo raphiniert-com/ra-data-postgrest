@@ -32,6 +32,8 @@ describe('parseFilters', () => {
                         'q6@cs': ['foo', 'bar'],
                         'q7@cd': 'foo',
                         'q8@cd': ['foo', 'bar'],
+                        q9: { 'name@ilike': 'ticket'},
+                        q10: { 'q10-1': {'name@ilike': 'ticket'}}
                     }
                 },
                 'eq'
@@ -46,6 +48,8 @@ describe('parseFilters', () => {
                 q6: 'cs.{foo,bar}',
                 q7: 'cd.{foo}',
                 q8: 'cd.{foo,bar}',
+                'q9.name': 'ilike.*ticket*',
+                'q10.q10-1.name': 'ilike.*ticket*'
             }
          });
     });
