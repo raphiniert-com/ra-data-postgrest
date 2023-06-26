@@ -49,6 +49,18 @@ type ParsedFiltersResult = {
     select: any;
 };
 
+const isObject = obj =>
+    typeof obj === 'object' && !Array.isArray(obj) && obj !== null;
+
+const resolveKeys = (filter: any, keys: Array<any>) => {
+    let result = filter[keys[0]];
+    for (let i = 1; i < keys.length; ++i) {
+        result = result[keys[i]];
+    }
+
+    return result;
+};
+
 export type PostgRestOperator = (typeof postgrestOperators)[number];
 
 export const parseFilters = (
@@ -62,22 +74,44 @@ export const parseFilters = (
     Object.keys(filter).forEach(function (key) {
         // key: the name of the object key
 
+        let keyArray = [key];
+        let values: Array<string>;
+
+        // in case of a nested object selection in a text field
+        // RA returns object{ object } structure which is resolved here
+        // see issue https://github.com/raphiniert-com/ra-data-postgrest/issues/58
+        if (key.split('@')[0] !== '' && isObject(filter[key])) {
+            let innerVal = filter[key];
+
+            do {
+                const inner = resolveKeys(filter, keyArray);
+                const [innerKey] = Object.keys(inner);
+
+                keyArray.push(innerKey);
+                innerVal = inner[innerKey];
+            } while (isObject(innerVal));
+
+            key = keyArray.join('.');
+            values = [innerVal];
+        } else {
+            values = [filter[key]];
+        }
+
         const splitKey = key.split('@');
         const operation: PostgRestOperator =
             splitKey.length == 2
                 ? (splitKey[1] as PostgRestOperator)
                 : defaultListOp;
 
-        let values: Array<string>;
         if (['like', 'ilike'].includes(operation)) {
             // we split the search term in words
-            values = filter[key].trim().split(/\s+/);
+            values = resolveKeys(filter, keyArray).trim().split(/\s+/);
         }
         // CASE: Logical operator
         else if (['or', 'and'].includes(operation)) {
             // we extract each value entries and make it dot separated string.
             const { filter: subFilter } = parseFilters(
-                { filter: filter[key] },
+                { filter: resolveKeys(filter, keyArray) },
                 defaultListOp
             );
 
@@ -91,8 +125,6 @@ export const parseFilters = (
 
             // finally we flatten all as single string and enclose with bracket.
             values = [`(${filterExpressions.join(',')})`];
-        } else {
-            values = [filter[key]];
         }
 
         values.forEach(value => {
@@ -108,7 +140,7 @@ export const parseFilters = (
                 return `${operation}.${value}`;
             })();
 
-            // If resulting filter haven't contains the fieldname, then add it.
+            // If resulting filter doesn't contain the fieldname, then add it.
             if (result.filter[splitKey[0]] === undefined) {
                 // first operator for the key,
                 if (['and', 'or'].includes(operation)) {
