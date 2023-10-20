@@ -1,6 +1,6 @@
 import { fetchUtils } from 'ra-core';
 import raPostgrestProvider, { IDataProviderConfig } from '../../src/index';
-import { resourcePimaryKeys } from '../fixtures';
+import { resourcePrimaryKeys } from '../fixtures';
 
 type HTTPClientMock = typeof fetchUtils.fetchJson;
 const BASE_URL = 'http://localhost:3000';
@@ -27,15 +27,15 @@ function createDataProviderMock(
         apiUrl: BASE_URL,
         httpClient: httpClient,
         defaultListOp: 'eq',
-        primaryKeys: resourcePimaryKeys,
+        primaryKeys: resourcePrimaryKeys,
         schema: customSchema
     }
 
-    const dataPovider = raPostgrestProvider(
+    const dataProvider = raPostgrestProvider(
         dataProviderConfig
     );
 
-    return { httpClient, dataPovider };
+    return { httpClient, dataProvider };
 }
 
 export type Case = {
@@ -66,7 +66,7 @@ export const makeTestFromCase = ({
     throws,
 }: Case) => {
     it(`${method} > ${test}`, async () => {
-        const { httpClient, dataPovider } = createDataProviderMock(
+        const { httpClient, dataProvider } = createDataProviderMock(
             200,
             '',
             httpClientResponseBody,
@@ -77,7 +77,7 @@ export const makeTestFromCase = ({
         let dataProviderResult;
 
         try {
-            dataProviderResult = await dataPovider[method](resource, params);
+            dataProviderResult = await dataProvider[method](resource, params);
         } catch (e) {
             if (throws) {
                 expect(e.message).toMatch(throws);

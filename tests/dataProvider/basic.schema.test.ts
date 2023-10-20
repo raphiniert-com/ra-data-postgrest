@@ -1,6 +1,6 @@
 import { enc } from '../urlBuilder/helper';
 import { makeTestFromCase, Case } from './helper';
-
+import qs from 'qs'
 const customSchema = () => ('custom');
 
 const cases: Case[] = [
@@ -126,15 +126,10 @@ const cases: Case[] = [
         method: 'updateMany',
         resource: 'posts',
         params: { ids: [1, 2, 3], data: { title: 'hello, world!' }, meta: {} },
-        expectedUrl: '/posts',
+        expectedUrl: '/posts?'.concat(qs.stringify({id: 'in.(1,2,3)'})),
         expectedOptions: {
             method: 'PATCH',
-            // TODO: The id's in the body should actually be numbers!
-            body: JSON.stringify([
-                { title: 'hello, world!', id: '1' },
-                { title: 'hello, world!', id: '2' },
-                { title: 'hello, world!', id: '3' },
-            ]),
+            body: JSON.stringify({ title: 'hello, world!' }),
             headers: {
                 prefer: 'return=representation',
                 'content-type': 'application/json',
@@ -311,15 +306,10 @@ const cases_meta: Case[] = [
             data: { title: 'hello, world!' }, 
             meta: { schema: customSchemaMeta } 
         },
-        expectedUrl: '/posts',
+        expectedUrl: '/posts?'.concat(qs.stringify({id: 'in.(1,2,3)'})),
         expectedOptions: {
             method: 'PATCH',
-            // TODO: The id's in the body should actually be numbers!
-            body: JSON.stringify([
-                { title: 'hello, world!', id: '1' },
-                { title: 'hello, world!', id: '2' },
-                { title: 'hello, world!', id: '3' },
-            ]),
+            body: JSON.stringify({ title: 'hello, world!'}),
             headers: {
                 prefer: 'return=representation',
                 'content-type': 'application/json',

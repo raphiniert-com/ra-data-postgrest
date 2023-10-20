@@ -3,7 +3,7 @@ import {
     getPrimaryKey,
     decodeId,
     encodeId,
-    dataWithId,
+    dataWithVirtualId,
     isCompoundKey,
     getQuery,
     getKeyData,
@@ -15,7 +15,7 @@ import {
     SINGLE_TODO,
     primaryKeyCompound,
     primaryKeySingle,
-    resourcePimaryKeys,
+    resourcePrimaryKeys,
 } from '../fixtures';
 
 describe('parseFilters', () => {
@@ -137,16 +137,16 @@ describe('parseFilters', () => {
 });
 
 describe('getPrimaryKey', () => {
-    it('should return the special primary for any resource in the resourcePimaryKeys map', () => {
-        expect(getPrimaryKey('contacts', resourcePimaryKeys)).toEqual(
+    it('should return the special primary for any resource in the resourcePrimaryKeys map', () => {
+        expect(getPrimaryKey('contacts', resourcePrimaryKeys)).toEqual(
             primaryKeyCompound
         );
-        expect(getPrimaryKey('licenses', resourcePimaryKeys)).toEqual([
+        expect(getPrimaryKey('licenses', resourcePrimaryKeys)).toEqual([
             'license_id',
         ]);
     });
     it("should return the regular primary ['id'] for any other resource", () => {
-        expect(getPrimaryKey('todos', resourcePimaryKeys)).toEqual(
+        expect(getPrimaryKey('todos', resourcePrimaryKeys)).toEqual(
             primaryKeySingle
         );
     });
@@ -174,10 +174,10 @@ describe('encodeId', () => {
 
 describe('dataWithId', () => {
     it('should return the data as-is if the primary key is the default one', () => {
-        expect(dataWithId(SINGLE_TODO, primaryKeySingle)).toEqual(SINGLE_TODO);
+        expect(dataWithVirtualId(SINGLE_TODO, primaryKeySingle)).toEqual(SINGLE_TODO);
     });
     it('should return the data with the id field added if the primary key is a compound', () => {
-        expect(dataWithId(SINGLE_CONTACT, primaryKeyCompound)).toEqual({
+        expect(dataWithVirtualId(SINGLE_CONTACT, primaryKeyCompound)).toEqual({
             ...SINGLE_CONTACT,
             id: '[1,"X"]',
         });
@@ -282,21 +282,21 @@ describe('getQuery', () => {
 describe('getKeyData', () => {
     it('should return the key data for a single column primary key', () => {
         const resource = 'todos';
-        const primaryKey = getPrimaryKey(resource, resourcePimaryKeys);
+        const primaryKey = getPrimaryKey(resource, resourcePrimaryKeys);
         expect(getKeyData(primaryKey, SINGLE_TODO)).toEqual({
             id: SINGLE_TODO.id,
         });
     });
     it('should return the key data for a single column primary key with an alternative name', () => {
         const resource = 'licenses';
-        const primaryKey = getPrimaryKey(resource, resourcePimaryKeys);
+        const primaryKey = getPrimaryKey(resource, resourcePrimaryKeys);
         expect(getKeyData(primaryKey, SINGLE_LICENSE)).toEqual({
             license_id: SINGLE_LICENSE.license_id,
         });
     });
     it('should return the key data for a multi column primary key', () => {
         const resource = 'contacts';
-        const primaryKey = getPrimaryKey(resource, resourcePimaryKeys);
+        const primaryKey = getPrimaryKey(resource, resourcePrimaryKeys);
         expect(getKeyData(primaryKey, SINGLE_CONTACT)).toEqual({
             id: SINGLE_CONTACT.id,
             type: SINGLE_CONTACT.type,

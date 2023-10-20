@@ -17,8 +17,9 @@ import {
     getPrimaryKey,
     parseFilters,
     getOrderBy,
-    dataWithId,
-    dataWithoutId,
+    dataWithVirtualId,
+    dataWithoutVirtualId,
+    removePrimaryKey,
     getQuery,
     getKeyData,
     encodeId,
@@ -155,7 +156,7 @@ export default (config: IDataProviderConfig): DataProvider => ({
                 );
             }
             return {
-                data: json.map(obj => dataWithId(obj, primaryKey)),
+                data: json.map(obj => dataWithVirtualId(obj, primaryKey)),
                 total: parseInt(
                     headers.get('content-range').split('/').pop(),
                     10
@@ -182,7 +183,7 @@ export default (config: IDataProviderConfig): DataProvider => ({
                 }),
             })
             .then(({ json }) => ({
-                data: dataWithId(json, primaryKey),
+                data: dataWithVirtualId(json, primaryKey),
             }));
     },
 
@@ -202,7 +203,7 @@ export default (config: IDataProviderConfig): DataProvider => ({
                 }),
             })
             .then(({ json }) => ({
-                data: json.map(data => dataWithId(data, primaryKey)),
+                data: json.map(data => dataWithVirtualId(data, primaryKey)),
             }));
     },
 
@@ -258,7 +259,7 @@ export default (config: IDataProviderConfig): DataProvider => ({
                 );
             }
             return {
-                data: json.map(data => dataWithId(data, primaryKey)),
+                data: json.map(data => dataWithVirtualId(data, primaryKey)),
                 total: parseInt(
                     headers.get('content-range').split('/').pop(),
                     10
@@ -279,8 +280,7 @@ export default (config: IDataProviderConfig): DataProvider => ({
         const metaSchema = params.meta?.schema;
 
         const body = JSON.stringify({
-            ...dataWithoutId(data, primaryKey),
-            ...primaryKeyData,
+            ...dataWithoutVirtualId(removePrimaryKey(data, primaryKey), primaryKey),
         });
 
         return config
@@ -295,35 +295,18 @@ export default (config: IDataProviderConfig): DataProvider => ({
                 }),
                 body,
             })
-            .then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
+            .then(({ json }) => ({ data: dataWithVirtualId(json, primaryKey) }));
     },
 
     updateMany: (resource, params: Partial<UpdateManyParams> = {}) => {
-        const ids = params.ids;
+        const { ids, meta, data } = params;
         const primaryKey = getPrimaryKey(resource, config.primaryKeys);
+        const query = getQuery(primaryKey, ids, resource, meta);
+        const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
+        const body = JSON.stringify({
+            ...dataWithoutVirtualId(removePrimaryKey(data, primaryKey), primaryKey),
+        });
 
-        const body = JSON.stringify(
-            params.ids.map(id => {
-                const { data } = params;
-                const primaryKeyParams = decodeId(id, primaryKey);
-
-                const primaryKeyData = {};
-                if (isCompoundKey(primaryKey)) {
-                    primaryKey.forEach((key, index) => {
-                        primaryKeyData[key] = primaryKeyParams[index];
-                    });
-                } else {
-                    primaryKeyData[primaryKey[0]] = primaryKeyParams[0];
-                }
-
-                return {
-                    ...dataWithoutId(data, primaryKey),
-                    ...primaryKeyData,
-                };
-            })
-        );
-
-        const url = `${config.apiUrl}/${resource}`;
         const metaSchema = params.meta?.schema;
 
         return config
@@ -346,7 +329,8 @@ export default (config: IDataProviderConfig): DataProvider => ({
         const { meta } = params;
         const primaryKey = getPrimaryKey(resource, config.primaryKeys);
         const query = getQuery(primaryKey, undefined, resource, meta);
-        const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
+        const queryStr = qs.stringify(query);
+        const url = `${config.apiUrl}/${resource}${queryStr.length > 0 ? '?' : ''}${queryStr}`;
         const metaSchema = params.meta?.schema;
 
         return config
@@ -359,7 +343,7 @@ export default (config: IDataProviderConfig): DataProvider => ({
                     ...(params.meta?.headers || {}),
                     ...useCustomSchema(config.schema, metaSchema, 'POST'),
                 }),
-                body: JSON.stringify(dataWithoutId(params.data, primaryKey)),
+                body: JSON.stringify(dataWithoutVirtualId(params.data, primaryKey)),
             })
             .then(({ json }) => ({
                 data: {
@@ -389,7 +373,7 @@ export default (config: IDataProviderConfig): DataProvider => ({
                     ...useCustomSchema(config.schema, metaSchema, 'DELETE'),
                 }),
             })
-            .then(({ json }) => ({ data: dataWithId(json, primaryKey) }));
+            .then(({ json }) => ({ data: dataWithVirtualId(json, primaryKey) }));
     },
 
     deleteMany: (resource, params: Partial<DeleteManyParams> = {}) => {

@@ -202,8 +202,14 @@ export const encodeId = (data: any, primaryKey: PrimaryKey): Identifier => {
     }
 };
 
-export const dataWithId = (data: any, primaryKey: PrimaryKey) => {
-    if (JSON.stringify(primaryKey) === JSON.stringify(['id'])) {
+export const removePrimaryKey = (data: any, primaryKey: PrimaryKey) => {
+    const newData = { ...data };
+    primaryKey.forEach(key => {delete newData[key];});
+    return newData;
+}
+
+export const dataWithVirtualId = (data: any, primaryKey: PrimaryKey) => {
+    if (primaryKey.length === 1 && primaryKey[0] === 'id') {
         return data;
     }
 
@@ -212,8 +218,8 @@ export const dataWithId = (data: any, primaryKey: PrimaryKey) => {
     });
 };
 
-export const dataWithoutId = (data: any, primaryKey: PrimaryKey) => {
-    if (JSON.stringify(primaryKey) === JSON.stringify(['id'])) {
+export const dataWithoutVirtualId = (data: any, primaryKey: PrimaryKey) => {
+    if (primaryKey.length === 1 && primaryKey[0] === 'id') {
         return data;
     }
 
