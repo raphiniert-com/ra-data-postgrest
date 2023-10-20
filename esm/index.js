@@ -9,7 +9,7 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-import { getPrimaryKey, parseFilters, getOrderBy, dataWithId, dataWithoutId, getQuery, getKeyData, encodeId, decodeId, isCompoundKey, } from './urlBuilder';
+import { getPrimaryKey, parseFilters, getOrderBy, dataWithVirtualId, dataWithoutVirtualId, removePrimaryKey, getQuery, getKeyData, encodeId, } from './urlBuilder';
 import qs from 'qs';
 export var defaultPrimaryKeys = new Map();
 export var defaultSchema = function () { return ''; };
@@ -61,7 +61,7 @@ export default (function (config) { return ({
                 throw new Error("The Content-Range header is missing in the HTTP Response. The postgREST data provider expects \n          responses for lists of resources to contain this header with the total number of results to build \n          the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?");
             }
             return {
-                data: json.map(function (obj) { return dataWithId(obj, primaryKey); }),
+                data: json.map(function (obj) { return dataWithVirtualId(obj, primaryKey); }),
                 total: parseInt(headers.get('content-range').split('/').pop(), 10),
             };
         });
@@ -81,7 +81,7 @@ export default (function (config) { return ({
             .then(function (_a) {
             var json = _a.json;
             return ({
-                data: dataWithId(json, primaryKey),
+                data: dataWithVirtualId(json, primaryKey),
             });
         });
     },
@@ -100,7 +100,7 @@ export default (function (config) { return ({
             .then(function (_a) {
             var json = _a.json;
             return ({
-                data: json.map(function (data) { return dataWithId(data, primaryKey); }),
+                data: json.map(function (data) { return dataWithVirtualId(data, primaryKey); }),
             });
         });
     },
@@ -129,7 +129,7 @@ export default (function (config) { return ({
                 throw new Error("The Content-Range header is missing in the HTTP Response. The postgREST data provider expects \n          responses for lists of resources to contain this header with the total number of results to build \n          the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?");
             }
             return {
-                data: json.map(function (data) { return dataWithId(data, primaryKey); }),
+                data: json.map(function (data) { return dataWithVirtualId(data, primaryKey); }),
                 total: parseInt(headers.get('content-range').split('/').pop(), 10),
             };
         });
@@ -143,7 +143,7 @@ export default (function (config) { return ({
         var primaryKeyData = getKeyData(primaryKey, data);
         var url = "".concat(config.apiUrl, "/").concat(resource, "?").concat(qs.stringify(query));
         var metaSchema = (_a = params.meta) === null || _a === void 0 ? void 0 : _a.schema;
-        var body = JSON.stringify(__assign(__assign({}, dataWithoutId(data, primaryKey)), primaryKeyData));
+        var body = JSON.stringify(__assign({}, dataWithoutVirtualId(removePrimaryKey(data, primaryKey), primaryKey)));
         return config
             .httpClient(url, {
             method: 'PATCH',
@@ -152,29 +152,17 @@ export default (function (config) { return ({
         })
             .then(function (_a) {
             var json = _a.json;
-            return ({ data: dataWithId(json, primaryKey) });
+            return ({ data: dataWithVirtualId(json, primaryKey) });
         });
     },
     updateMany: function (resource, params) {
         var _a, _b;
         if (params === void 0) { params = {}; }
-        var ids = params.ids;
+        var ids = params.ids, meta = params.meta, data = params.data;
         var primaryKey = getPrimaryKey(resource, config.primaryKeys);
-        var body = JSON.stringify(params.ids.map(function (id) {
-            var data = params.data;
-            var primaryKeyParams = decodeId(id, primaryKey);
-            var primaryKeyData = {};
-            if (isCompoundKey(primaryKey)) {
-                primaryKey.forEach(function (key, index) {
-                    primaryKeyData[key] = primaryKeyParams[index];
-                });
-            }
-            else {
-                primaryKeyData[primaryKey[0]] = primaryKeyParams[0];
-            }
-            return __assign(__assign({}, dataWithoutId(data, primaryKey)), primaryKeyData);
-        }));
-        var url = "".concat(config.apiUrl, "/").concat(resource);
+        var query = getQuery(primaryKey, ids, resource, meta);
+        var url = "".concat(config.apiUrl, "/").concat(resource, "?").concat(qs.stringify(query));
+        var body = JSON.stringify(__assign({}, dataWithoutVirtualId(removePrimaryKey(data, primaryKey), primaryKey)));
         var metaSchema = (_a = params.meta) === null || _a === void 0 ? void 0 : _a.schema;
         return config
             .httpClient(url, {
@@ -195,13 +183,14 @@ export default (function (config) { return ({
         var meta = params.meta;
         var primaryKey = getPrimaryKey(resource, config.primaryKeys);
         var query = getQuery(primaryKey, undefined, resource, meta);
-        var url = "".concat(config.apiUrl, "/").concat(resource, "?").concat(qs.stringify(query));
+        var queryStr = qs.stringify(query);
+        var url = "".concat(config.apiUrl, "/").concat(resource).concat(queryStr.length > 0 ? '?' : '').concat(queryStr);
         var metaSchema = (_a = params.meta) === null || _a === void 0 ? void 0 : _a.schema;
         return config
             .httpClient(url, {
             method: 'POST',
             headers: new Headers(__assign(__assign({ Accept: 'application/vnd.pgrst.object+json', Prefer: 'return=representation', 'Content-Type': 'application/json' }, (((_b = params.meta) === null || _b === void 0 ? void 0 : _b.headers) || {})), useCustomSchema(config.schema, metaSchema, 'POST'))),
-            body: JSON.stringify(dataWithoutId(params.data, primaryKey)),
+            body: JSON.stringify(dataWithoutVirtualId(params.data, primaryKey)),
         })
             .then(function (_a) {
             var json = _a.json;
@@ -225,7 +214,7 @@ export default (function (config) { return ({
         })
             .then(function (_a) {
             var json = _a.json;
-            return ({ data: dataWithId(json, primaryKey) });
+            return ({ data: dataWithVirtualId(json, primaryKey) });
         });
     },
     deleteMany: function (resource, params) {

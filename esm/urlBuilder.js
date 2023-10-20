@@ -177,16 +177,21 @@ export var encodeId = function (data, primaryKey) {
         return data[primaryKey[0]];
     }
 };
-export var dataWithId = function (data, primaryKey) {
-    if (JSON.stringify(primaryKey) === JSON.stringify(['id'])) {
+export var removePrimaryKey = function (data, primaryKey) {
+    var newData = __assign({}, data);
+    primaryKey.forEach(function (key) { delete newData[key]; });
+    return newData;
+};
+export var dataWithVirtualId = function (data, primaryKey) {
+    if (primaryKey.length === 1 && primaryKey[0] === 'id') {
         return data;
     }
     return Object.assign(data, {
         id: encodeId(data, primaryKey),
     });
 };
-export var dataWithoutId = function (data, primaryKey) {
-    if (JSON.stringify(primaryKey) === JSON.stringify(['id'])) {
+export var dataWithoutVirtualId = function (data, primaryKey) {
+    if (primaryKey.length === 1 && primaryKey[0] === 'id') {
         return data;
     }
     var id = data.id, dataWithoutId = __rest(data, ["id"]);
