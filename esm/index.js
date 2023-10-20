@@ -9,7 +9,7 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-import { getPrimaryKey, parseFilters, getOrderBy, dataWithVirtualId, dataWithoutVirtualId, removePrimaryKey, getQuery, getKeyData, encodeId, } from './urlBuilder';
+import { getPrimaryKey, parseFilters, getOrderBy, dataWithVirtualId, dataWithoutVirtualId, removePrimaryKey, getQuery, encodeId, } from './urlBuilder';
 import qs from 'qs';
 export var defaultPrimaryKeys = new Map();
 export var defaultSchema = function () { return ''; };
@@ -140,7 +140,6 @@ export default (function (config) { return ({
         var id = params.id, data = params.data, meta = params.meta;
         var primaryKey = getPrimaryKey(resource, config.primaryKeys);
         var query = getQuery(primaryKey, id, resource, meta);
-        var primaryKeyData = getKeyData(primaryKey, data);
         var url = "".concat(config.apiUrl, "/").concat(resource, "?").concat(qs.stringify(query));
         var metaSchema = (_a = params.meta) === null || _a === void 0 ? void 0 : _a.schema;
         var body = JSON.stringify(__assign({}, dataWithoutVirtualId(removePrimaryKey(data, primaryKey), primaryKey)));

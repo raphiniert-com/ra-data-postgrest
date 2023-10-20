@@ -17,8 +17,6 @@ export declare const encodeId: (data: any, primaryKey: PrimaryKey) => Identifier
 export declare const removePrimaryKey: (data: any, primaryKey: PrimaryKey) => any;
 export declare const dataWithVirtualId: (data: any, primaryKey: PrimaryKey) => any;
 export declare const dataWithoutVirtualId: (data: any, primaryKey: PrimaryKey) => any;
-export declare const isCompoundKey: (primaryKey: PrimaryKey) => Boolean;
 export declare const getQuery: (primaryKey: PrimaryKey, ids: Identifier | Array<Identifier> | undefined, resource: string, meta?: any) => any;
-export declare const getKeyData: (primaryKey: PrimaryKey, data: object) => object;
 export declare const getOrderBy: (field: string, order: string, primaryKey: PrimaryKey) => string;
 export {};

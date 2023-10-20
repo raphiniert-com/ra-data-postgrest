@@ -197,7 +197,7 @@ export var dataWithoutVirtualId = function (data, primaryKey) {
     var id = data.id, dataWithoutId = __rest(data, ["id"]);
     return dataWithoutId;
 };
-export var isCompoundKey = function (primaryKey) {
+var isCompoundKey = function (primaryKey) {
     return primaryKey.length > 1;
 };
 export var getQuery = function (primaryKey, ids, resource, meta) {
@@ -257,18 +257,6 @@ export var getQuery = function (primaryKey, ids, resource, meta) {
             : meta.columns;
     }
     return result;
-};
-export var getKeyData = function (primaryKey, data) {
-    var _a;
-    if (isCompoundKey(primaryKey)) {
-        return primaryKey.reduce(function (keyData, key) {
-            var _a;
-            return (__assign(__assign({}, keyData), (_a = {}, _a[key] = data[key], _a)));
-        }, {});
-    }
-    else {
-        return _a = {}, _a[primaryKey[0]] = data[primaryKey[0]], _a;
-    }
 };
 export var getOrderBy = function (field, order, primaryKey) {
     if (field == 'id') {
