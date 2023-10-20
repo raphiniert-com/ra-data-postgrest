@@ -4,9 +4,7 @@ import {
     decodeId,
     encodeId,
     dataWithVirtualId,
-    isCompoundKey,
     getQuery,
-    getKeyData,
     getOrderBy,
 } from '../../src/urlBuilder';
 import {
@@ -184,15 +182,6 @@ describe('dataWithId', () => {
     });
 });
 
-describe('isCompoundKey', () => {
-    it('should return false if the primaryKey consists of a single column', () => {
-        expect(isCompoundKey(primaryKeySingle)).toBe(false);
-    });
-    it('should return true if the primaryKey consists of multiple columns', () => {
-        expect(isCompoundKey(primaryKeyCompound)).toBe(true);
-    });
-});
-
 describe('getQuery', () => {
     // Testing all combinations:
     // - non-rpc vs rpc resource x
@@ -279,30 +268,6 @@ describe('getQuery', () => {
     });
 });
 
-describe('getKeyData', () => {
-    it('should return the key data for a single column primary key', () => {
-        const resource = 'todos';
-        const primaryKey = getPrimaryKey(resource, resourcePrimaryKeys);
-        expect(getKeyData(primaryKey, SINGLE_TODO)).toEqual({
-            id: SINGLE_TODO.id,
-        });
-    });
-    it('should return the key data for a single column primary key with an alternative name', () => {
-        const resource = 'licenses';
-        const primaryKey = getPrimaryKey(resource, resourcePrimaryKeys);
-        expect(getKeyData(primaryKey, SINGLE_LICENSE)).toEqual({
-            license_id: SINGLE_LICENSE.license_id,
-        });
-    });
-    it('should return the key data for a multi column primary key', () => {
-        const resource = 'contacts';
-        const primaryKey = getPrimaryKey(resource, resourcePrimaryKeys);
-        expect(getKeyData(primaryKey, SINGLE_CONTACT)).toEqual({
-            id: SINGLE_CONTACT.id,
-            type: SINGLE_CONTACT.type,
-        });
-    });
-});
 
 describe('getOrderBy', () => {
     it('should return an order by string for an id column', () => {

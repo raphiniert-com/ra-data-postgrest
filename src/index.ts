@@ -1,5 +1,4 @@
 import {
-    fetchUtils,
     DataProvider,
     GetListParams,
     GetOneParams,
@@ -21,10 +20,7 @@ import {
     dataWithoutVirtualId,
     removePrimaryKey,
     getQuery,
-    getKeyData,
     encodeId,
-    decodeId,
-    isCompoundKey,
 } from './urlBuilder';
 import qs from 'qs';
 
@@ -271,11 +267,7 @@ export default (config: IDataProviderConfig): DataProvider => ({
     update: (resource, params: Partial<UpdateParams> = {}) => {
         const { id, data, meta } = params;
         const primaryKey = getPrimaryKey(resource, config.primaryKeys);
-
         const query = getQuery(primaryKey, id, resource, meta);
-
-        const primaryKeyData = getKeyData(primaryKey, data);
-
         const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
         const metaSchema = params.meta?.schema;
 

@@ -227,7 +227,7 @@ export const dataWithoutVirtualId = (data: any, primaryKey: PrimaryKey) => {
     return dataWithoutId;
 }
 
-export const isCompoundKey = (primaryKey: PrimaryKey): Boolean => {
+const isCompoundKey = (primaryKey: PrimaryKey): Boolean => {
     return primaryKey.length > 1;
 };
 
@@ -296,20 +296,6 @@ export const getQuery = (
     }
 
     return result;
-};
-
-export const getKeyData = (primaryKey: PrimaryKey, data: object): object => {
-    if (isCompoundKey(primaryKey)) {
-        return primaryKey.reduce(
-            (keyData, key) => ({
-                ...keyData,
-                [key]: data[key],
-            }),
-            {}
-        );
-    } else {
-        return { [primaryKey[0]]: data[primaryKey[0]] };
-    }
 };
 
 export const getOrderBy = (
