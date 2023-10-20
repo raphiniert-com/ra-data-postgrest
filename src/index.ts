@@ -343,8 +343,10 @@ export default (config: IDataProviderConfig): DataProvider => ({
     },
 
     create: (resource, params: Partial<CreateParams> = {}) => {
+        const { meta } = params;
         const primaryKey = getPrimaryKey(resource, config.primaryKeys);
-        const url = `${config.apiUrl}/${resource}`;
+        const query = getQuery(primaryKey, undefined, resource, meta);
+        const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
         const metaSchema = params.meta?.schema;
 
         return config

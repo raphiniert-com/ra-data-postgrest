@@ -227,7 +227,7 @@ export const isCompoundKey = (primaryKey: PrimaryKey): Boolean => {
 
 export const getQuery = (
     primaryKey: PrimaryKey,
-    ids: Identifier | Array<Identifier>,
+    ids: Identifier | Array<Identifier> | undefined,
     resource: string,
     meta: any = null
 ): any => {
@@ -256,7 +256,7 @@ export const getQuery = (
                 [primaryKey[0]]: `in.(${ids.join(',')})`,
             };
         }
-    } else {
+    } else if (ids) {
         // if ids is one Identifier
         const id: Identifier = ids.toString();
         const primaryKeyParams = decodeId(id, primaryKey);
