@@ -212,6 +212,15 @@ export const dataWithId = (data: any, primaryKey: PrimaryKey) => {
     });
 };
 
+export const dataWithoutId = (data: any, primaryKey: PrimaryKey) => {
+    if (JSON.stringify(primaryKey) === JSON.stringify(['id'])) {
+        return data;
+    }
+
+    const { id, ...dataWithoutId } = data;
+    return dataWithoutId;
+}
+
 export const isCompoundKey = (primaryKey: PrimaryKey): Boolean => {
     return primaryKey.length > 1;
 };

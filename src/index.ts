@@ -18,6 +18,7 @@ import {
     parseFilters,
     getOrderBy,
     dataWithId,
+    dataWithoutId,
     getQuery,
     getKeyData,
     encodeId,
@@ -278,7 +279,7 @@ export default (config: IDataProviderConfig): DataProvider => ({
         const metaSchema = params.meta?.schema;
 
         const body = JSON.stringify({
-            ...data,
+            ...dataWithoutId(data, primaryKey),
             ...primaryKeyData,
         });
 
@@ -316,7 +317,7 @@ export default (config: IDataProviderConfig): DataProvider => ({
                 }
 
                 return {
-                    ...data,
+                    ...dataWithoutId(data, primaryKey),
                     ...primaryKeyData,
                 };
             })
@@ -356,7 +357,7 @@ export default (config: IDataProviderConfig): DataProvider => ({
                     ...(params.meta?.headers || {}),
                     ...useCustomSchema(config.schema, metaSchema, 'POST'),
                 }),
-                body: JSON.stringify(params.data),
+                body: JSON.stringify(dataWithoutId(params.data, primaryKey)),
             })
             .then(({ json }) => ({
                 data: {
