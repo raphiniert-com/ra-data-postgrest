@@ -2,6 +2,17 @@
 
 Find all notable changes of this project in this file.
 
+## v2.0.0-alpha.4 - 2023-10-23
+### Improvements
+- updated dependencies
+
+### New feature
+- [#100](https://github.com/raphiniert-com/ra-data-postgrest/pull/100) support "meta.columns" on all code paths (useful when the user does not have permissions on all the columns in which case doing select=* gives permissions errors) - @[ruslantalpa](https://github.com/ruslantalpa)
+
+### Fixes
+- [#50](https://github.com/raphiniert-com/ra-data-postgrest/issues/50) and [#88](https://github.com/raphiniert-com/ra-data-postgrest/issues/88) solved by [#100](https://github.com/raphiniert-com/ra-data-postgrest/pull/100) including other fixes - @[ruslantalpa](https://github.com/ruslantalpa)
+
+
 ## v2.0.0-alpha.3 - 2023-06-16
 ### Improvements
 - updated dependencies
