@@ -202,8 +202,14 @@ export const encodeId = (data: any, primaryKey: PrimaryKey): Identifier => {
     }
 };
 
-export const dataWithId = (data: any, primaryKey: PrimaryKey) => {
-    if (JSON.stringify(primaryKey) === JSON.stringify(['id'])) {
+export const removePrimaryKey = (data: any, primaryKey: PrimaryKey) => {
+    const newData = { ...data };
+    primaryKey.forEach(key => {delete newData[key];});
+    return newData;
+}
+
+export const dataWithVirtualId = (data: any, primaryKey: PrimaryKey) => {
+    if (primaryKey.length === 1 && primaryKey[0] === 'id') {
         return data;
     }
 
@@ -212,13 +218,22 @@ export const dataWithId = (data: any, primaryKey: PrimaryKey) => {
     });
 };
 
-export const isCompoundKey = (primaryKey: PrimaryKey): Boolean => {
+export const dataWithoutVirtualId = (data: any, primaryKey: PrimaryKey) => {
+    if (primaryKey.length === 1 && primaryKey[0] === 'id') {
+        return data;
+    }
+
+    const { id, ...dataWithoutId } = data;
+    return dataWithoutId;
+}
+
+const isCompoundKey = (primaryKey: PrimaryKey): Boolean => {
     return primaryKey.length > 1;
 };
 
 export const getQuery = (
     primaryKey: PrimaryKey,
-    ids: Identifier | Array<Identifier>,
+    ids: Identifier | Array<Identifier> | undefined,
     resource: string,
     meta: any = null
 ): any => {
@@ -247,7 +262,7 @@ export const getQuery = (
                 [primaryKey[0]]: `in.(${ids.join(',')})`,
             };
         }
-    } else {
+    } else if (ids) {
         // if ids is one Identifier
         const id: Identifier = ids.toString();
         const primaryKeyParams = decodeId(id, primaryKey);
@@ -281,20 +296,6 @@ export const getQuery = (
     }
 
     return result;
-};
-
-export const getKeyData = (primaryKey: PrimaryKey, data: object): object => {
-    if (isCompoundKey(primaryKey)) {
-        return primaryKey.reduce(
-            (keyData, key) => ({
-                ...keyData,
-                [key]: data[key],
-            }),
-            {}
-        );
-    } else {
-        return { [primaryKey[0]]: data[primaryKey[0]] };
-    }
 };
 
 export const getOrderBy = (

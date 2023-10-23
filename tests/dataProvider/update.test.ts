@@ -24,7 +24,7 @@ describe('update specific', () => {
                     'content-type': 'application/json',
                 },
             },
-        },
+        }
     ];
 
     cases.forEach(makeTestFromCase);
