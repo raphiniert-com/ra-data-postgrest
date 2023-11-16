@@ -135,6 +135,8 @@ export const parseFilters = (
                 if (operation.includes('like'))
                     return `${operation}.*${value}*`;
                 if (['and', 'or'].includes(operation)) return `${value}`;
+                if (['cs', 'cd'].includes(operation) && Array.isArray(value))
+                    return `${operation}.{${value}}`;
                 return `${operation}.${value}`;
             })();
 
