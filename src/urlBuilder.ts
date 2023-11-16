@@ -204,9 +204,11 @@ export const encodeId = (data: any, primaryKey: PrimaryKey): Identifier => {
 
 export const removePrimaryKey = (data: any, primaryKey: PrimaryKey) => {
     const newData = { ...data };
-    primaryKey.forEach(key => {delete newData[key];});
+    primaryKey.forEach(key => {
+        delete newData[key];
+    });
     return newData;
-}
+};
 
 export const dataWithVirtualId = (data: any, primaryKey: PrimaryKey) => {
     if (primaryKey.length === 1 && primaryKey[0] === 'id') {
@@ -225,7 +227,7 @@ export const dataWithoutVirtualId = (data: any, primaryKey: PrimaryKey) => {
 
     const { id, ...dataWithoutId } = data;
     return dataWithoutId;
-}
+};
 
 const isCompoundKey = (primaryKey: PrimaryKey): Boolean => {
     return primaryKey.length > 1;

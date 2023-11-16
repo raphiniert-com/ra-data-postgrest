@@ -272,7 +272,10 @@ export default (config: IDataProviderConfig): DataProvider => ({
         const metaSchema = params.meta?.schema;
 
         const body = JSON.stringify({
-            ...dataWithoutVirtualId(removePrimaryKey(data, primaryKey), primaryKey),
+            ...dataWithoutVirtualId(
+                removePrimaryKey(data, primaryKey),
+                primaryKey
+            ),
         });
 
         return config
@@ -287,7 +290,9 @@ export default (config: IDataProviderConfig): DataProvider => ({
                 }),
                 body,
             })
-            .then(({ json }) => ({ data: dataWithVirtualId(json, primaryKey) }));
+            .then(({ json }) => ({
+                data: dataWithVirtualId(json, primaryKey),
+            }));
     },
 
     updateMany: (resource, params: Partial<UpdateManyParams> = {}) => {
@@ -296,7 +301,10 @@ export default (config: IDataProviderConfig): DataProvider => ({
         const query = getQuery(primaryKey, ids, resource, meta);
         const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
         const body = JSON.stringify({
-            ...dataWithoutVirtualId(removePrimaryKey(data, primaryKey), primaryKey),
+            ...dataWithoutVirtualId(
+                removePrimaryKey(data, primaryKey),
+                primaryKey
+            ),
         });
 
         const metaSchema = params.meta?.schema;
@@ -322,7 +330,9 @@ export default (config: IDataProviderConfig): DataProvider => ({
         const primaryKey = getPrimaryKey(resource, config.primaryKeys);
         const query = getQuery(primaryKey, undefined, resource, meta);
         const queryStr = qs.stringify(query);
-        const url = `${config.apiUrl}/${resource}${queryStr.length > 0 ? '?' : ''}${queryStr}`;
+        const url = `${config.apiUrl}/${resource}${
+            queryStr.length > 0 ? '?' : ''
+        }${queryStr}`;
         const metaSchema = params.meta?.schema;
 
         return config
@@ -335,7 +345,9 @@ export default (config: IDataProviderConfig): DataProvider => ({
                     ...(params.meta?.headers || {}),
                     ...useCustomSchema(config.schema, metaSchema, 'POST'),
                 }),
-                body: JSON.stringify(dataWithoutVirtualId(params.data, primaryKey)),
+                body: JSON.stringify(
+                    dataWithoutVirtualId(params.data, primaryKey)
+                ),
             })
             .then(({ json }) => ({
                 data: {
@@ -365,7 +377,9 @@ export default (config: IDataProviderConfig): DataProvider => ({
                     ...useCustomSchema(config.schema, metaSchema, 'DELETE'),
                 }),
             })
-            .then(({ json }) => ({ data: dataWithVirtualId(json, primaryKey) }));
+            .then(({ json }) => ({
+                data: dataWithVirtualId(json, primaryKey),
+            }));
     },
 
     deleteMany: (resource, params: Partial<DeleteManyParams> = {}) => {
