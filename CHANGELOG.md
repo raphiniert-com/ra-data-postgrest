@@ -2,7 +2,7 @@
 
 Find all notable changes of this project in this file.
 
-## Unreleased
+## v2.0.0 - 2023-12-29
 ### Improvements
 - updated dependencies
 
