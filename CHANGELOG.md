@@ -2,6 +2,17 @@
 
 Find all notable changes of this project in this file.
 
+## Unreleased
+### Improvements
+- updated dependencies
+
+### Fixes
+- [#113](https://github.com/raphiniert-com/ra-data-postgrest/pull/113) remove {} value wrapping for cs/cd @[ruslantalpa](https://github.com/ruslantalpa)
+
+## Breaking changes
+- the fix in this version might break old versions, as the {} are removed. Thus, one needs to manually add the {} for cs/cd.
+
+
 ## v2.0.0-alpha.4 - 2023-10-23
 ### Improvements
 - updated dependencies
