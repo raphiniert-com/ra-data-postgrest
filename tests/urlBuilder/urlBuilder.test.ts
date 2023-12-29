@@ -30,14 +30,14 @@ describe('parseFilters', () => {
                         'q6@cs': '{foo,bar}',
                         'q7@cd': '{foo}',
                         'q8@cd': '{foo,bar}',
-                        q9: { 'foo@ilike': 'bar'},
-                        q10: { 'foo@like': 'baz qux'},
-                        q11: { 'foo@gt': 'c'},
-                        q12: { 'foo@cs': '{bar}'},
-                        q13: { 'foo@cs': '{foo,bar}'},
-                        q14: { 'foo@cd': '{bar}'},
-                        q15: { 'foo@cd': '{foo,bar}'},
-                        q16: { 'foo': {'bar@cs': '{foo,bar}'}},
+                        q9: { 'foo@ilike': 'bar' },
+                        q10: { 'foo@like': 'baz qux' },
+                        q11: { 'foo@gt': 'c' },
+                        q12: { 'foo@cs': '{bar}' },
+                        q13: { 'foo@cs': '{foo,bar}' },
+                        q14: { 'foo@cd': '{bar}' },
+                        q15: { 'foo@cd': '{foo,bar}' },
+                        q16: { 'foo': { 'bar@cs': '{foo,bar}' } },
                         'q17@cd': '["foo","bar"]',
                         'q18@cd': JSON.stringify({ 'foo': 'bar' }),
                     }
@@ -54,7 +54,7 @@ describe('parseFilters', () => {
                 q6: 'cs.{foo,bar}',
                 q7: 'cd.{foo}',
                 q8: 'cd.{foo,bar}',
-                'q9.foo':'ilike.*bar*',
+                'q9.foo': 'ilike.*bar*',
                 'q10.foo': ['like.*baz*', 'like.*qux*'],
                 'q11.foo': 'gt.c',
                 'q12.foo': 'cs.{bar}',
@@ -63,9 +63,9 @@ describe('parseFilters', () => {
                 'q15.foo': 'cd.{foo,bar}',
                 'q16.foo.bar': 'cs.{foo,bar}',
                 'q17': 'cd.["foo","bar"]',
-                'q18': 'cd.{"foo":"bar"}',
+                'q18': 'cd.{"foo":"bar"}'
             }
-         });
+        });
     });
     it('should parse filters with one select fields', () => {
         expect(
@@ -89,7 +89,7 @@ describe('parseFilters', () => {
                 q4: 'gt.c'
             },
             select: 'title'
-         });
+        });
     });
     it('should parse filters with multiple select fields', () => {
         expect(
@@ -136,6 +136,40 @@ describe('parseFilters', () => {
             or: '(age.lt.18,age.gt.21,q1.eq.foo,q2.ilike.*bar*,q3.like.*baz*,q3.like.*qux*,q4.gt.c)',
         });
     });
+    it('should parse filters of multiple identical logical operators', () => {
+        const { filter } = parseFilters(
+            {
+                filter: {
+                    '@or': [
+                        { "cluster_configuration_id": 1, "cluster_configuration_id@is": null },
+                        { "cluster_id": 1, "cluster_id@is": null }
+                    ],
+                }
+            },
+            'eq'
+        );
+        expect(filter).toEqual({
+            or: ['cluster_id.eq.2,cluster_id.is.null', 'cluster_id.eq.2,cluster_configuration_id.is.null']
+        });
+    });
+    // it('should parse filters of multiple nested logical operators', () => {
+    //     const { filter } = parseFilters(
+    //         {
+    //             filter: {
+    //                 '@and': {
+    //                     '@or': [
+    //                         { "cluster_configuration_id": 1, "cluster_configuration_id@is": null },
+    //                         { "cluster_id": 1, "cluster_id@is": null }
+    //                     ]
+    //                 }
+    //             }
+    //         },
+    //         'eq'
+    //     );
+    //     expect(filter).toEqual({
+    //         and: { or: ['cluster_id.eq.2,cluster_id.is.null', 'cluster_id.eq.2,cluster_configuration_id.is.null'] },
+    //     });
+    // });
 });
 
 describe('getPrimaryKey', () => {
@@ -229,7 +263,7 @@ describe('getQuery', () => {
         const id = '[1,"X"]';
         const query = getQuery(primaryKeyCompound, id, resource);
 
-        expect(query).toEqual({and: '(id.eq.1,type.eq.X)'});
+        expect(query).toEqual({ and: '(id.eq.1,type.eq.X)' });
     });
 
     it('should return the query for multiple ids of a resource with a compound key', () => {
@@ -255,7 +289,7 @@ describe('getQuery', () => {
 
         const spiedConsoleError = jest
             .spyOn(console, 'error')
-            .mockImplementation(() => {});
+            .mockImplementation(() => { });
 
         const query = getQuery(primaryKeySingle, ids, resource);
         expect(spiedConsoleError.mock.calls[0][0]).toMatch(
@@ -268,7 +302,7 @@ describe('getQuery', () => {
         const id = '[1,"X"]';
         const query = getQuery(primaryKeyCompound, id, resource);
 
-        expect(query).toEqual({id: '1', type:'X'});
+        expect(query).toEqual({ id: '1', type: 'X' });
     });
 });
 
