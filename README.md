@@ -172,7 +172,7 @@ PostgREST allows to [select and switch the database schema](https://postgrest.or
 ```jsx
 const config: IDataProviderConfig = {
     ...
-    schema: localStorage.getItem("schema") || "api",
+    schema: () => localStorage.getItem("schema") || "api",
     ...
 }
 
