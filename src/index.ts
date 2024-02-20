@@ -23,6 +23,7 @@ import {
     encodeId,
 } from './urlBuilder';
 import qs from 'qs';
+import isEqual from 'lodash/isEqual';
 
 /**
  * Maps react-admin queries to a postgrest REST API
@@ -146,8 +147,8 @@ export default (config: IDataProviderConfig): DataProvider => ({
         return config.httpClient(url, options).then(({ headers, json }) => {
             if (!headers.has('content-range')) {
                 throw new Error(
-                    `The Content-Range header is missing in the HTTP Response. The postgREST data provider expects 
-          responses for lists of resources to contain this header with the total number of results to build 
+                    `The Content-Range header is missing in the HTTP Response. The postgREST data provider expects
+          responses for lists of resources to contain this header with the total number of results to build
           the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?`
                 );
             }
@@ -249,8 +250,8 @@ export default (config: IDataProviderConfig): DataProvider => ({
         return config.httpClient(url, options).then(({ headers, json }) => {
             if (!headers.has('content-range')) {
                 throw new Error(
-                    `The Content-Range header is missing in the HTTP Response. The postgREST data provider expects 
-          responses for lists of resources to contain this header with the total number of results to build 
+                    `The Content-Range header is missing in the HTTP Response. The postgREST data provider expects
+          responses for lists of resources to contain this header with the total number of results to build
           the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?`
                 );
             }
@@ -265,15 +266,16 @@ export default (config: IDataProviderConfig): DataProvider => ({
     },
 
     update: (resource, params: Partial<UpdateParams> = {}) => {
-        const { id, data, meta } = params;
+        const { id, data, meta, previousData } = params;
         const primaryKey = getPrimaryKey(resource, config.primaryKeys);
         const query = getQuery(primaryKey, id, resource, meta);
         const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
+        const changedData = getChanges(data, previousData);
         const metaSchema = params.meta?.schema;
 
         const body = JSON.stringify({
             ...dataWithoutVirtualId(
-                removePrimaryKey(data, primaryKey),
+                removePrimaryKey(changedData, primaryKey),
                 primaryKey
             ),
         });
@@ -406,3 +408,13 @@ export default (config: IDataProviderConfig): DataProvider => ({
             }));
     },
 });
+
+const getChanges = (data: any, previousData: any) => {
+    const changes = Object.keys(data).reduce((changes, key) => {
+        if (!isEqual(data[key], previousData[key])) {
+            changes[key] = data[key];
+        }
+        return changes;
+    }, {});
+    return changes;
+};

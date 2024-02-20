@@ -11,10 +11,13 @@ describe('update specific', () => {
             resource: 'contacts',
             params: {
                 id: JSON.stringify([1, 'X']),
-                data: { name: 'new name' },
+                data: { name: 'new name', unchanged: 'value' },
+                previousData: { name: 'old name', unchanged: 'value' },
                 meta: {},
             },
-            expectedUrl: '/contacts?'.concat(qs.stringify({and: '(id.eq.1,type.eq.X)'})),
+            expectedUrl: '/contacts?'.concat(
+                qs.stringify({ and: '(id.eq.1,type.eq.X)' })
+            ),
             expectedOptions: {
                 method: 'PATCH',
                 body: JSON.stringify({ name: 'new name' }),
@@ -24,7 +27,7 @@ describe('update specific', () => {
                     'content-type': 'application/json',
                 },
             },
-        }
+        },
     ];
 
     cases.forEach(makeTestFromCase);
