@@ -2,6 +2,14 @@
 
 Find all notable changes of this project in this file.
 
+## v2.1.0 - 2024-02-27
+### Improvements
+- updated dependencies
+
+### Fixes
+- [#123](https://github.com/raphiniert-com/ra-data-postgrest/pull/123) Modifying update call to only update changed fields @[kav](https://github.com/kav)
+
+
 ## v2.0.0 - 2023-12-29
 ### Improvements
 - updated dependencies
