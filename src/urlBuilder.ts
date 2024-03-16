@@ -298,14 +298,23 @@ export const getQuery = (
     return result;
 };
 
+export enum PostgRestSortOrder {
+    AscendingNullsLastDescendingNullsFirst = 'asc,desc',
+    AscendingNullsLastDescendingNullsLast = 'asc,desc.nullslast',
+    AscendingNullsFirstDescendingNullsFirst = 'asc.nullsfirst,desc',
+    AscendingNullsFirstDescendingNullsLast = 'asc.nullsfirst,desc.nullslast',
+}
+
 export const getOrderBy = (
     field: string,
     order: string,
-    primaryKey: PrimaryKey
+    primaryKey: PrimaryKey,
+    sortOrder: PostgRestSortOrder = PostgRestSortOrder.AscendingNullsLastDescendingNullsFirst
 ) => {
+    const postgRestOrder = sortOrder.split(',')[order === 'ASC' ? 0 : 1];
     if (field == 'id') {
-        return primaryKey.map(key => `${key}.${order.toLowerCase()}`).join(',');
+        return primaryKey.map(key => `${key}.${postgRestOrder}`).join(',');
     } else {
-        return `${field}.${order.toLowerCase()}`;
+        return `${field}.${postgRestOrder}`;
     }
 };

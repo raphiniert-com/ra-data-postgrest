@@ -6,6 +6,7 @@ import {
     dataWithVirtualId,
     getQuery,
     getOrderBy,
+    PostgRestSortOrder,
 } from '../../src/urlBuilder';
 import {
     SINGLE_CONTACT,
@@ -30,17 +31,17 @@ describe('parseFilters', () => {
                         'q6@cs': '{foo,bar}',
                         'q7@cd': '{foo}',
                         'q8@cd': '{foo,bar}',
-                        q9: { 'foo@ilike': 'bar'},
-                        q10: { 'foo@like': 'baz qux'},
-                        q11: { 'foo@gt': 'c'},
-                        q12: { 'foo@cs': '{bar}'},
-                        q13: { 'foo@cs': '{foo,bar}'},
-                        q14: { 'foo@cd': '{bar}'},
-                        q15: { 'foo@cd': '{foo,bar}'},
-                        q16: { 'foo': {'bar@cs': '{foo,bar}'}},
+                        q9: { 'foo@ilike': 'bar' },
+                        q10: { 'foo@like': 'baz qux' },
+                        q11: { 'foo@gt': 'c' },
+                        q12: { 'foo@cs': '{bar}' },
+                        q13: { 'foo@cs': '{foo,bar}' },
+                        q14: { 'foo@cd': '{bar}' },
+                        q15: { 'foo@cd': '{foo,bar}' },
+                        q16: { foo: { 'bar@cs': '{foo,bar}' } },
                         'q17@cd': '["foo","bar"]',
-                        'q18@cd': JSON.stringify({ 'foo': 'bar' }),
-                    }
+                        'q18@cd': JSON.stringify({ foo: 'bar' }),
+                    },
                 },
                 'eq'
             )
@@ -54,7 +55,7 @@ describe('parseFilters', () => {
                 q6: 'cs.{foo,bar}',
                 q7: 'cd.{foo}',
                 q8: 'cd.{foo,bar}',
-                'q9.foo':'ilike.*bar*',
+                'q9.foo': 'ilike.*bar*',
                 'q10.foo': ['like.*baz*', 'like.*qux*'],
                 'q11.foo': 'gt.c',
                 'q12.foo': 'cs.{bar}',
@@ -62,10 +63,10 @@ describe('parseFilters', () => {
                 'q14.foo': 'cd.{bar}',
                 'q15.foo': 'cd.{foo,bar}',
                 'q16.foo.bar': 'cs.{foo,bar}',
-                'q17': 'cd.["foo","bar"]',
-                'q18': 'cd.{"foo":"bar"}',
-            }
-         });
+                q17: 'cd.["foo","bar"]',
+                q18: 'cd.{"foo":"bar"}',
+            },
+        });
     });
     it('should parse filters with one select fields', () => {
         expect(
@@ -77,7 +78,7 @@ describe('parseFilters', () => {
                         'q3@like': 'baz qux',
                         'q4@gt': 'c',
                     },
-                    meta: { columns: 'title' }
+                    meta: { columns: 'title' },
                 },
                 'eq'
             )
@@ -86,10 +87,10 @@ describe('parseFilters', () => {
                 q1: 'eq.foo',
                 q2: 'ilike.*bar*',
                 q3: ['like.*baz*', 'like.*qux*'],
-                q4: 'gt.c'
+                q4: 'gt.c',
             },
-            select: 'title'
-         });
+            select: 'title',
+        });
     });
     it('should parse filters with multiple select fields', () => {
         expect(
@@ -101,7 +102,7 @@ describe('parseFilters', () => {
                         'q3@like': 'baz qux',
                         'q4@gt': 'c',
                     },
-                    meta: { columns: ['id', 'title'] }
+                    meta: { columns: ['id', 'title'] },
                 },
                 'eq'
             )
@@ -176,7 +177,9 @@ describe('encodeId', () => {
 
 describe('dataWithId', () => {
     it('should return the data as-is if the primary key is the default one', () => {
-        expect(dataWithVirtualId(SINGLE_TODO, primaryKeySingle)).toEqual(SINGLE_TODO);
+        expect(dataWithVirtualId(SINGLE_TODO, primaryKeySingle)).toEqual(
+            SINGLE_TODO
+        );
     });
     it('should return the data with the id field added if the primary key is a compound', () => {
         expect(dataWithVirtualId(SINGLE_CONTACT, primaryKeyCompound)).toEqual({
@@ -229,7 +232,7 @@ describe('getQuery', () => {
         const id = '[1,"X"]';
         const query = getQuery(primaryKeyCompound, id, resource);
 
-        expect(query).toEqual({and: '(id.eq.1,type.eq.X)'});
+        expect(query).toEqual({ and: '(id.eq.1,type.eq.X)' });
     });
 
     it('should return the query for multiple ids of a resource with a compound key', () => {
@@ -238,7 +241,7 @@ describe('getQuery', () => {
         const query = getQuery(primaryKeyCompound, ids, resource);
 
         expect(query).toEqual({
-            or: '(and(id.eq.1,type.eq.X),and(id.eq.2,type.eq.Y))'
+            or: '(and(id.eq.1,type.eq.X),and(id.eq.2,type.eq.Y))',
         });
     });
     it('should return the query for a single id of an rpc resource', () => {
@@ -268,10 +271,9 @@ describe('getQuery', () => {
         const id = '[1,"X"]';
         const query = getQuery(primaryKeyCompound, id, resource);
 
-        expect(query).toEqual({id: '1', type:'X'});
+        expect(query).toEqual({ id: '1', type: 'X' });
     });
 });
-
 
 describe('getOrderBy', () => {
     it('should return an order by string for an id column', () => {
@@ -279,5 +281,78 @@ describe('getOrderBy', () => {
     });
     it('should return an order by string for any other column', () => {
         expect(getOrderBy('xxx', 'ASC', primaryKeySingle)).toBe('xxx.asc');
+    });
+    it('should support alternative sort orders', () => {
+        expect(
+            getOrderBy(
+                'xxx',
+                'ASC',
+                primaryKeySingle,
+                PostgRestSortOrder.AscendingNullsFirstDescendingNullsFirst
+            )
+        ).toBe('xxx.asc.nullsfirst');
+
+        expect(
+            getOrderBy(
+                'xxx',
+                'ASC',
+                primaryKeySingle,
+                PostgRestSortOrder.AscendingNullsFirstDescendingNullsLast
+            )
+        ).toBe('xxx.asc.nullsfirst');
+
+        expect(
+            getOrderBy(
+                'xxx',
+                'ASC',
+                primaryKeySingle,
+                PostgRestSortOrder.AscendingNullsLastDescendingNullsFirst
+            )
+        ).toBe('xxx.asc');
+
+        expect(
+            getOrderBy(
+                'xxx',
+                'ASC',
+                primaryKeySingle,
+                PostgRestSortOrder.AscendingNullsLastDescendingNullsLast
+            )
+        ).toBe('xxx.asc');
+
+        expect(
+            getOrderBy(
+                'xxx',
+                'DESC',
+                primaryKeySingle,
+                PostgRestSortOrder.AscendingNullsFirstDescendingNullsFirst
+            )
+        ).toBe('xxx.desc');
+
+        expect(
+            getOrderBy(
+                'xxx',
+                'DESC',
+                primaryKeySingle,
+                PostgRestSortOrder.AscendingNullsFirstDescendingNullsLast
+            )
+        ).toBe('xxx.desc.nullslast');
+
+        expect(
+            getOrderBy(
+                'xxx',
+                'DESC',
+                primaryKeySingle,
+                PostgRestSortOrder.AscendingNullsLastDescendingNullsFirst
+            )
+        ).toBe('xxx.desc');
+
+        expect(
+            getOrderBy(
+                'xxx',
+                'DESC',
+                primaryKeySingle,
+                PostgRestSortOrder.AscendingNullsLastDescendingNullsLast
+            )
+        ).toBe('xxx.desc.nullslast');
     });
 });
