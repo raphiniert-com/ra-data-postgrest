@@ -21,6 +21,7 @@ import {
     removePrimaryKey,
     getQuery,
     encodeId,
+    PostgRestSortOrder,
 } from './urlBuilder';
 import qs from 'qs';
 import isEqual from 'lodash/isEqual';
@@ -82,6 +83,7 @@ export interface IDataProviderConfig {
     apiUrl: string;
     httpClient: (string, Options) => Promise<any>;
     defaultListOp: PostgRestOperator;
+    sortOrder?: PostgRestSortOrder;
     primaryKeys: Map<string, PrimaryKey>;
     schema: () => string;
 }
@@ -219,7 +221,7 @@ export default (config: IDataProviderConfig): DataProvider => ({
         let query = params.target
             ? {
                   [params.target]: `eq.${params.id}`,
-                  order: getOrderBy(field, order, primaryKey),
+                  order: getOrderBy(field, order, primaryKey, config.sortOrder),
                   offset: String((page - 1) * perPage),
                   limit: String(perPage),
                   ...filter,
