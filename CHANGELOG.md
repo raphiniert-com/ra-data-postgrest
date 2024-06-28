@@ -2,6 +2,10 @@
 
 Find all notable changes of this project in this file.
 
+## v2.2.0 - 2024-06-28
+### Improvements
+- [#123](https://github.com/raphiniert-com/ra-data-postgrest/pull/125) Adding global sort order options @[kav](https://github.com/kav)
+
 ## v2.1.0 - 2024-02-27
 ### Improvements
 - updated dependencies
