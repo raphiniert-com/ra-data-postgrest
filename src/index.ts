@@ -273,6 +273,9 @@ export default (config: IDataProviderConfig): DataProvider => ({
         const query = getQuery(primaryKey, id, resource, meta);
         const url = `${config.apiUrl}/${resource}?${qs.stringify(query)}`;
         const changedData = getChanges(data, previousData);
+        if (Object.keys(changedData).length === 0) {
+            return Promise.resolve({ data: { ...previousData } });
+        }
         const metaSchema = params.meta?.schema;
 
         const body = JSON.stringify({

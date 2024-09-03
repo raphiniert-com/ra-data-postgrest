@@ -1,5 +1,6 @@
 import qs from 'qs';
 import { makeTestFromCase, Case } from './helper';
+import dataProviderBuilder from '../../src';
 
 describe('update specific', () => {
     const method = 'update';
@@ -31,4 +32,14 @@ describe('update specific', () => {
     ];
 
     cases.forEach(makeTestFromCase);
+
+    it('should not fail when no changes are requested', async () => {
+        const dataProvider = dataProviderBuilder({} as any);
+        const { data } = await dataProvider.update('posts', {
+            id: 123,
+            data: { foo: 'bar' },
+            previousData: { id: 123, foo: 'bar' },
+        });
+        expect(data).toEqual({ id: 123, foo: 'bar' });
+    });
 });
