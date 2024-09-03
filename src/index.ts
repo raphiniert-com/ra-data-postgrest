@@ -79,6 +79,8 @@ export const defaultPrimaryKeys = new Map<string, PrimaryKey>();
 
 export const defaultSchema = () => '';
 
+export { PostgRestSortOrder };
+
 export interface IDataProviderConfig {
     apiUrl: string;
     httpClient: (string, Options) => Promise<any>;
@@ -127,7 +129,37 @@ export default (config: IDataProviderConfig): DataProvider => ({
         };
 
         if (field) {
-            query.order = getOrderBy(field, order, primaryKey);
+            query.order = getOrderBy(
+                field,
+                order,
+                primaryKey,
+                config.sortOrder
+            );
+            if (
+                params.meta?.nullsfirst &&
+                !query.order.includes('nullsfirst')
+            ) {
+                query.order = query.order.includes('nullslast')
+                    ? query.order.replace('nullslast', 'nullsfirst')
+                    : `${query.order}.nullsfirst`;
+            }
+            if (
+                params.meta?.nullsfirst === false &&
+                query.order.includes('nullsfirst')
+            ) {
+                query.order = query.order.replace('.nullsfirst', '');
+            }
+            if (params.meta?.nullslast && !query.order.includes('nullslast')) {
+                query.order = query.order.includes('nullsfirst')
+                    ? query.order.replace('nullsfirst', 'nullslast')
+                    : `${query.order}.nullslast`;
+            }
+            if (
+                params.meta?.nullslast === false &&
+                query.order.includes('nullslast')
+            ) {
+                query.order = query.order.replace('.nullslast', '');
+            }
         }
 
         if (select) {
