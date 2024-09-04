@@ -298,7 +298,7 @@ export const getQuery = (
     return result;
 };
 
-export enum PostgRestSortOrder {
+export const enum PostgRestSortOrder {
     AscendingNullsLastDescendingNullsFirst = 'asc,desc',
     AscendingNullsLastDescendingNullsLast = 'asc,desc.nullslast',
     AscendingNullsFirstDescendingNullsFirst = 'asc.nullsfirst,desc',

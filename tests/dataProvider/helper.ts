@@ -10,7 +10,8 @@ function createDataProviderMock(
     mockedResponseBody: string,
     mockedResponseJSON?: any,
     mockedResponseOptions?: Record<string, any>,
-    mockedCustomSchema?: () => string
+    mockedCustomSchema?: () => string,
+    config?: Partial<IDataProviderConfig>
 ) {
     const httpClient = jest.fn((url, options) =>
         Promise.resolve({
@@ -21,19 +22,20 @@ function createDataProviderMock(
         })
     );
 
-    const customSchema : () => string = mockedCustomSchema ? mockedCustomSchema : () => ("");
+    const customSchema: () => string = mockedCustomSchema
+        ? mockedCustomSchema
+        : () => '';
 
     const dataProviderConfig: IDataProviderConfig = {
         apiUrl: BASE_URL,
         httpClient: httpClient,
         defaultListOp: 'eq',
         primaryKeys: resourcePrimaryKeys,
-        schema: customSchema
-    }
+        schema: customSchema,
+        ...config,
+    };
 
-    const dataProvider = raPostgrestProvider(
-        dataProviderConfig
-    );
+    const dataProvider = raPostgrestProvider(dataProviderConfig);
 
     return { httpClient, dataProvider };
 }
@@ -48,8 +50,9 @@ export type Case = {
     expectedUrl?: string;
     expectedOptions?: Record<string, any>;
     expectedResult?: any;
-    schema?: () => (string);
+    schema?: () => string;
     throws?: RegExp;
+    config?: Partial<IDataProviderConfig>;
 };
 
 export const makeTestFromCase = ({
@@ -64,6 +67,7 @@ export const makeTestFromCase = ({
     expectedResult,
     schema,
     throws,
+    config,
 }: Case) => {
     it(`${method} > ${test}`, async () => {
         const { httpClient, dataProvider } = createDataProviderMock(
@@ -71,7 +75,8 @@ export const makeTestFromCase = ({
             '',
             httpClientResponseBody,
             httpClientResponseHeaders,
-            schema
+            schema,
+            config
         );
 
         let dataProviderResult;

@@ -195,9 +195,12 @@ const [create, { isLoading, error }] = useCreate(
 ```
 
 ### Null sort order
+
 Postgrest supports specifying the position of nulls in [sort ordering](https://postgrest.org/en/v12/references/api/tables_views.html#ordering). This can be configured via an optional data provider parameter:
 
 ```jsx
+import { PostgRestSortOrder, IDataProviderConfig } from '@raphiniert/ra-data-postgrest';
+
 const config: IDataProviderConfig = {
     ...
     sortOrder: PostgRestSortOrder.AscendingNullsLastDescendingNullsLast
@@ -207,7 +210,22 @@ const config: IDataProviderConfig = {
 const dataProvider = postgrestRestProvider(config);
 ```
 
+This parameter impacts the `getList` and `getManyReference` calls.
+
 It is important to note that null positioning in sort will impact index utilization so in some cases you'll want to add  corresponding index on the database side.
+
+You can also override this parameter on a per-query basis by passing `nullsfirst: true` or `nullslast: true` in the `meta` object of the query:
+
+```jsx
+const { data, total, isLoading, error } = useGetList(
+    'posts',
+    {
+        pagination: { page: 1, perPage: 10 },
+        sort: { field: 'published_at', order: 'DESC' },
+        meta: { nullslast: true }
+    }
+);
+```
 
 ### Vertical filtering
 Postgrest supports a feature of [Vertical Filtering (Columns)](https://postgrest.org/en/stable/api.html#vertical-filtering-columns). Within the react-admin hooks this feature can be used as in the following example:
