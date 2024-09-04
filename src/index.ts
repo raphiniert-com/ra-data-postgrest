@@ -220,6 +220,9 @@ export default (config: IDataProviderConfig): DataProvider => ({
 
     getMany: (resource, params: Partial<GetManyParams> = {}) => {
         const ids = params.ids;
+        if (ids.length === 0) {
+            return Promise.resolve({ data: [] });
+        }
         const primaryKey = getPrimaryKey(resource, config.primaryKeys);
 
         const query = getQuery(primaryKey, ids, resource, params.meta);
