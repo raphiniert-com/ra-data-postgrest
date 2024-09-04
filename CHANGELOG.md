@@ -2,6 +2,16 @@
 
 Find all notable changes of this project in this file.
 
+## v2.4.0 - 2024-09-04
+### Fixes
+- [#166](https://github.com/raphiniert-com/ra-data-postgrest/pull/166) Fix update fails when nothing is changed @[fzaninotto](https://github.com/fzaninotto)
+- [#165](https://github.com/raphiniert-com/ra-data-postgrest/pull/165) Fix getMany fails when called with an empty array of ids @[fzaninotto](https://github.com/fzaninotto)
+
+### Improvements
+- [#164](https://github.com/raphiniert-com/ra-data-postgrest/pull/164) Add nullslast and nullsfirst support to getList @[fzaninotto](https://github.com/fzaninotto)
+- updated dependencies
+- updated README.md: added section "Citation"
+
 ## v2.3.0 - 2024-06-28
 ### Improvements
 - [#142](https://github.com/raphiniert-com/ra-data-postgrest/pull/142) Add support for React Admin v5 @[slax57](https://github.com/slax57)
