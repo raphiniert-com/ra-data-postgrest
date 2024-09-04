@@ -178,7 +178,7 @@ export const getPrimaryKey = (
     resource: string,
     primaryKeys: Map<string, PrimaryKey>
 ) => {
-    return primaryKeys.get(resource) || ['id'];
+    return (primaryKeys && primaryKeys.get(resource)) || ['id'];
 };
 
 export const decodeId = (
