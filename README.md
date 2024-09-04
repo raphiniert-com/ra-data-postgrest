@@ -13,8 +13,6 @@ PostgREST Data Provider for [react-admin](https://github.com/marmelab/react-admi
 npm install --save @raphiniert/ra-data-postgrest
 ```
 
-**NOTE**: When using RA 3.x.x, use the data-provider 1.x.x. For RA >= 4.1.x use the data-provider starting from 1.2.x.
-
 ## Citation
 If you use the PostgREST Data Provider in your research or project, please consider citing the (our paper)[https://www.sciencedirect.com/science/article/pii/S2665963824000873]. Feel free to include the following BibTeX entry in your publications:
 ```bibtex
