@@ -14,7 +14,8 @@ npm install --save @raphiniert/ra-data-postgrest
 ```
 
 ## Citation
-If you use the PostgREST Data Provider in your research or project, please consider citing the (our paper)[https://www.sciencedirect.com/science/article/pii/S2665963824000873]. Feel free to include the following BibTeX entry in your publications:
+If you use the PostgREST Data Provider in your research or project, please consider citing the corresponding [paper](https://www.sciencedirect.com/science/article/pii/S2665963824000873). Feel free to include the following BibTeX entry in your publications:
+
 ```bibtex
 @article{SCHEIBLE2024100699,
     title = {PostgREST Data Provider for React-Admin: Bootstrap the creation of user interfaces on top of PostgreSQL databases},

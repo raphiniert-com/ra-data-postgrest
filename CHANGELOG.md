@@ -2,6 +2,10 @@
 
 Find all notable changes of this project in this file.
 
+## v2.4.1 - 2024-09-04
+### Improvements
+- updated/fixed README.md
+
 ## v2.4.0 - 2024-09-04
 ### Fixes
 - [#166](https://github.com/raphiniert-com/ra-data-postgrest/pull/166) Fix update fails when nothing is changed @[fzaninotto](https://github.com/fzaninotto)
