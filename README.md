@@ -271,6 +271,86 @@ columns: ['id', 'json_data->>blood_type', 'json_data->phones']
 
 **Note**: not working for `create` and `updateMany`.
 
+### Embeds and prefetch
+
+`ra-data-postgrest` supports React Admin [embed](https://marmelab.com/react-admin/DataProviders.html#embedding-relationships) and [prefetch](https://marmelab.com/react-admin/DataProviders.html#prefetching-relationships) features.
+
+For instance, here's how to prefetch posts authors (many-to-one relationship):
+
+```jsx
+import { Datagrid, List, ReferenceField, TextField } from 'react-admin';
+
+const PostList = () => (
+    <List queryOptions={{ meta: { prefetch: ['authors'] } }}>
+        <Datagrid>
+            <TextField source="title" />
+            <ReferenceField source="author_id" reference="authors" />
+        </Datagrid>
+    </List>
+)
+```
+
+Here's how to embed posts authors instead:
+
+```jsx
+import { Datagrid, List, ReferenceField, TextField } from 'react-admin';
+
+const PostList = () => (
+    <List queryOptions={{ meta: { embed: ['authors'] } }}>
+        <Datagrid>
+            <TextField source="title" />
+            <TextField source="authors.name" />
+        </Datagrid>
+    </List>
+)
+```
+
+This will result in a single query to the database and populate React Admin cache for the `authors` resource.
+
+This works for one-to-many relationships too. For instance, here's how to prefetch all books from an author:
+
+```jsx
+import { Show, SimpleShowLayout, ReferenceManyField, Datagrid, TextField, DateField } from 'react-admin';
+
+const AuthorShow = () => (
+    <Show queryOptions={{ meta: { prefetch: ['books'] } }}>
+        <SimpleShowLayout>
+            <TextField source="first_name" />
+            <TextField source="last_name" />
+            <ReferenceManyField reference="books" target="author_id" label="Books">
+              <Datagrid>
+                <TextField source="title" />
+                <DateField source="published_at" />
+              </Datagrid>
+            </ReferenceManyField>
+        </SimpleShowLayout>
+    </Show>
+);
+```
+
+Here's how to embed the books instead:
+
+```jsx
+import { Show, SimpleShowLayout, ArrayField, Datagrid, TextField, DateField } from 'react-admin';
+
+const AuthorShow = () => (
+    <Show queryOptions={{ meta: { prefetch: ['books'] } }}>
+        <SimpleShowLayout>
+            <TextField source="first_name" />
+            <TextField source="last_name" />
+            <ArrayField source="books">
+              <Datagrid>
+                <TextField source="title" />
+                <DateField source="published_at" />
+              </Datagrid>
+            </ArrayField>
+        </SimpleShowLayout>
+    </Show>
+);
+```
+
+This will result in a single query to the database and populate React Admin cache for the `books` resource.
+
 ## Developers notes
 
 The current development of this library was done with node v19.10 and npm 8.19.3. In this version the unit tests and the development environment should work.

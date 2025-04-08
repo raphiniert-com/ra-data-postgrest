@@ -1,5 +1,11 @@
 import { makeTestFromCase, Case } from './helper';
 import { PostgRestSortOrder } from '../../src/index';
+import {
+    PREFETCHED_TAGS,
+    PREFETCHED_USERS,
+    TODO_LIST,
+    TODO_LIST_WITH_PREFETCHED_TAGS_USER,
+} from '../fixtures';
 
 describe('getList specific', () => {
     const method = 'getList';
@@ -47,6 +53,77 @@ describe('getList specific', () => {
                 filter: {},
             },
             throws: /the content-range header is missing/i,
+        },
+        {
+            test: 'should not remove the embedded data from the result nor add it to the meta',
+            method,
+            resource: 'todos',
+            params: {
+                pagination: {
+                    page: 1,
+                    perPage: 10,
+                },
+                sort: {
+                    field: 'id',
+                    order: 'DESC',
+                },
+                filter: {},
+                meta: { embed: ['tags', 'users'] },
+            },
+            httpClientResponseBody: TODO_LIST_WITH_PREFETCHED_TAGS_USER,
+            httpClientResponseHeaders: {
+                'content-range': '0-9/100',
+            },
+            expectedUrl: `/todos?offset=0&limit=10&order=id.desc&select=%2A%2Ctags%28%2A%29%2Cusers%28%2A%29`,
+            expectedOptions: {
+                headers: {
+                    accept: 'application/json',
+                    prefer: 'count=exact',
+                },
+            },
+            expectedResult: {
+                data: TODO_LIST_WITH_PREFETCHED_TAGS_USER,
+                total: 100,
+                meta: undefined,
+            },
+        },
+        {
+            test: 'should remove the prefetched data from the result and add it to the meta',
+            method,
+            resource: 'todos',
+            params: {
+                pagination: {
+                    page: 1,
+                    perPage: 10,
+                },
+                sort: {
+                    field: 'id',
+                    order: 'DESC',
+                },
+                filter: {},
+                meta: { prefetch: ['tags', 'users'] },
+            },
+            httpClientResponseBody: TODO_LIST_WITH_PREFETCHED_TAGS_USER,
+            httpClientResponseHeaders: {
+                'content-range': '0-9/100',
+            },
+            expectedUrl: `/todos?offset=0&limit=10&order=id.desc&select=%2A%2Ctags%28%2A%29%2Cusers%28%2A%29`,
+            expectedOptions: {
+                headers: {
+                    accept: 'application/json',
+                    prefer: 'count=exact',
+                },
+            },
+            expectedResult: {
+                data: TODO_LIST,
+                total: 100,
+                meta: {
+                    prefetched: {
+                        tags: PREFETCHED_TAGS,
+                        users: PREFETCHED_USERS,
+                    },
+                },
+            },
         },
     ];
 
@@ -175,128 +252,128 @@ describe('getList specific', () => {
                 },
             });
         });
-    });
 
-    describe('nullslast', () => {
-        makeTestFromCase({
-            test: 'nullslast true added in meta changes the sort order',
-            method,
-            resource: 'posts',
-            params: {
-                pagination: {
-                    page: 1,
-                    perPage: 10,
+        describe('nullslast', () => {
+            makeTestFromCase({
+                test: 'nullslast true added in meta changes the sort order',
+                method,
+                resource: 'posts',
+                params: {
+                    pagination: {
+                        page: 1,
+                        perPage: 10,
+                    },
+                    sort: {
+                        field: 'id',
+                        order: 'DESC',
+                    },
+                    filter: {},
+                    meta: { nullslast: true },
                 },
-                sort: {
-                    field: 'id',
-                    order: 'DESC',
+                expectedUrl: `/posts?offset=0&limit=10&order=id.desc.nullslast`,
+                expectedOptions: {
+                    headers: {
+                        accept: 'application/json',
+                        prefer: 'count=exact',
+                    },
                 },
-                filter: {},
-                meta: { nullslast: true },
-            },
-            expectedUrl: `/posts?offset=0&limit=10&order=id.desc.nullslast`,
-            expectedOptions: {
-                headers: {
-                    accept: 'application/json',
-                    prefer: 'count=exact',
+                httpClientResponseHeaders: {
+                    'content-range': '0-9/100',
                 },
-            },
-            httpClientResponseHeaders: {
-                'content-range': '0-9/100',
-            },
-        });
-        makeTestFromCase({
-            test: 'nullslast true added in meta is compatible with the default sort order',
-            method,
-            config: {
-                sortOrder:
-                    PostgRestSortOrder.AscendingNullsLastDescendingNullsLast,
-            },
-            resource: 'posts',
-            params: {
-                pagination: {
-                    page: 1,
-                    perPage: 10,
+            });
+            makeTestFromCase({
+                test: 'nullslast true added in meta is compatible with the default sort order',
+                method,
+                config: {
+                    sortOrder:
+                        PostgRestSortOrder.AscendingNullsLastDescendingNullsLast,
                 },
-                sort: {
-                    field: 'id',
-                    order: 'DESC',
+                resource: 'posts',
+                params: {
+                    pagination: {
+                        page: 1,
+                        perPage: 10,
+                    },
+                    sort: {
+                        field: 'id',
+                        order: 'DESC',
+                    },
+                    filter: {},
+                    meta: { nullslast: true },
                 },
-                filter: {},
-                meta: { nullslast: true },
-            },
-            expectedUrl: `/posts?offset=0&limit=10&order=id.desc.nullslast`,
-            expectedOptions: {
-                headers: {
-                    accept: 'application/json',
-                    prefer: 'count=exact',
+                expectedUrl: `/posts?offset=0&limit=10&order=id.desc.nullslast`,
+                expectedOptions: {
+                    headers: {
+                        accept: 'application/json',
+                        prefer: 'count=exact',
+                    },
                 },
-            },
-            httpClientResponseHeaders: {
-                'content-range': '0-9/100',
-            },
-        });
-        makeTestFromCase({
-            test: 'nullslast true added in meta overrides the default sort order',
-            method,
-            config: {
-                sortOrder:
-                    PostgRestSortOrder.AscendingNullsFirstDescendingNullsFirst,
-            },
-            resource: 'posts',
-            params: {
-                pagination: {
-                    page: 1,
-                    perPage: 10,
+                httpClientResponseHeaders: {
+                    'content-range': '0-9/100',
                 },
-                sort: {
-                    field: 'id',
-                    order: 'DESC',
+            });
+            makeTestFromCase({
+                test: 'nullslast true added in meta overrides the default sort order',
+                method,
+                config: {
+                    sortOrder:
+                        PostgRestSortOrder.AscendingNullsFirstDescendingNullsFirst,
                 },
-                filter: {},
-                meta: { nullslast: true },
-            },
-            expectedUrl: `/posts?offset=0&limit=10&order=id.desc.nullslast`,
-            expectedOptions: {
-                headers: {
-                    accept: 'application/json',
-                    prefer: 'count=exact',
+                resource: 'posts',
+                params: {
+                    pagination: {
+                        page: 1,
+                        perPage: 10,
+                    },
+                    sort: {
+                        field: 'id',
+                        order: 'DESC',
+                    },
+                    filter: {},
+                    meta: { nullslast: true },
                 },
-            },
-            httpClientResponseHeaders: {
-                'content-range': '0-9/100',
-            },
-        });
-        makeTestFromCase({
-            test: 'nullslast false added in meta overrides the default sort order',
-            method,
-            config: {
-                sortOrder:
-                    PostgRestSortOrder.AscendingNullsLastDescendingNullsLast,
-            },
-            resource: 'posts',
-            params: {
-                pagination: {
-                    page: 1,
-                    perPage: 10,
+                expectedUrl: `/posts?offset=0&limit=10&order=id.desc.nullslast`,
+                expectedOptions: {
+                    headers: {
+                        accept: 'application/json',
+                        prefer: 'count=exact',
+                    },
                 },
-                sort: {
-                    field: 'id',
-                    order: 'DESC',
+                httpClientResponseHeaders: {
+                    'content-range': '0-9/100',
                 },
-                filter: {},
-                meta: { nullslast: false },
-            },
-            expectedUrl: `/posts?offset=0&limit=10&order=id.desc`,
-            expectedOptions: {
-                headers: {
-                    accept: 'application/json',
-                    prefer: 'count=exact',
+            });
+            makeTestFromCase({
+                test: 'nullslast false added in meta overrides the default sort order',
+                method,
+                config: {
+                    sortOrder:
+                        PostgRestSortOrder.AscendingNullsLastDescendingNullsLast,
                 },
-            },
-            httpClientResponseHeaders: {
-                'content-range': '0-9/100',
-            },
+                resource: 'posts',
+                params: {
+                    pagination: {
+                        page: 1,
+                        perPage: 10,
+                    },
+                    sort: {
+                        field: 'id',
+                        order: 'DESC',
+                    },
+                    filter: {},
+                    meta: { nullslast: false },
+                },
+                expectedUrl: `/posts?offset=0&limit=10&order=id.desc`,
+                expectedOptions: {
+                    headers: {
+                        accept: 'application/json',
+                        prefer: 'count=exact',
+                    },
+                },
+                httpClientResponseHeaders: {
+                    'content-range': '0-9/100',
+                },
+            });
         });
     });
 });

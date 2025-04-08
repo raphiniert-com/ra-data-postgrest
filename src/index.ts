@@ -186,12 +186,15 @@ export default (config: IDataProviderConfig): DataProvider => ({
           the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?`
                 );
             }
+            const data = json.map(obj => dataWithVirtualId(obj, primaryKey));
+            const prefetched = getPrefetchedData(data, params.meta?.prefetch);
             return {
-                data: json.map(obj => dataWithVirtualId(obj, primaryKey)),
+                data: removePrefetchedData(data, params.meta?.prefetch),
                 total: parseInt(
                     headers.get('content-range').split('/').pop(),
                     10
                 ),
+                meta: params.meta?.prefetch ? { prefetched } : undefined,
             };
         });
     },
@@ -213,9 +216,17 @@ export default (config: IDataProviderConfig): DataProvider => ({
                     ...useCustomSchema(config.schema, metaSchema, 'GET'),
                 }),
             })
-            .then(({ json }) => ({
-                data: dataWithVirtualId(json, primaryKey),
-            }));
+            .then(({ json }) => {
+                const data = dataWithVirtualId(json, primaryKey);
+                const prefetched = getPrefetchedData(
+                    data,
+                    params.meta?.prefetch
+                );
+                return {
+                    data: removePrefetchedData(data, params.meta?.prefetch),
+                    meta: params.meta?.prefetch ? { prefetched } : undefined,
+                };
+            });
     },
 
     getMany: (resource, params: Partial<GetManyParams> = {}) => {
@@ -236,9 +247,19 @@ export default (config: IDataProviderConfig): DataProvider => ({
                     ...useCustomSchema(config.schema, metaSchema, 'GET'),
                 }),
             })
-            .then(({ json }) => ({
-                data: json.map(data => dataWithVirtualId(data, primaryKey)),
-            }));
+            .then(({ json }) => {
+                const data = json.map(data =>
+                    dataWithVirtualId(data, primaryKey)
+                );
+                const prefetched = getPrefetchedData(
+                    data,
+                    params.meta?.prefetch
+                );
+                return {
+                    data: removePrefetchedData(data, params.meta?.prefetch),
+                    meta: params.meta?.prefetch ? { prefetched } : undefined,
+                };
+            });
     },
 
     getManyReference: (
@@ -292,12 +313,15 @@ export default (config: IDataProviderConfig): DataProvider => ({
           the pagination. If you are using CORS, did you declare Content-Range in the Access-Control-Expose-Headers header?`
                 );
             }
+            const data = json.map(data => dataWithVirtualId(data, primaryKey));
+            const prefetched = getPrefetchedData(data, params.meta?.prefetch);
             return {
-                data: json.map(data => dataWithVirtualId(data, primaryKey)),
+                data: removePrefetchedData(data, params.meta?.prefetch),
                 total: parseInt(
                     headers.get('content-range').split('/').pop(),
                     10
                 ),
+                meta: params.meta?.prefetch ? { prefetched } : undefined,
             };
         });
     },
@@ -332,9 +356,17 @@ export default (config: IDataProviderConfig): DataProvider => ({
                 }),
                 body,
             })
-            .then(({ json }) => ({
-                data: dataWithVirtualId(json, primaryKey),
-            }));
+            .then(({ json }) => {
+                const data = dataWithVirtualId(json, primaryKey);
+                const prefetched = getPrefetchedData(
+                    data,
+                    params.meta?.prefetch
+                );
+                return {
+                    data: removePrefetchedData(data, params.meta?.prefetch),
+                    meta: params.meta?.prefetch ? { prefetched } : undefined,
+                };
+            });
     },
 
     updateMany: (resource, params: Partial<UpdateManyParams> = {}) => {
@@ -391,12 +423,20 @@ export default (config: IDataProviderConfig): DataProvider => ({
                     dataWithoutVirtualId(params.data, primaryKey)
                 ),
             })
-            .then(({ json }) => ({
-                data: {
+            .then(({ json }) => {
+                const data = {
                     ...json,
                     id: encodeId(json, primaryKey),
-                },
-            }));
+                };
+                const prefetched = getPrefetchedData(
+                    data,
+                    params.meta?.prefetch
+                );
+                return {
+                    data: removePrefetchedData(data, params.meta?.prefetch),
+                    meta: params.meta?.prefetch ? { prefetched } : undefined,
+                };
+            });
     },
 
     delete: (resource, params: Partial<DeleteParams> = {}) => {
@@ -419,9 +459,17 @@ export default (config: IDataProviderConfig): DataProvider => ({
                     ...useCustomSchema(config.schema, metaSchema, 'DELETE'),
                 }),
             })
-            .then(({ json }) => ({
-                data: dataWithVirtualId(json, primaryKey),
-            }));
+            .then(({ json }) => {
+                const data = dataWithVirtualId(json, primaryKey);
+                const prefetched = getPrefetchedData(
+                    data,
+                    params.meta?.prefetch
+                );
+                return {
+                    data: removePrefetchedData(data, params.meta?.prefetch),
+                    meta: params.meta?.prefetch ? { prefetched } : undefined,
+                };
+            });
     },
 
     deleteMany: (resource, params: Partial<DeleteManyParams> = {}) => {
@@ -457,4 +505,77 @@ const getChanges = (data: any, previousData: any) => {
         return changes;
     }, {});
     return changes;
+};
+
+/**
+ * Extract embeds from Postgrest responses
+ *
+ * When calling Postgrest database.getOne('posts', 123, { embed: 'tags' }),
+ * the Postgrest response adds a `tags` key to the response, containing the
+ * related tags. Something like:
+ *
+ *     { id: 123, title: 'React-query in details', tags: [{ id: 1, name: 'react' }, { id: 1, name: 'query' }] }
+ *
+ * We want to copy all the embeds in a data object, that will later
+ * be included into the response meta.prefetched key.
+ *
+ * @example getPrefetchedData({ id: 123, title: 'React-query in details', tags: [{ id: 1, name: 'react' }, { id: 1, name: 'query' }] }, ['tags'])
+ * // {
+ * //   tags: [{ id: 1, name: 'react' }, { id: 1, name: 'query' }]
+ * // }
+ */
+const getPrefetchedData = (data, prefetchParam?: string[]) => {
+    if (!prefetchParam) return undefined;
+    const prefetched = {};
+    const dataArray = Array.isArray(data) ? data : [data];
+    prefetchParam.forEach(resource => {
+        dataArray.forEach(record => {
+            if (!prefetched[resource]) {
+                prefetched[resource] = [];
+            }
+            const prefetchedData = Array.isArray(record[resource])
+                ? record[resource]
+                : [record[resource]];
+            prefetchedData.forEach(prefetchedRecord => {
+                if (
+                    prefetched[resource].some(r => r.id === prefetchedRecord.id)
+                ) {
+                    // do not add the record if it's already there
+                    return;
+                }
+                prefetched[resource].push(prefetchedRecord);
+            });
+        });
+    });
+
+    return prefetched;
+};
+
+/**
+ * Remove embeds from Postgrest responses
+ *
+ * When calling Postgrest database.getOne('posts', 123, { embed: 'tags' }),
+ * the Postgrest response adds a `post` key to the response, containing the
+ * related post. Something like:
+ *
+ *     { id: 123, title: 'React-query in details', tags: [{ id: 1, name: 'react' }, { id: 1, name: 'query' }] }
+ *
+ * We want to remove all the embeds from the response.
+ *
+ * @example removePrefetchedData({ id: 123, title: 'React-query in details', tags: [{ id: 1, name: 'react' }, { id: 1, name: 'query' }] }, 'tags')
+ * // { id: 123, title: 'React-query in details' }
+ */
+const removePrefetchedData = (data, prefetchParam?: string[]) => {
+    if (!prefetchParam) return data;
+    const dataArray = Array.isArray(data) ? data : [data];
+    const newDataArray = dataArray.map(record => {
+        const newRecord = {};
+        for (const key in record) {
+            if (!prefetchParam.includes(key)) {
+                newRecord[key] = record[key];
+            }
+        }
+        return newRecord;
+    });
+    return Array.isArray(data) ? newDataArray : newDataArray[0];
 };
