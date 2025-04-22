@@ -168,6 +168,15 @@ export const parseFilters = (
             : meta.columns;
     }
 
+    if (meta?.embed || meta?.prefetch) {
+        const columns = getColumnsParam(meta.embed, meta.prefetch);
+        if (columns) {
+            result.select = result.select
+                ? `${result.select},${columns.join(',')}`
+                : `*,${columns.join(',')}`;
+        }
+    }
+
     return result;
 };
 
@@ -295,6 +304,16 @@ export const getQuery = (
             : meta.columns;
     }
 
+    if (meta?.embed || meta?.prefetch) {
+        const columns = getColumnsParam(meta.embed, meta.prefetch);
+        if (columns) {
+            result.select = result.select
+                ? `${result.select},${columns.join(',')}`
+                // if users did not specify any columns, we must add the wildcard select to not get only the embeds/prefetch 
+                : `*,${columns.join(',')}`;
+        }
+    }
+
     return result;
 };
 
@@ -317,4 +336,15 @@ export const getOrderBy = (
     } else {
         return `${field}.${postgRestOrder}`;
     }
+};
+
+/**
+ * Compute the columns parameter for the embed and prefetch query meta properties
+ */
+const getColumnsParam = (embed: string[], prefetch: string[]) => {
+    if (!embed && !prefetch) return;
+    const param = new Set<string>();
+    if (embed) embed.forEach(resource => param.add(`${resource}(*)`));
+    if (prefetch) prefetch.forEach(resource => param.add(`${resource}(*)`));
+    return Array.from(param);
 };

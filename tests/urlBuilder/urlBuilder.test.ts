@@ -92,6 +92,162 @@ describe('parseFilters', () => {
             select: 'title',
         });
     });
+    it('should parse filters with meta.embeds', () => {
+        expect(
+            parseFilters(
+                {
+                    filter: {
+                        q1: 'foo',
+                        'q2@ilike': 'bar',
+                        'q3@like': 'baz qux',
+                        'q4@gt': 'c',
+                    },
+                    meta: { embed: ['embeds1', 'embeds2'] },
+                },
+                'eq'
+            )
+        ).toEqual({
+            filter: {
+                q1: 'eq.foo',
+                q2: 'ilike.*bar*',
+                q3: ['like.*baz*', 'like.*qux*'],
+                q4: 'gt.c',
+            },
+            select: '*,embeds1(*),embeds2(*)',
+        });
+    });
+    it('should parse filters with meta.embeds and simple select provided', () => {
+        expect(
+            parseFilters(
+                {
+                    filter: {
+                        q1: 'foo',
+                        'q2@ilike': 'bar',
+                        'q3@like': 'baz qux',
+                        'q4@gt': 'c',
+                    },
+                    meta: {
+                        columns: 'title',
+                        embed: ['embeds'],
+                    },
+                },
+                'eq'
+            )
+        ).toEqual({
+            filter: {
+                q1: 'eq.foo',
+                q2: 'ilike.*bar*',
+                q3: ['like.*baz*', 'like.*qux*'],
+                q4: 'gt.c',
+            },
+            select: 'title,embeds(*)',
+        });
+    });
+    it('should parse filters with meta.embeds and complex select provided', () => {
+        expect(
+            parseFilters(
+                {
+                    filter: {
+                        q1: 'foo',
+                        'q2@ilike': 'bar',
+                        'q3@like': 'baz qux',
+                        'q4@gt': 'c',
+                    },
+                    meta: {
+                        columns: ['title', 'first_embed(*)'],
+                        embed: ['embeds'],
+                    },
+                },
+                'eq'
+            )
+        ).toEqual({
+            filter: {
+                q1: 'eq.foo',
+                q2: 'ilike.*bar*',
+                q3: ['like.*baz*', 'like.*qux*'],
+                q4: 'gt.c',
+            },
+            select: 'title,first_embed(*),embeds(*)',
+        });
+    });
+    it('should parse filters with meta.prefetch', () => {
+        expect(
+            parseFilters(
+                {
+                    filter: {
+                        q1: 'foo',
+                        'q2@ilike': 'bar',
+                        'q3@like': 'baz qux',
+                        'q4@gt': 'c',
+                    },
+                    meta: { prefetch: ['prefetched1', 'prefetched2'] },
+                },
+                'eq'
+            )
+        ).toEqual({
+            filter: {
+                q1: 'eq.foo',
+                q2: 'ilike.*bar*',
+                q3: ['like.*baz*', 'like.*qux*'],
+                q4: 'gt.c',
+            },
+            select: '*,prefetched1(*),prefetched2(*)',
+        });
+    });
+    it('should parse filters with meta.prefetch and simple select provided', () => {
+        expect(
+            parseFilters(
+                {
+                    filter: {
+                        q1: 'foo',
+                        'q2@ilike': 'bar',
+                        'q3@like': 'baz qux',
+                        'q4@gt': 'c',
+                    },
+                    meta: {
+                        columns: 'title',
+                        prefetch: ['prefetched'],
+                    },
+                },
+                'eq'
+            )
+        ).toEqual({
+            filter: {
+                q1: 'eq.foo',
+                q2: 'ilike.*bar*',
+                q3: ['like.*baz*', 'like.*qux*'],
+                q4: 'gt.c',
+            },
+            select: 'title,prefetched(*)',
+        });
+    });
+    it('should parse filters with meta.prefetch and complex select provided', () => {
+        expect(
+            parseFilters(
+                {
+                    filter: {
+                        q1: 'foo',
+                        'q2@ilike': 'bar',
+                        'q3@like': 'baz qux',
+                        'q4@gt': 'c',
+                    },
+                    meta: {
+                        columns: ['title', 'first_embed(*)'],
+                        prefetch: ['prefetched'],
+                    },
+                },
+                'eq'
+            )
+        ).toEqual({
+            filter: {
+                q1: 'eq.foo',
+                q2: 'ilike.*bar*',
+                q3: ['like.*baz*', 'like.*qux*'],
+                q4: 'gt.c',
+            },
+            select: 'title,first_embed(*),prefetched(*)',
+        });
+    });
     it('should parse filters with multiple select fields', () => {
         expect(
             parseFilters(
@@ -272,6 +428,65 @@ describe('getQuery', () => {
         const query = getQuery(primaryKeyCompound, id, resource);
 
         expect(query).toEqual({ id: '1', type: 'X' });
+    });
+
+    it('should return the query with meta.embed', () => {
+        const resource = 'todos';
+        const id = 2;
+        expect(
+            getQuery(primaryKeySingle, id, resource, {
+                embed: ['embeds1', 'embeds2'],
+            })
+        ).toEqual({ id: 'eq.2', select: '*,embeds1(*),embeds2(*)' });
+    });
+    it('should return the query with meta.embed and simple select provided', () => {
+        const resource = 'todos';
+        const id = 2;
+        expect(
+            getQuery(primaryKeySingle, id, resource, {
+                columns: 'title',
+                embed: ['embeds'],
+            })
+        ).toEqual({ id: 'eq.2', select: 'title,embeds(*)' });
+    });
+    it('should return the query with meta.embed and complex select provided', () => {
+        const resource = 'todos';
+        const id = 2;
+        expect(
+            getQuery(primaryKeySingle, id, resource, {
+                columns: ['title', 'first_embed(*)'],
+                embed: ['embeds'],
+            })
+        ).toEqual({ id: 'eq.2', select: 'title,first_embed(*),embeds(*)' });
+    });
+    it('should return the query with meta.prefetch', () => {
+        const resource = 'todos';
+        const id = 2;
+        expect(
+            getQuery(primaryKeySingle, id, resource, {
+                prefetch: ['prefetch1', 'prefetch2'],
+            })
+        ).toEqual({ id: 'eq.2', select: '*,prefetch1(*),prefetch2(*)' });
+    });
+    it('should return the query with meta.prefetch and simple select provided', () => {
+        const resource = 'todos';
+        const id = 2;
+        expect(
+            getQuery(primaryKeySingle, id, resource, {
+                columns: 'title',
+                prefetch: ['prefetch'],
+            })
+        ).toEqual({ id: 'eq.2', select: 'title,prefetch(*)' });
+    });
+    it('should return the query with meta.prefetch and complex select provided', () => {
+        const resource = 'todos';
+        const id = 2;
+        expect(
+            getQuery(primaryKeySingle, id, resource, {
+                columns: ['title', 'first_embed(*)'],
+                prefetch: ['prefetch'],
+            })
+        ).toEqual({ id: 'eq.2', select: 'title,first_embed(*),prefetch(*)' });
     });
 });
 
