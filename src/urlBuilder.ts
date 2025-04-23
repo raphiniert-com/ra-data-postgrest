@@ -309,8 +309,8 @@ export const getQuery = (
         if (columns) {
             result.select = result.select
                 ? `${result.select},${columns.join(',')}`
-                // if users did not specify any columns, we must add the wildcard select to not get only the embeds/prefetch 
-                : `*,${columns.join(',')}`;
+                : // if users did not specify any columns, we must add the wildcard select to not get only the embeds/prefetch
+                  `*,${columns.join(',')}`;
         }
     }
 
