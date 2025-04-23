@@ -353,7 +353,7 @@ This will result in a single query to the database and populate React Admin cach
 
 ## Developers notes
 
-The current development of this library was done with node v19.10 and npm 8.19.3. In this version the unit tests and the development environment should work.
+The current development of this library was done with node v20.18.0 (npm v10.8.2). In this version the unit tests and the development environment should work.
 
 ## License
 
