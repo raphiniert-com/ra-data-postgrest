@@ -2,6 +2,11 @@
 
 Find all notable changes of this project in this file.
 
+## v2.5.0 - 2025-04-23
+### Improvements
+- [#181](https://github.com/raphiniert-com/ra-data-postgrest/pull/181) Add support for embed and prefetch @[djhi](https://github.com/djhi)
+- updated dependencies
+
 ## v2.4.1 - 2024-09-04
 ### Improvements
 - updated/fixed README.md
