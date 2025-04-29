@@ -2,6 +2,10 @@
 
 Find all notable changes of this project in this file.
 
+## v2.5.1 - 2025-04-29
+### Fixes
+- [#182](https://github.com/raphiniert-com/ra-data-postgrest/issues/182) Fix the need for workaround by switching to [dequal](https://www.npmjs.com/package/dequal)
+
 ## v2.5.0 - 2025-04-23
 ### Improvements
 - [#181](https://github.com/raphiniert-com/ra-data-postgrest/pull/181) Add support for embed and prefetch @[djhi](https://github.com/djhi)

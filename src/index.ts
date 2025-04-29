@@ -24,7 +24,7 @@ import {
     PostgRestSortOrder,
 } from './urlBuilder';
 import qs from 'qs';
-import { isDeepStrictEqual as isEqual } from 'node:util';
+import { dequal as isEqual } from 'dequal';
 
 /**
  * Maps react-admin queries to a postgrest REST API
