@@ -148,7 +148,7 @@ export const parseFilters = (
                     result.filter[splitKey[0]] = op;
                 }
             } else {
-                if (!Array.isArray(result[splitKey[0]])) {
+                if (!Array.isArray(result.filter[splitKey[0]])) {
                     // second operator, we transform to an array
                     result.filter[splitKey[0]] = [
                         result.filter[splitKey[0]],
