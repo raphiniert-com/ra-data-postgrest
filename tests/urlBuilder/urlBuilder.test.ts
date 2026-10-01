@@ -293,6 +293,56 @@ describe('parseFilters', () => {
             or: '(age.lt.18,age.gt.21,q1.eq.foo,q2.ilike.*bar*,q3.like.*baz*,q3.like.*qux*,q4.gt.c)',
         });
     });
+    it('should parse filters of a like operator with three or more words', () => {
+        expect(
+            parseFilters(
+                {
+                    filter: {
+                        'q3@like': 'baz qux quux',
+                    },
+                },
+                'eq'
+            )
+        ).toEqual({
+            filter: {
+                q3: ['like.*baz*', 'like.*qux*', 'like.*quux*'],
+            },
+        });
+    });
+    it('should parse filters of logical operator with a like operator of three or more words', () => {
+        const { filter } = parseFilters(
+            {
+                filter: {
+                    '@or': {
+                        'q2@ilike': 'la maison dans',
+                        'q3@like': 'foo',
+                    },
+                },
+            },
+            'eq'
+        );
+        expect(filter).toEqual({
+            or: '(q2.ilike.*la*,q2.ilike.*maison*,q2.ilike.*dans*,q3.like.*foo*)',
+        });
+    });
+    it('should parse filters of three or more operators on the same column', () => {
+        expect(
+            parseFilters(
+                {
+                    filter: {
+                        'age@gt': 18,
+                        'age@lt': 65,
+                        'age@neq': 30,
+                    },
+                },
+                'eq'
+            )
+        ).toEqual({
+            filter: {
+                age: ['gt.18', 'lt.65', 'neq.30'],
+            },
+        });
+    });
 });
 
 describe('getPrimaryKey', () => {
